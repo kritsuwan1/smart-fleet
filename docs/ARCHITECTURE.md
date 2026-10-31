@@ -1,126 +1,111 @@
 # SmartFleet - System Architecture
 
-## 1. Project Overview
-Project: SmartFleet Vehicle Usage Web Application
-Baseline Version: v3.8.5
-Repository: kritsuwan1/smart-fleet
+## Audit scope and evidence
 
-Purpose:
-- Record company vehicle usage
-- Track trips and odometer readings
-- Manage vehicle maintenance
-- Generate usage reports
-- Support secure administration
+- Audited 2026-11-01 (Asia/Bangkok), branch `docs/smartfleet-master-plan`.
+- Source snapshot: [45f01a17dff015475aebf78862cacef617046ed8](https://github.com/kritsuwan1/smart-fleet/tree/45f01a17dff015475aebf78862cacef617046ed8). All source references below refer to this snapshot.
+- Read `AGENTS.md` and all four `docs/` files before source inspection. Only this file and `PROGRESS.md` are changed by this audit.
+- Evidence is repository code plus local tests, not confirmation of the deployed Worker, Cloudflare settings, production records or physical mobile devices. Execution results and gaps are in [PROGRESS.md](PROGRESS.md).
 
-## 2. Known Repository Structure
-- src/ : Application source code
-- assets/ : Static assets
-- scripts/ : Utility and build scripts
-- tests/ : Application tests
-- .github/workflows/ : GitHub automation
-- package.json : Project dependencies and scripts
-- schema.sql : Database schema file
-- schema-demo.sql : Demo schema file
-- schema-production.sql : Production schema file
-- build.mjs : Build script
+## Stack and application structure
 
-Note: Directory contents and actual runtime behavior
-must be verified against the current source code.
+| Layer | Verified implementation | Evidence |
+| --- | --- | --- |
+| Browser | React 19.2.6, React DOM 19.2.6, TypeScript/TSX, lucide-react 1.31.0; custom CSS | [package.json](../package.json), [client.tsx](../src/client.tsx), [App.tsx](../src/App.tsx) |
+| Build | esbuild 0.28.0; TypeScript 5.9.3; Wrangler 4.92.0; ES2022 browser IIFE and Worker ESM | [build.mjs](../build.mjs), [tsconfig.json](../tsconfig.json) |
+| Server | Cloudflare Worker Fetch handler, explicit routing; HTML login/register pages and protected bundled assets | [worker.ts](../src/worker.ts) |
+| Storage | Cloudflare D1 binding, SQLite SQL, one shared JSON state with optimistic version checks | [storage.ts](../src/storage.ts), [schema.sql](../schema.sql) |
+| Reports | Custom OOXML ZIP writer for XLSX; canvas/JPEG embedded in a one-page landscape A4 PDF; bundled Sarabun fonts | [export.ts](../src/export.ts), [MonthlyReport.tsx](../src/MonthlyReport.tsx), [report.ts](../src/report.ts) |
+| Tests | Node assert, Node experimental SQLite in memory, esbuild and React static rendering; CI Node 24 | [tests/](../tests), [deploy.yml](../.github/workflows/deploy.yml) |
 
-## 3. Technology Stack
-Status: Pending source code verification
+Runtime flow: browser React UI -> same-origin Worker routes -> authentication and authorization -> D1 `fleet_store`. No separate API server or ORM is present.
 
-Codex must inspect:
-- package.json
-- build.mjs
-- src/
-- Database connection modules
-- GitHub Actions workflows
-- Deployment configuration
+Main frontend modules: `App.tsx` coordinates state, navigation and writes; `EmployeeDashboard.tsx`, `JourneyForm.tsx`, `TripHistory.tsx`, `JourneyDetail.tsx` and `TripSaveConfirmation.tsx` implement trip flows. `ProfilePanel.tsx` and `AccountPanels.tsx` manage accounts; `ExcelImport.tsx`, `xlsx-reader.ts` and `import-plan.ts` handle import; `BackupPanel.tsx` and `SystemStatusPanel.tsx` provide administration.
 
-Do not assume the framework, hosting provider,
-database provider, or authentication implementation.
+## Database architecture
 
-## 4. Core Application Modules
-The following are functional areas, not verified modules:
-- Authentication and user management
-- Vehicle usage and trip records
-- Odometer validation
-- Dashboard and reporting
-- Maintenance management
-- Automatic backup
-- Multi-vehicle management
+All three `schema*.sql` files define only:
 
-For each area, identify:
-- Existing implementation
-- Relevant source files
-- API endpoints
-- Database tables
-- Dependencies
-- Missing functionality
+```sql
+fleet_store (
+  id TEXT PRIMARY KEY NOT NULL,
+  payload TEXT NOT NULL,
+  version INTEGER NOT NULL DEFAULT 0
+)
+```
 
-## 5. Database Architecture
-Status: Pending verification
+| Row ID | Payload and lifecycle | Evidence |
+| --- | --- | --- |
+| `main` | Entire Fleet JSON; initialized lazily; session signing key added if absent | [storage.ts](../src/storage.ts) |
+| `environment` | Plain text `demo` or `production`; environment guard | [environment.ts](../src/environment.ts), [schema-demo.sql](../schema-demo.sql), [schema-production.sql](../schema-production.sql) |
+| `auth:<HMAC>` | Login/register/password-change rate-limit expiry; counter in version; periodic cleanup | [auth.ts](../src/auth.ts) |
+| `fuel:b7:<month>` | Cached price lookup result and expiry | [fuel.ts](../src/fuel.ts) |
+| `restore-<UUID>` | Temporary SQL restore staging row, removed at end of generated script | [worker.ts](../src/worker.ts) |
 
-Inspect schema.sql, schema-demo.sql,
-schema-production.sql and application queries.
+Logical entities are arrays inside `main`, not SQL tables or foreign keys:
 
-Requirements:
-- Preserve existing trip records
-- Preserve odometer history
-- Avoid destructive schema changes
-- Test migrations in staging first
-- Keep production and staging isolated
-- Verify backup and restoration
+- `cars[]`: ID, plate/province/model, initial odometer, active, optional display/fuel fields.
+- `people[]`, `projects[]`: drivers and project names.
+- `trips[]`: carId -> cars.id; driverId -> people.id; optional ownerUserId -> accounts.id. Dates are local Thai datetime strings; open trip has empty end and null odoEnd.
+- `accounts[]`: linked driverId, admin/employee role, active flag, salted password hash and passwordVersion.
+- `audit[]`: actor, action, timestamp, before/after; `fuelPrices[]`: monthly manual references; `imported` and private `sessionKey`.
 
-## 6. Security Architecture
-Requirements:
-- Enforce authorization on the server
-- Support role-based access control
-- Protect environment secrets
-- Never commit credentials
-- Restrict backup access to Admin
-- Maintain audit logs for sensitive operations
+[Fleet types and validation](../src/fleet.ts) define references and trip rules. Writes replace the full JSON using `WHERE version=?`; stale versions receive HTTP 409 through [api.ts](../src/api.ts). There are no separate per-vehicle databases or SQL constraints for logical relationships. The shared state has an application limit of 1,500,000 UTF-8 bytes and 200 accounts ([limits.ts](../src/limits.ts)); audit growth also consumes that state. System status measures main-payload size, not total D1 storage.
 
-## 7. Deployment Architecture
-Status: Pending verification
+Initial data includes vehicle 8กน3362 Bangkok with initial odometer 115784. Historical import is available but is not proof of current production data. No schema or records were changed by this audit.
 
-Inspect:
-- .github/workflows/
-- Deployment scripts
-- Environment configuration
-- Production branch configuration
+## Authentication, permissions and API
 
-Rules:
-- Develop on isolated branches
-- Test before deployment
-- Never modify production without approval
-- Document rollback procedures
+[auth.ts](../src/auth.ts) implements root admin login against `APP_PASSWORD`, employee passwords using PBKDF2-SHA256 (100,000 iterations and random salt), HMAC-SHA256 sessions, and an eight-hour `__Host-smartfleet` cookie with Secure, HttpOnly and SameSite=Lax. Account status/passwordVersion is checked on requests; password resets and role changes invalidate prior sessions.
 
-## 8. Development Workflow
-1. Read AGENTS.md
-2. Read docs/ROADMAP.md
-3. Inspect existing architecture
-4. Identify affected components
-5. Implement the smallest necessary changes
-6. Run available automated tests
-7. Validate staging behavior
-8. Update docs/PROGRESS.md
-9. Request approval before deployment
+| Route | Access / behavior |
+| --- | --- |
+| POST `/login`, `/register` | Public with rate limits (10/20 per IP per 15-minute bucket); registration immediately creates an active employee |
+| POST `/logout` | Clears cookie; GET renders confirmation |
+| GET/POST `/api/fleet` | Authenticated scoped state; POST action dispatcher |
+| POST trip action | Employee starts/returns own open trip, cannot spoof driver or edit closed/other users' trips; admin has broader management |
+| POST car/person/project/account/import/importExcel/fuelPrice actions | Admin only; rechecks current user and version before writing |
+| POST `/api/profile/password` | Authenticated non-root account; current password verified |
+| GET `/api/backup.sql`, `/api/backup.json` | Admin only |
+| GET `/api/system-status`, `/qr` | Admin only |
+| GET `/api/fuel-price?month=...` | Authenticated; fixed upstream monthly diesel source/cache |
+| GET app assets/report fonts | Protected; QR SVGs public |
 
-## 9. Architecture Verification Tasks
-Codex must document:
-- Actual technology stack
-- Application entry points
-- Source directory structure
-- Database tables and relationships
-- Authentication flow
-- Existing API endpoints
-- Deployment workflow
-- Backup implementation status
-- Maintenance implementation status
+[worker.ts](../src/worker.ts) enforces same-origin POSTs, method/body limits and security headers (CSP, no-store, nosniff, frame denial). [viewForUser](../src/auth.ts) removes password/session fields, hides audit/accounts and other employees' trips from employee views.
 
-## 10. Current Status
-Architecture documentation: Draft
-Source code verification: Pending
-Production modifications: Not authorized
+Verified limits/gaps:
+
+- Roles are `admin` and `employee`; Roadmap Admin/Staff/User tiers and pending approval are absent. Registration can link an existing driver by matching name; no administrator approval or identity proof is implemented.
+- Password minimum is six characters. Tests establish covered authorization cases, not a complete security certification.
+- Logout deletes the current browser cookie; sessions are stateless and have no per-session revocation registry.
+- SQL/JSON backups deliberately include password hashes, salts and session-signing material. They are unencrypted downloads; checksum verification detects corruption but does not establish trusted origin. Normal API redaction does not apply to full backups.
+- Sensitive admin changes are audited, but downloads/login attempts and future scheduled jobs have no dedicated operational audit trail.
+
+## Backup and maintenance
+
+**Manual backup exists; scheduled backup does not.**
+
+[BackupPanel.tsx](../src/BackupPanel.tsx) downloads SQL/JSON and checks JSON locally. [backup.ts](../src/backup.ts) emits format/schema/environment/version/time metadata and SHA-256, validates structure/references/counts and accepts legacy files with an unverified notice.
+
+SQL export in [worker.ts](../src/worker.ts) snapshots only `main`, escapes/chunks strings, stages valid JSON before replacement, checks environment compatibility and rotates the restored session key. It is an application-state backup, not a complete D1 export: auth/fuel-cache/environment rows are not backed up. There is no web restore-write endpoint. [check-sql-backup.mjs](../scripts/check-sql-backup.mjs) rehearses SQL restoration in fresh in-memory SQLite; restore tests cover empty/populated targets and environment guards.
+
+Missing from source/configuration: Worker scheduled handler, cron trigger, remote backup destination, seven-day retention, job status/history, retries, failure notification and staging-D1 recovery evidence. Roadmap 02:00 Asia/Bangkok and seven daily copies remain proposals, not configured behavior. Independent SQL and JSON downloads can observe different versions.
+
+**Vehicle maintenance is absent in this snapshot.** Fleet types, API actions and settings contain no maintenance records, due-date/odometer thresholds, service history or maintenance reporting. [OpenTripsPanel.tsx](../src/OpenTripsPanel.tsx) / [open-trips.ts](../src/open-trips.ts) show elapsed time and a 24-hour open-trip review warning; this is not a service reminder. Fuel reference pricing is also unrelated to maintenance.
+
+## Mobile, reporting and multiple vehicles
+
+- Mobile dashboard, bottom navigation, start/return form, busy/disabled controls, odometer hints, card history and confirmation already exist. CSS has 760px and 360px breakpoints in [journey.css](../src/journey.css), [history.css](../src/history.css) and [receipt.css](../src/receipt.css).
+- Save confirmation uses the server-returned trip ID/normalized values and shows plate, trip event date/time, odometer and detail link. It does not display a separate database-save timestamp.
+- Optimistic versions plus disabled controls reduce duplicate writes; there is no explicit request idempotency key. Rapid taps, retries and concurrent-device behavior still need browser/staging tests.
+- QR assets/print page are static for the site and car-1 (8กน3362), with separate Demo versions. [App.tsx](../src/App.tsx) handles `?car=...&action=start` after login. There is no dynamic per-vehicle QR generation UI.
+- Dashboard has trip/distance summaries and per-car status; history filters include month, vehicle, driver and search/status. Monthly metrics and PDF/XLSX paths exist. Monthly trend charts, arbitrary date-range filters and maintenance reports are absent.
+- Multi-car arrays, admin add/edit/deactivate, carId-scoped odometer/overlap checks and vehicle report selection already exist. Fleet-wide acceptance, generated QR per car and preservation of deployed historical records remain unverified; a normalized-schema migration is not required merely to add another car.
+
+## Deployment and verification boundaries
+
+[build.mjs](../build.mjs) produces separate Demo/Production Workers with build-time environment selection. Production uses DB; Demo maps DEMO_DB to DB and requires the demo marker. Production tolerates an absent marker for legacy data, so environment protection is not equally strict on both sides. Demo configuration still contains a placeholder database ID; actual staging provisioning was not verified.
+
+The only workflow, [deploy.yml](../.github/workflows/deploy.yml), is manual `workflow_dispatch`, target demo/production, with install -> build -> typecheck -> tests -> existing Worker/binding metadata check -> Wrangler deploy -> unauthenticated login-page check. There is no push/PR CI trigger, scheduled backup workflow, or explicit branch/environment approval gate in this YAML. GitHub settings outside the repository are unknown.
+
+[scripts/prepare-deploy.mjs](../scripts/prepare-deploy.mjs) reads remote binding metadata and creates deployment config; [check-deployment.mjs](../scripts/check-deployment.mjs) checks login HTML only. Neither script nor Wrangler/deployment workflow was executed during this audit. Production deployment/version, secrets, backups, infrastructure and rollback behavior remain unverified.
