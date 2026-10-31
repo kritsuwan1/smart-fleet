@@ -151,3 +151,58 @@
 }
 @media(max-width:360px){.employee-car-heading h3{font-size:22px}.employee-pending dl>div,.journey-summary dl>div{grid-template-columns:1fr;gap:2px}.journey-vehicle img{width:92px}.employee-history-bottom{flex-wrap:wrap}}
 @media print{.mobile-bottom-nav,.mobile-brand{display:none!important}.employee-app main{padding:0}.employee-car{break-inside:avoid}.employee-pending{background:#fff}}
+
+/* v3.8.4: compact receive/return forms on phones; retain readable inputs. */
+@media(max-width:760px){
+ .trip-dialog .modal-header{min-height:56px;padding:8px 16px 8px 56px}
+ .trip-dialog .modal-header h2{font-size:20px;line-height:1.4}
+ .trip-dialog .modal-header .iconbutton{left:8px;min-width:40px;min-height:40px}
+ .trip-dialog .journey-form{min-height:calc(100dvh - 56px)}
+ .trip-dialog .journey-form .modal-body{padding:14px 16px 12px}
+ .trip-dialog .journey-vehicle{min-height:72px;gap:10px;margin-bottom:12px;padding-bottom:10px}
+ .trip-dialog .journey-vehicle>div{min-width:0;flex:1}
+ .trip-dialog .journey-vehicle img{width:90px;height:60px}
+ .trip-dialog .journey-vehicle>svg{width:56px;height:56px}
+ .trip-dialog .journey-vehicle strong{display:block;font-size:20px;line-height:1.4;margin-bottom:3px}
+ .trip-dialog .journey-vehicle p{display:inline;font-size:13px;line-height:1.5;margin:0;overflow-wrap:anywhere}
+ .trip-dialog .journey-vehicle small{display:inline;font-size:13px;line-height:1.5}
+ .trip-dialog .journey-vehicle small:before{content:' · '}
+ .trip-dialog .journey-driver{min-height:40px;padding:8px 10px;gap:9px;font-size:14px;line-height:1.5}
+ .trip-dialog .journey-driver>svg:first-child{width:20px;height:20px}
+ .trip-dialog .journey-section-title{font-size:16px;line-height:1.5;margin:14px 0 10px}
+ .trip-dialog .journey-inputs{gap:12px}
+ .trip-dialog .journey-form .field>span{font-size:14px;line-height:1.5;margin-bottom:5px}
+ .trip-dialog .journey-form input,.trip-dialog .journey-form select{font-size:16px;line-height:1.4;min-height:46px;padding:9px 10px;border-radius:8px}
+ .trip-dialog .journey-form input[type=datetime-local]{font-size:16px;min-height:46px}
+ .trip-dialog .journey-form textarea{font-size:16px;line-height:1.5;min-height:64px;padding:9px 10px;border-radius:8px}
+ .trip-dialog .journey-form .journey-number input{font-size:16px;border-radius:8px 0 0 8px}
+ .trip-dialog .journey-number>span{font-size:14px;padding:0 12px;border-radius:0 8px 8px 0}
+ .trip-dialog .journey-hint{font-size:12px;line-height:1.5;margin-top:5px;gap:6px}
+ .trip-dialog .journey-latest{font-size:13px;line-height:1.5;margin-bottom:6px}
+ .trip-dialog .journey-mileage{margin-top:10px}
+ .trip-dialog .journey-summary h3{font-size:16px;line-height:1.5;padding:8px 11px;gap:7px}
+ .trip-dialog .journey-summary h3 svg{width:19px;height:19px}
+ .trip-dialog .journey-summary dl{padding:10px 11px;gap:6px}
+ .trip-dialog .journey-summary dl>div{grid-template-columns:114px minmax(0,1fr);gap:8px;font-size:14px;line-height:1.5}
+ .trip-dialog .journey-distance{gap:14px;padding:12px 14px;margin-top:12px}
+ .trip-dialog .journey-distance>svg{width:30px;height:30px;flex-shrink:0}
+ .trip-dialog .journey-distance span{font-size:14px;margin-bottom:3px}
+ .trip-dialog .journey-distance strong{font-size:26px;line-height:1.3}
+ .trip-dialog .journey-notes,.trip-dialog .journey-reason{margin-top:14px}
+ .trip-dialog .journey-counter{font-size:12px;margin-top:3px}
+ .trip-dialog .journey-car-select,.trip-dialog .journey-driver-select{margin-bottom:12px}
+ .trip-dialog .journey-error{margin:0 16px 12px;font-size:14px;line-height:1.6}
+ .trip-dialog .journey-footer{flex-direction:row-reverse;align-items:center;gap:8px;padding:8px 16px calc(8px + env(safe-area-inset-bottom))}
+ .trip-dialog .journey-footer .vehicle-action{flex:1;width:auto;min-width:0;min-height:48px;font-size:16px;line-height:1.4;padding:8px 10px;gap:7px;white-space:normal;border-radius:9px}
+ .trip-dialog .journey-footer .vehicle-action-label{min-width:0;overflow-wrap:anywhere}
+ .trip-dialog .journey-footer .vehicle-action-icon{width:24px;height:24px;flex-basis:24px;border-radius:50%}
+ .trip-dialog .journey-footer .vehicle-action-return .vehicle-action-icon{border-radius:7px}
+ .trip-dialog .journey-footer .vehicle-action-icon svg{width:18px;height:18px}
+ .trip-dialog .journey-footer .vehicle-action-arrow{width:16px;height:16px;margin-left:0}
+ .trip-dialog .journey-cancel{width:64px;flex:0 0 64px;min-height:48px;font-size:14px;line-height:1.5;padding:8px 0;color:#587160}
+}
+@media(max-width:360px){
+ .trip-dialog .journey-summary dl>div{grid-template-columns:108px minmax(0,1fr);gap:6px}
+ .trip-dialog .journey-footer .vehicle-action{gap:5px;padding-left:8px;padding-right:8px}
+ .trip-dialog .journey-cancel{width:56px;flex-basis:56px}
+}
