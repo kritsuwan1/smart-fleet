@@ -17,6 +17,7 @@ async function POST(req:Request){try{
  if(b.version!==version)return json({error:'ข้อมูลเปลี่ยนแปลงจากหน้าต่างอื่นแล้ว กรุณารีเฟรชและลองใหม่'},409);
  let before:unknown=null,after:unknown=null,action='';
  let importResult:unknown=undefined;
+ let tripResult:{id:string;operation:'start'|'return'|'edit'|'historical'}|undefined;
  if(b.action==='trip'){
   const old=s.trips.find(t=>t.id===b.data.id);before=old||null;
   const d=b.data;
@@ -31,6 +32,7 @@ async function POST(req:Request){try{
   validateTrip(s,t);
   if(!old&&(!s.cars.find(c=>c.id===t.carId)?.active||!s.people.find(p=>p.id===t.driverId)?.active))throw Error('รถหรือพนักงานถูกปิดใช้งานแล้ว');
   s.trips=old?s.trips.map(x=>x.id===t.id?t:x):[...s.trips,t];after=t;action=old?'แก้ไขรายการ / คืนรถ':'เพิ่มรายการใช้รถ';
+  tripResult={id:t.id,operation:old?(!old.end&&t.end?'return':'edit'):(t.end?'historical':'start')};
  }else if(b.action==='fuelPrice'){
   if(!validMonth(String(b.data?.month||'')))throw Error('เดือนไม่ถูกต้อง');
   before=s.fuelPrices?.find(p=>p.month===b.data.month&&p.product==='b7')||null;
@@ -106,7 +108,7 @@ async function POST(req:Request){try{
  s.audit.unshift({id:crypto.randomUUID(),time:new Date().toISOString(),actor,action,before,after});
  if(!await writeState(env,s,version))return json({error:'มีการบันทึกพร้อมกัน กรุณารีเฟรชแล้วลองใหม่'},409);
  if(b.action==='account'&&b.data.id===actorUser.id)return new Response(JSON.stringify({reauthenticate:true}),{headers:{'Content-Type':'application/json','Cache-Control':'no-store','Set-Cookie':clearSession()}});
- return json({...viewForUser(s,version+1,actorUser),importResult});
+ return json({...viewForUser(s,version+1,actorUser),importResult,tripResult});
  }catch(e){return fail(e);}}
 
 return {GET,POST};

@@ -1,0 +1,42 @@
+.modal.trip-receipt-dialog{max-width:480px}
+.trip-receipt-dialog .modal-header{padding:19px 22px;background:#fff}
+.trip-receipt-dialog .modal-header h2{font-size:22px;line-height:1.5;color:#17503b}
+.trip-receipt-dialog .modal-header .eyebrow{display:none}
+.trip-receipt .modal-body{padding:20px 24px}
+.trip-receipt-check{display:grid;place-items:center;width:72px;height:72px;border-radius:50%;background:#e6f4ec;color:#248359;margin:0 auto 13px}
+.trip-receipt-intro{text-align:center;font-size:15px;line-height:1.8;color:#6b8173;margin:0 0 21px}
+.trip-receipt-car{display:flex;align-items:center;gap:13px;padding:15px;border:1px solid #deebe2;border-radius:12px;background:#f5f9f6;color:#377857}
+.trip-receipt-car>svg{flex-shrink:0}
+.trip-receipt-car>div{flex:1;min-width:0}
+.trip-receipt-car h3{font-size:25px;line-height:1.4;color:#214e36;overflow-wrap:anywhere}
+.trip-receipt-car p{font-size:13px;color:#7c9082;line-height:1.7;margin-top:3px}
+.trip-receipt-car>span{font-size:13px;color:#8a9c8d;align-self:flex-start}
+.trip-receipt-fields{margin:19px 0 0}
+.trip-receipt-fields>div{display:grid;grid-template-columns:135px minmax(0,1fr);gap:12px;padding:12px 0;border-bottom:1px solid #edf1ee;font-size:15px;line-height:1.7}
+.trip-receipt-fields>div:last-child{border-bottom:0}
+.trip-receipt-fields dt{color:#7c8e80}
+.trip-receipt-fields dd{margin:0;color:#2f513a;overflow-wrap:anywhere}
+.trip-receipt-fields dd>span{display:block;color:#718577;font-size:14px;margin-top:2px}
+.trip-receipt-mileage dd{font-size:23px;font-weight:650;line-height:1.4;font-variant-numeric:tabular-nums}
+.trip-receipt-mileage small{font-size:14px;font-weight:400}
+.trip-receipt-distance{display:flex;align-items:center;gap:10px;font-size:14px;padding:13px;border-radius:11px;background:#edf6f1;color:#386e50;margin-top:13px;line-height:1.6}
+.trip-receipt-distance strong{margin-left:auto;font-size:20px;white-space:nowrap}
+.trip-receipt-actions{display:flex;flex-direction:column;gap:9px;padding:15px 24px 19px;background:white}
+.trip-receipt-actions>button{width:100%;justify-content:center;min-height:48px;font-size:16px;line-height:1.5}
+.trip-receipt.returned .trip-receipt-check{color:#237fc0;background:#e8f2fb}
+.trip-receipt.returned .trip-receipt-actions>.primary{background:#1679cd;border-color:#1679cd}
+@media(max-width:760px){
+ .trip-receipt-dialog .modal-header{padding:15px 18px}
+ .trip-receipt-dialog .modal-header h2{font-size:20px}
+ .trip-receipt .modal-body{padding:17px 18px}
+ .trip-receipt-check{width:62px;height:62px;margin-bottom:10px}
+ .trip-receipt-check>svg{width:40px;height:40px}
+ .trip-receipt-intro{font-size:14px;margin-bottom:16px}
+ .trip-receipt-car{gap:10px;padding:12px}
+ .trip-receipt-car h3{font-size:23px}
+ .trip-receipt-fields{margin-top:13px}
+ .trip-receipt-fields>div{grid-template-columns:120px minmax(0,1fr);gap:10px;font-size:14px;padding:10px 0}
+ .trip-receipt-mileage dd{font-size:21px}
+ .trip-receipt-actions{padding:12px 18px calc(14px + env(safe-area-inset-bottom))}
+}
+@media(max-width:360px){.trip-receipt-fields>div{grid-template-columns:1fr;gap:4px}.trip-receipt-distance{flex-wrap:wrap}.trip-receipt-distance strong{font-size:18px}}
