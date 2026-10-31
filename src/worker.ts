@@ -8,10 +8,12 @@ import reportBold from '../assets/sarabun-bold.base64.txt';
 import {fleetApi} from './api';
 import {readState,writeState} from './storage';
 import {checkLogin,sessionUser,issueSession,clearSession,registerEmployee,rateLimit,safeReturn,verifyPassword,hashPassword,passwordValid,hex} from './auth';
-import {screen,login,registerPage,escape} from './auth-pages';
+import {screen,login,registerPage,escape,passwordChangedPage} from './auth-pages';
 import appJS from './client.bundle.txt';
 import appCSS from './app.css';
 import journeyCSS from './journey.css';
+import historyCSS from './history.css';
+import accountCSS from './account.css';
 import revoImage from '../assets/vehicle-revo-canopy.base64.txt';
 import qrSite from '../assets/smart-fleet-qr.svg';
 import qrCar from '../assets/smart-fleet-car-8kn3362-qr.svg';
@@ -63,6 +65,7 @@ export default {async fetch(req:Request,env:any){
   }
   const user=await sessionUser(req,env,state);
   const returnTo=safeReturn(url.searchParams.get('returnTo')||url.pathname+url.search);
+  if(path==='/password-changed'&&req.method==='GET')return html(passwordChangedPage());
   if(!user){
    if(path.startsWith('/api/'))return json({error:'UNAUTHORIZED'},401);
    if(path==='/register')return html(registerPage('',returnTo));
@@ -104,7 +107,7 @@ export default {async fetch(req:Request,env:any){
   if(path==='/qr'){if(user.role!=='admin')return json({error:'FORBIDDEN'},403);return html(qrPage());}
   if(path==='/app.js')return response(appJS,200,{'Content-Type':'text/javascript; charset=utf-8'});
   if(path==='/vehicle-revo-canopy.webp')return response(Uint8Array.from(atob(revoImage),c=>c.charCodeAt(0)),200,{'Content-Type':'image/webp','Cache-Control':'private, max-age=86400'});
-  if(path==='/app.css')return response(appCSS+'\n'+journeyCSS,200,{'Content-Type':'text/css; charset=utf-8'});
+  if(path==='/app.css')return response(appCSS+'\n'+journeyCSS+'\n'+historyCSS+'\n'+accountCSS,200,{'Content-Type':'text/css; charset=utf-8'});
   if(path==='/')return html('<!doctype html><html lang="th"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Smart Fleet | บันทึกการใช้รถยนต์</title><link rel="stylesheet" href="/app.css"></head><body><div id="root"></div><script src="/app.js" defer></script></body></html>');
   return response('Not found',404);
  }catch(error){if(error instanceof Error&&error.message==='ENVIRONMENT_MISMATCH'){const message='ฐานข้อมูลไม่ตรงกับ '+ENVIRONMENT+' ระบบหยุดเพื่อป้องกันข้อมูล กรุณาตรวจ Binding และใช้ schema ของฝั่งที่ถูกต้อง';return path.startsWith('/api/')?json({error:message},503):html(screen('<p>'+message+'</p>'),503);}console.error('Smart Fleet request failed',error);return path.startsWith('/api/')?json({error:'ระบบยังไม่พร้อม กรุณาตรวจฐานข้อมูลและลองใหม่'},503):html(screen('<p>ระบบไม่สามารถทำรายการได้ในขณะนี้ กรุณาตรวจว่า DB เชื่อมฐานข้อมูลที่มีตาราง fleet_store แล้ว</p>'),503);}

@@ -40,6 +40,7 @@ r=await post(admin,'account',{id:member.id,operation:'active',active:true},a.ver
 r=await post(admin,'account',{id:member.id,operation:'resetPassword',password:'new456'},a.version);assert.equal(r.status,200);
 assert.equal((await request('/login',form({username:'employee.two',password:'two123'}))).status,401);r=await request('/login',form({username:'employee.two',password:'new456'}));assert.equal(r.status,303);const e2new=cookieFrom(r);
 r=await request('/api/profile/password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({currentPassword:'new456',password:'fresh789'})},e2new);assert.equal(r.status,200);assert.match(r.headers.get('set-cookie'),/Max-Age=0/);assert.equal((await request('/api/fleet',{},e2new)).status,401);
+const changedPage=await request('/password-changed');assert.equal(changedPage.status,200);const changedHTML=await changedPage.text();assert.match(changedHTML,/เปลี่ยนรหัสผ่านสำเร็จ/);assert.match(changedHTML,/href="\/login"/);assert.doesNotMatch(changedHTML,/passwordHash|sessionKey|APP_PASSWORD/);
 assert.equal((await request('/login',form({username:'employee.two',password:'fresh789'}))).status,303);
 // A six-character admin password remains supported; the signing key is random and not derived from that weak secret alone.
 env.APP_PASSWORD='abc123';r=await request('/login',form({username:'admin',password:'abc123'}));assert.equal(r.status,303);const admin6=cookieFrom(r);assert.equal((await request('/api/fleet',{},admin)).status,401);

@@ -22,14 +22,14 @@ const login=await request('/login',{method:'POST',body:new URLSearchParams({user
 let state=JSON.parse(sql.prepare("SELECT payload FROM fleet_store WHERE id='main'").get().payload);
 state.trips.push({id:'t1',seq:1,carId:'car-1',driverId:'p1',project:"ทดสอบ 'quoted'",destination:'สำนักงาน',start:'2026-10-29T08:00',end:'',odoStart:115784,odoEnd:null,note:'ไทย '.repeat(4000),reason:''});
 sql.prepare("UPDATE fleet_store SET payload=?,version=version+1 WHERE id='main'").run(JSON.stringify(state));
-const r=await request('/api/backup.json');assert.equal(r.status,200);const b=await r.json();assert.equal(b.format,'smart-fleet-backup');assert.equal(b.appVersion,'3.8.2');
+const r=await request('/api/backup.json');assert.equal(r.status,200);const b=await r.json();assert.equal(b.format,'smart-fleet-backup');assert.equal(b.appVersion,'3.8.3');
 const report=await inspectBackup(JSON.stringify(b));assert.equal(report.verified,true);assert.equal(report.trips,1);assert.equal(report.open,1);assert.ok(!JSON.stringify(report).includes(state.sessionKey));
 const tampered=structuredClone(b);tampered.state.trips[0].odoStart++;
 await assert.rejects(inspectBackup(JSON.stringify(tampered)),/SHA-256/);
 await assert.rejects(inspectBackup('oops'),/JSON/);
 await assert.rejects(inspectBackup(' '.repeat(5_000_001)),/5 MB/);
 assert.equal((await inspectBackup(JSON.stringify({exportedAt:b.exportedAt,state}))).verified,false);
-const invalid=structuredClone(state);invalid.trips[0].carId='missing';await assert.rejects(inspectBackup(JSON.stringify(await createBackup(invalid,'3.8.2'))),/โครงสร้าง/);
+const invalid=structuredClone(state);invalid.trips[0].carId='missing';await assert.rejects(inspectBackup(JSON.stringify(await createBackup(invalid,'3.8.3'))),/โครงสร้าง/);
 const sqlText=await (await request('/api/backup.sql')).text();
 for(const populated of [false,true]){
  const target=new DatabaseSync(':memory:');
@@ -37,7 +37,7 @@ for(const populated of [false,true]){
  target.exec(sqlText);
  const restored=JSON.parse(target.prepare("SELECT payload FROM fleet_store WHERE id='main'").get().payload);
  assert.notEqual(restored.sessionKey,state.sessionKey);assert.deepEqual({...restored,sessionKey:''},{...state,sessionKey:''});
- const inspection=await inspectBackup(JSON.stringify(await createBackup(restored,'3.8.2')));assert.equal(inspection.trips,report.trips);assert.equal(inspection.cars,report.cars);
+ const inspection=await inspectBackup(JSON.stringify(await createBackup(restored,'3.8.3')));assert.equal(inspection.trips,report.trips);assert.equal(inspection.cars,report.cars);
  target.close();
 }
 const temporary=await mkdtemp(join(tmpdir(),'fleet-restore-'));

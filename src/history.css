@@ -1,0 +1,100 @@
+.mobile-trip-cards{display:none}
+.history-toolbar{padding:22px 24px 14px}
+.history-search{display:flex;align-items:center;gap:12px;padding:0 14px;background:#fff;border:1px solid #d5e1da;border-radius:11px;color:#27674d;margin-bottom:15px}
+.history-search input{width:100%;min-width:0;min-height:48px;border:0;outline:0;background:transparent;font-size:16px;color:#234535}
+.history-search:focus-within{outline:2px solid #2d8662;outline-offset:2px}
+.history-filter-row{display:flex;gap:12px;margin-bottom:17px;flex-wrap:wrap}
+.history-filter-row .field{flex:1;min-width:170px}
+.history-filter-row .field>span{font-size:13px;color:#66806f}
+.history-filter-row select{width:100%;min-height:48px;font-size:16px;color:#284b39;background:#fff;border:1px solid #d5e1da;border-radius:10px;padding:10px}
+.history-status-filters{display:flex;flex-direction:row;gap:5px;padding:4px;border-radius:11px;background:#eef4f0;max-width:620px}
+.history-status-filters button{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 8px;min-height:47px;font-size:16px;color:#5d7266;border-radius:8px;white-space:nowrap}
+.history-status-filters button>span{font-size:14px;padding:1px 6px;border-radius:6px;background:#ffffff85;font-variant-numeric:tabular-nums}
+.history-status-filters button.selected{background:#07543f;color:white;box-shadow:0 2px 6px #164e3520;font-weight:600}
+.history-status-filters button.selected>span{background:#ffffff23}
+.history-status-filters button.pending.selected{background:#ffdc75;color:#684300}
+.history-status-filters button.pending.selected>span{background:#ffffff59}
+.history-reset{display:block;margin:10px 0 0 auto;min-height:40px;font-size:14px;color:#357357;padding:7px}
+.history-panel .results-line{padding-top:7px}
+.journey-detail-dialog .modal-header{background:#07533e;color:white;position:relative;padding:20px 26px 20px 64px}
+.journey-detail-dialog .modal-header .eyebrow{display:none}
+.journey-detail-dialog .modal-header h2{font-size:22px;color:white}
+.journey-detail-dialog .modal-header .iconbutton{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:white;min-width:40px;min-height:40px;display:grid;place-items:center}
+.journey-detail-body{padding:26px}
+.journey-detail-status{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:19px}
+.journey-detail-status .badge{font-size:15px;padding:8px 13px;gap:7px}
+.journey-detail-status>small{color:#819487;font-size:13px}
+.journey-detail-project{font-size:25px;line-height:1.6;overflow-wrap:anywhere;margin:15px 0 12px;color:#173b2d}
+.journey-detail-line{display:flex;gap:10px;align-items:flex-start;font-size:16px;color:#546d5e;line-height:1.8;margin:10px 0;overflow-wrap:anywhere}
+.journey-detail-line svg{flex-shrink:0;margin-top:4px}
+.journey-timeline{padding:25px 0 0 12px;margin:24px 0 0;border-top:1px solid #e3ebe5;list-style:none}
+.journey-timeline li{position:relative;border-left:2px solid #dce7df;padding:0 0 28px 30px;margin:0;min-width:0}
+.journey-timeline li:last-child{border-left-color:transparent;padding-bottom:0}
+.journey-timeline li:before{content:'';position:absolute;left:-10px;top:0;width:14px;height:14px;border:4px solid #219259;border-radius:50%;background:white;box-sizing:content-box}
+.journey-timeline li.returned:before{border-color:#2184d4}
+.journey-timeline li.awaiting:before{border-color:#d19b35}
+.journey-timeline h4{font-size:18px;color:#16583d;margin:0 0 10px;line-height:1.4}
+.journey-timeline p{font-size:16px;color:#536d5e;line-height:1.9;margin:4px 0;overflow-wrap:anywhere}
+.journey-detail-distance{margin-top:26px}
+.journey-detail-distance strong{font-size:35px}
+.journey-detail-notes{margin-top:25px}
+.journey-detail-notes h4{display:flex;align-items:center;gap:10px;font-size:16px;color:#325b43;margin:0 0 10px}
+.journey-detail-notes p{font-size:16px;line-height:1.8;color:#64796b;white-space:pre-wrap;overflow-wrap:anywhere}
+.journey-detail-footer{flex-wrap:wrap;gap:10px}
+.journey-detail-back{margin-right:auto;min-height:46px}
+.journey-detail-footer .vehicle-action{min-height:48px}
+@media(max-width:760px){
+ .history-page-heading .eyebrow,.history-page-heading .heading-actions{display:none}
+ .history-page-heading h1{font-size:27px}
+ .history-page-heading p{font-size:15px;max-width:none}
+ .history-page-heading{margin-bottom:18px}
+ .history-panel{background:transparent;box-shadow:none;border:0;overflow:visible}
+ .history-toolbar{padding:0 0 10px}
+ .history-filter-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin-bottom:14px}
+ .history-filter-row .field{min-width:0}
+ .history-filter-row .field:last-child:nth-child(3){grid-column:1/-1}
+ .history-filter-row .field>span{font-size:12px;margin-bottom:6px}
+ .history-filter-row select{font-size:16px;padding:10px 8px;min-height:48px}
+ .history-status-filters{max-width:none;gap:3px;padding:3px}
+ .history-status-filters button{gap:5px;padding:9px 4px;font-size:15px;min-height:48px}
+ .history-status-filters button>span{font-size:13px;padding:1px 5px}
+ .history-panel .results-line{padding:6px 2px 14px;font-size:13px;border:0}
+ .history-desktop-table{display:none}
+ .mobile-trip-cards{display:grid;gap:14px}
+ .history-trip-card{border:1px solid #dfe8e2;border-radius:15px;background:white;padding:15px;box-shadow:0 3px 14px #163f2a06;min-width:0}
+ .history-trip-card.pending{border-color:#efdbab}
+ .history-card-top{display:flex;align-items:center;justify-content:space-between;gap:7px}
+ .history-card-top .badge{font-size:13px;gap:5px;padding:7px 9px;white-space:nowrap}
+ .history-card-top>span:not(.badge){font-size:13px;color:#617466;margin-left:auto;white-space:nowrap}
+ .history-card-chevron{display:grid;place-items:center;min-width:36px;min-height:44px;color:#688273}
+ .history-trip-card h2{font-size:20px;color:#193f2c;line-height:1.6;margin:8px 0 10px;overflow-wrap:anywhere}
+ .history-card-content{display:flex;align-items:flex-start;gap:8px}
+ .history-card-facts{flex:1;min-width:0}
+ .history-card-facts p{display:flex;align-items:flex-start;gap:8px;font-size:14px;line-height:1.7;color:#587060;margin:5px 0;overflow-wrap:anywhere}
+ .history-card-facts svg{flex-shrink:0;margin-top:3px;color:#6d8577}
+ .history-car-thumbnail{width:105px;height:80px;object-fit:contain;flex-shrink:0}
+ .history-card-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid #e8eee9;margin-top:13px;padding-top:13px}
+ .history-detail-button{display:flex;align-items:center;justify-content:center;min-height:47px;border:1px solid #cadbd0;border-radius:9px;padding:10px 12px;font-size:14px;color:#286347;flex:1}
+ .history-card-footer .vehicle-action{min-height:48px;padding:8px 12px;gap:8px;border-radius:9px;font-size:16px;flex:1}
+ .history-card-footer .vehicle-action-return{background:#e5f1fd;border-color:#9bc8f1;color:#126db7}
+ .history-distance{border-left:1px solid #dce7e0;padding-left:18px;flex:1;text-align:right;color:#1b6544}
+ .history-distance>span{display:block;font-size:12px;margin-bottom:3px;color:#647f6b}
+ .history-distance strong{font-size:24px;line-height:1.4;white-space:nowrap}
+ .history-distance small{font-size:14px;font-weight:400}
+ .history-empty{text-align:center;background:#fff;border:1px dashed #d1dfd6;border-radius:14px;padding:30px 18px;color:#748879}
+ .history-empty h3{font-size:19px;color:#365d43;margin:15px 0 10px}
+ .history-empty p{font-size:15px;line-height:1.8;margin-bottom:18px}
+ .modal-layer:has(.journey-detail-dialog){padding:0}
+ .modal.journey-detail-dialog{height:100dvh;max-height:100dvh;width:100%;max-width:100%;border-radius:0;overscroll-behavior:contain}
+ .journey-detail-dialog .modal-header{position:sticky;top:0;z-index:3;padding:20px 15px 20px 58px;min-height:70px}
+ .journey-detail-dialog .modal-header h2{font-size:19px}
+ .journey-detail-body{padding:21px 18px 25px;flex:1}
+ .journey-detail-project{font-size:24px}
+ .journey-detail-line,.journey-timeline p{font-size:16px}
+ .journey-detail-footer{flex-direction:column;padding:13px 18px calc(12px + env(safe-area-inset-bottom));background:#fff;position:sticky;bottom:0;z-index:2}
+ .journey-detail-footer>button{width:100%;margin:0;justify-content:center;font-size:16px}
+ .journey-detail-footer>.vehicle-action{order:-1}
+ .journey-detail-footer>.secondary:not(.journey-detail-back){font-size:14px}
+}
+@media(max-width:360px){.history-car-thumbnail{width:80px;height:67px}.history-card-top{gap:3px}.history-card-chevron{min-width:28px}.history-card-top .badge{font-size:12px;padding:6px}.history-card-top>span:not(.badge){font-size:12px}.history-status-filters button{gap:3px;font-size:14px}}
+@media print{.history-toolbar{display:none}.history-desktop-table{display:block!important}.mobile-trip-cards{display:none!important}}

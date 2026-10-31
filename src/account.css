@@ -1,0 +1,93 @@
+.account-page-heading-hidden{display:none}
+.account-overview{max-width:1020px;margin:0 auto}
+.account-page-heading{margin-bottom:25px}
+.account-page-heading h1{font-size:29px;line-height:1.5;color:#143e2e}
+.account-page-heading p{font-size:16px;color:#718578;line-height:1.8;margin-top:6px}
+.account-layout{display:grid;grid-template-columns:1fr 1fr;gap:25px;align-items:start}
+.account-identity-card{background:#fff;border:1px solid #dde8e0;border-radius:17px;padding:25px;box-shadow:0 4px 20px #194c3508;min-width:0}
+.account-person{display:flex;align-items:center;gap:17px;padding-bottom:21px}
+.account-person-avatar{display:grid;place-items:center;background:#d8efe2;color:#3d7960;width:76px;height:76px;border-radius:50%;flex-shrink:0}
+.account-person>div{min-width:0}
+.account-person h2{font-size:22px;line-height:1.5;overflow-wrap:anywhere;color:#214b35}
+.account-person p{font-size:15px;color:#708376;line-height:1.7;margin:5px 0 9px;overflow-wrap:anywhere}
+.account-person .badge{font-size:13px;padding:5px 12px}
+.account-identity-card dl{margin:0}
+.account-identity-card dl>div{display:grid;grid-template-columns:125px minmax(0,1fr);gap:14px;border-top:1px solid #e8eee9;padding:15px 0;font-size:16px;line-height:1.7}
+.account-identity-card dt{color:#738477}
+.account-identity-card dd{margin:0;text-align:right;color:#2f513b;overflow-wrap:anywhere}
+.account-contact{border-top:1px solid #e8eee9;padding-top:17px;font-size:13px;line-height:1.9;color:#8a978d}
+.account-actions>h2{font-size:20px;color:#234b35;margin:0 0 16px;line-height:1.5}
+.account-action-row,.account-about>summary{display:flex;align-items:center;gap:14px;width:100%;border:1px solid #dfe8e1;border-radius:13px;background:white;padding:18px;text-align:left;color:#3f654e;box-shadow:0 3px 14px #194c3507;min-height:88px;box-sizing:border-box;cursor:pointer}
+.account-action-icon{display:grid;place-items:center;background:#e2f4e9;color:#277957;border-radius:50%;width:49px;height:49px;flex-shrink:0}
+.account-action-row>span:nth-child(2),.account-about summary>span:nth-child(2){flex:1;min-width:0}
+.account-action-row strong,.account-about strong{font-size:17px;font-weight:600;display:block;line-height:1.6;color:#2e533d}
+.account-action-row small,.account-about summary small{font-size:13px;color:#849287;display:block;line-height:1.8;margin-top:3px}
+.account-action-row>svg,.account-about summary>svg{flex-shrink:0;color:#7c9382}
+.account-about{margin-top:14px}
+.account-about>summary{list-style:none}
+.account-about>summary::-webkit-details-marker{display:none}
+.account-about[open]>summary>svg{transform:rotate(90deg)}
+.account-about>div{padding:15px 20px;background:#f0f6f2;border-radius:0 0 12px 12px;font-size:15px;line-height:1.9;color:#567560}
+.account-logout{width:100%;display:flex;align-items:center;justify-content:center;gap:12px;border:1px solid #da9a8b;border-radius:10px;background:#fff;color:#b66550;min-height:51px;font-size:17px;margin-top:20px;padding:12px}
+.account-root-note{display:flex;gap:12px;background:#eff6f1;border:1px solid #d7e7da;border-radius:12px;padding:18px;color:#4b7256;line-height:1.8}
+.account-root-note>svg{flex-shrink:0}
+.account-root-note strong{font-size:16px}
+.account-root-note p{font-size:14px;margin-top:7px;overflow-wrap:anywhere}
+.account-password-view{max-width:580px;margin:0 auto;border:1px solid #dce8df;border-radius:16px;background:white;box-shadow:0 5px 20px #173f2d08;overflow:hidden}
+.account-password-header{background:#07533e;color:white;display:flex;align-items:center;gap:12px;padding:13px 15px}
+.account-password-header button{min-width:44px;min-height:44px;display:grid;place-items:center;color:#fff;border-radius:9px}
+.account-password-header h1{font-size:22px;color:white;line-height:1.5;letter-spacing:0}
+.account-password-form{padding:25px}
+.account-password-intro{text-align:center;margin:6px 0 27px}
+.account-password-intro>span{display:grid;place-items:center;background:#e0f3e7;color:#1f7954;border-radius:22px;width:76px;height:76px;margin:0 auto 18px}
+.account-password-intro h2{font-size:27px;line-height:1.6;color:#214e36}
+.account-password-intro p{font-size:16px;color:#7b8b7f;margin-top:4px;line-height:1.8}
+.account-password-form fieldset{margin:0;padding:0;border:0;min-width:0}
+.account-password-field{margin:21px 0 0}
+.account-password-field>span{font-size:16px;color:#58705e;margin-bottom:9px}
+.account-password-field b{color:#b47765}
+.account-password-input{display:flex;align-items:stretch;border:1px solid #cfddd3;border-radius:10px;background:white;overflow:hidden;min-height:50px}
+.account-password-input:focus-within{outline:2px solid #3d8b64;outline-offset:2px}
+.account-password-input input{width:0;flex:1;min-width:0;border:0;border-radius:0;padding:13px 12px;font-size:18px;color:#284f37;min-height:50px;background:transparent;box-shadow:none;outline:none}
+.account-password-input input:focus{outline:none;box-shadow:none}
+.account-password-input button{display:grid;place-items:center;min-width:48px;min-height:48px;color:#6c8172;border:0;flex-shrink:0}
+.account-password-form fieldset:disabled .account-password-input{background:#f4f7f4}
+.account-password-feedback{display:flex;align-items:center;gap:7px;line-height:1.8;font-size:14px;margin:8px 0 0}
+.account-password-feedback.valid{color:#288252}
+.account-password-feedback.invalid{color:#a07448}
+.account-password-feedback svg{flex-shrink:0}
+.account-password-notice{display:flex;align-items:flex-start;gap:12px;border-radius:11px;background:#e9f6ed;padding:16px;color:#427a55;margin-top:26px}
+.account-password-notice svg{flex-shrink:0}
+.account-password-notice p{font-size:15px;line-height:1.8;margin:0}
+.account-password-error{margin-top:18px;line-height:1.8;font-size:15px}
+.account-password-actions{margin-top:20px;display:grid;gap:8px}
+.account-password-actions .primary{width:100%;min-height:54px;font-size:18px;justify-content:center}
+.account-password-cancel{font-size:16px;color:#7e8e81;min-height:46px;padding:10px}
+@media(max-width:760px){
+ .account-page-heading h1{font-size:28px}
+ .account-page-heading{margin-bottom:19px}
+ .account-layout{display:block}
+ .account-identity-card{padding:21px 18px}
+ .account-person{gap:15px;padding-bottom:17px}
+ .account-person-avatar{width:66px;height:66px}
+ .account-person h2{font-size:22px}
+ .account-identity-card dl>div{grid-template-columns:112px minmax(0,1fr);font-size:16px;gap:10px;padding:12px 0}
+ .account-contact{font-size:13px;padding-top:14px}
+ .account-actions{margin-top:23px}
+ .account-actions>h2{font-size:20px;margin-bottom:14px}
+ .account-action-row,.account-about>summary{padding:16px 14px;gap:12px;min-height:86px}
+ .account-action-row strong,.account-about strong{font-size:17px}
+ .account-action-row small,.account-about summary small{font-size:13px}
+ .account-action-icon{width:44px;height:44px}
+ .app:has(.account-password-view) .topbar,.app:has(.account-password-view) .mobile-bottom-nav,.app:has(.account-password-view) main>footer{display:none}
+ .app:has(.account-password-view) main{padding:0;max-width:none}
+ .account-password-view{border:0;border-radius:0;min-height:100dvh;max-width:none;box-shadow:none}
+ .account-password-header{position:sticky;top:0;z-index:2;min-height:70px;box-sizing:border-box;padding:13px 12px}
+ .account-password-header h1{font-size:22px}
+ .account-password-form{padding:23px 21px calc(18px + env(safe-area-inset-bottom))}
+ .account-password-intro{margin:4px 0 27px}
+ .account-password-intro h2{font-size:26px}
+ .account-password-field{margin-top:22px}
+}
+@media(max-width:360px){.account-identity-card dl>div{grid-template-columns:1fr;gap:3px}.account-identity-card dd{text-align:left}.account-person h2{font-size:20px}.account-password-form{padding-left:17px;padding-right:17px}}
+@media print{.account-logout,.account-password-view{display:none!important}}
