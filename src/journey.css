@@ -1,0 +1,153 @@
+/* Employee journey UI, approved mobile proposal. */
+.mobile-brand,.mobile-bottom-nav{display:none}
+.employee-overview-heading{display:none}
+.employee-home{max-width:1060px;margin:0 auto}
+.employee-greeting{display:flex;align-items:center;gap:14px;margin-bottom:26px}
+.employee-avatar{display:grid;place-items:center;width:52px;height:52px;background:#dceee5;border-radius:50%;color:#07543e;flex-shrink:0}
+.employee-greeting h1{font-size:25px;letter-spacing:0;line-height:1.5;overflow-wrap:anywhere}
+.employee-greeting p{font-size:15px;color:#6c8178;margin-top:3px}
+.employee-section-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 14px}
+.employee-section-heading h2{font-size:21px;line-height:1.5}
+.employee-section-heading>span{font-size:13px;color:#77877f}
+.employee-cars{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:20px;align-items:start}
+.employee-car{border:1px solid #dde8e2;background:white;border-radius:17px;padding:22px;box-shadow:0 5px 18px #174e3508;min-width:0}
+.employee-car-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.employee-car-heading h3{font-size:26px;line-height:1.5;color:#16352d}
+.employee-car-heading .badge{font-size:12px;flex-shrink:0}
+.employee-model{font-size:17px;line-height:1.6;color:#425b51;margin-top:4px;overflow-wrap:anywhere}
+.employee-car-meta{font-size:13px;color:#77877f;margin-top:3px;line-height:1.7}
+.employee-car-image{display:block;width:100%;height:auto;max-height:285px;object-fit:contain;aspect-ratio:1.65;margin:8px auto 10px}
+.employee-car-placeholder{display:grid;place-items:center;min-height:200px;background:#f4f8f5;color:#7b9487;border-radius:10px;margin:15px 0}
+.employee-pending{background:#fff8e7;border:1px solid #f3dfae;border-radius:11px;overflow:hidden}
+.employee-pending h4,.journey-summary h3{margin:0;display:flex;align-items:center;gap:9px;background:#fff0c4;padding:12px 15px;font-size:18px;color:#9a6012;line-height:1.5}
+.employee-pending dl,.journey-summary dl{padding:12px 15px;display:grid;gap:11px;margin:0}
+.employee-pending dl>div,.journey-summary dl>div{display:grid;grid-template-columns:115px minmax(0,1fr);gap:10px;font-size:14px;line-height:1.6}
+.employee-pending dt,.journey-summary dt{color:#66746f}
+.employee-pending dd,.journey-summary dd{margin:0;overflow-wrap:anywhere;color:#223c32}
+.employee-pending .vehicle-action-card{width:calc(100% - 28px);margin:2px 14px 0;min-height:50px}
+.employee-detail{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;min-height:46px;font-size:14px;color:#1873b7;padding:10px}
+.employee-unavailable{display:flex;align-items:center;gap:12px;background:#fff7e8;color:#896322;border-radius:10px;padding:16px;font-size:15px;line-height:1.7}
+.employee-unavailable small{font-size:13px}
+.employee-odometer{display:flex;justify-content:space-between;gap:12px;border-top:1px solid #e7eee9;padding-top:16px;font-size:14px;color:#6c8178}
+.employee-odometer strong{color:#1e5340}
+.employee-history{margin-top:28px}
+.employee-history-item{display:block;text-align:left;width:100%;background:#fff;border:1px solid #e0e9e3;border-radius:13px;padding:18px;margin-top:12px;box-shadow:0 3px 12px #174e3505}
+.employee-history-item>strong{display:block;font-size:17px;margin:12px 0 8px;overflow-wrap:anywhere;color:#234538}
+.employee-history-status{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.employee-history-status span{display:flex;align-items:center;gap:7px;font-size:14px;color:#248263}
+.employee-history-status small{font-size:13px;color:#6c8178}
+.employee-history-place{display:flex;align-items:center;gap:7px;font-size:14px;color:#6c8178;overflow-wrap:anywhere}
+.employee-history-place svg{flex-shrink:0}
+.employee-history-bottom{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid #edf1ee;margin-top:12px;padding-top:12px;line-height:1.7}
+.employee-history-bottom>span{font-size:13px;color:#6c8178}
+.employee-history-bottom>strong{display:flex;align-items:center;gap:8px;font-size:16px;white-space:nowrap}
+.employee-empty{text-align:center;padding:30px;color:#667e70;line-height:1.8}
+.employee-empty h3{margin-top:12px}
+.employee-empty-history{background:#fff;border:1px dashed #d7e2db;border-radius:12px;padding:24px;text-align:center;font-size:15px;color:#71867a}
+.journey-form{color:#233e33}
+.journey-fields{border:0;padding:0;margin:0;min-width:0}
+.journey-form .modal-body{padding:22px 26px}
+.journey-vehicle{display:flex;align-items:center;gap:16px;padding:0 0 18px;border-bottom:1px solid #e3ebe6;margin-bottom:18px}
+.journey-vehicle img{width:128px;height:86px;object-fit:contain;flex-shrink:0}
+.journey-vehicle>svg{flex-shrink:0;color:#739486}
+.journey-vehicle strong{font-size:23px;line-height:1.5}
+.journey-vehicle p{font-size:15px;color:#576c61;line-height:1.6;overflow-wrap:anywhere;margin:3px 0}
+.journey-vehicle small{font-size:13px;color:#71867a}
+.journey-driver{display:flex;align-items:center;gap:12px;padding:13px;background:#f6f9f7;border-radius:10px;font-size:15px}
+.journey-driver>svg:first-child{color:#1d7054;flex-shrink:0}
+.journey-driver strong{font-weight:600;flex:1;overflow-wrap:anywhere}
+.journey-driver>svg:last-child{color:#738276;flex-shrink:0}
+.journey-section-title{font-size:18px;line-height:1.6;margin:24px 0 15px;color:#155541}
+.journey-inputs{display:grid;gap:19px}
+.journey-form .field>span{font-size:15px;color:#50655b;margin-bottom:8px}
+.journey-form .field b{color:#cb584c}
+.journey-form input,.journey-form select,.journey-form textarea{font-size:17px;padding:12px;min-height:48px;width:100%;border-radius:9px;box-sizing:border-box;max-width:100%;color:#223e32;background:#fff;border:1px solid #cfdcd3}
+.journey-form input:focus,.journey-form select:focus,.journey-form textarea:focus{outline:2px solid #3e8b6c;outline-offset:2px}
+.journey-form input[type=datetime-local]{font-size:16px;min-width:0;width:100%;display:block}
+.journey-car-select,.journey-driver-select{margin-bottom:18px}
+.journey-number{display:flex;align-items:stretch;min-width:0}
+.journey-form .journey-number input{border-radius:9px 0 0 9px;flex:1;min-width:0;width:0;font-variant-numeric:tabular-nums;font-size:20px}
+.journey-number>span{display:flex;align-items:center;justify-content:center;padding:0 16px;background:#f1f5f2;border:1px solid #cfdcd3;border-left:0;border-radius:0 9px 9px 0;font-size:15px;color:#6b7c72}
+.journey-hint{display:flex;align-items:center;gap:7px;font-size:13px;color:#738276;line-height:1.8;margin-top:8px}
+.journey-latest{display:block;font-size:14px;color:#708478;margin:0 0 9px;line-height:1.6}
+.journey-mileage{margin-top:18px}
+.journey-summary{background:#fff8e7;border:1px solid #f3dfae;border-radius:11px;overflow:hidden}
+.journey-summary dl>div{font-size:14px;grid-template-columns:132px minmax(0,1fr)}
+.journey-distance{display:flex;align-items:center;gap:20px;background:#e5f5eb;border:1px solid #d6eddf;border-radius:12px;padding:19px;margin-top:20px;color:#0c5a40}
+.journey-distance span{display:block;font-size:15px;margin-bottom:5px}
+.journey-distance strong{font-size:30px;line-height:1.3;color:#153c2e;font-variant-numeric:tabular-nums}
+.journey-notes,.journey-reason{margin-top:23px}
+.journey-counter{display:block;text-align:right;color:#7a8a80;font-size:12px;margin-top:4px}
+.journey-validation{font-size:14px;color:#ad493b;margin-top:10px;line-height:1.8}
+.journey-error{margin:0 26px 20px;line-height:1.8}
+.journey-footer{flex-direction:column;gap:5px;background:#fff;padding:15px 26px}
+.journey-footer .vehicle-action{width:100%;min-height:54px}
+.journey-footer .vehicle-action-return{background:#1679cd;border-color:#1679cd;color:#fff}
+.journey-footer .vehicle-action-return .vehicle-action-icon{background:#ffffff20}
+.journey-footer .vehicle-action-return:not(:disabled):hover{background:#106ab8;border-color:#106ab8}
+.journey-cancel{min-height:44px;font-size:14px;color:#6b7e71;width:100%}
+.trip-dialog .modal-header{background:#07533e;color:#fff;position:relative;padding:20px 26px 20px 64px}
+.trip-dialog .modal-header .eyebrow{display:none}
+.trip-dialog .modal-header h2{font-size:22px;color:#fff}
+.trip-dialog .modal-header .iconbutton{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:#fff;min-width:40px;min-height:40px;display:grid;place-items:center}
+@media(max-width:760px){
+ .app .topbar{background:#074a38;color:#fff;padding:14px 17px;min-height:74px;height:auto;gap:10px;flex-wrap:wrap}
+ .mobile-brand{display:flex;align-items:center;gap:10px;color:white;flex:1;text-decoration:none;min-width:0}
+ .mobile-brand>span{font-size:22px;font-weight:700;line-height:1.4}
+ .mobile-brand small{display:block;font-size:9px;font-weight:400;letter-spacing:1px;color:#d7e9df;line-height:1.7}
+ .app .topbar .breadcrumb{order:2;color:#fff}
+ .app .topbar .breadcrumb>span,.app .topbar .breadcrumb>strong,.app .topbar .breadcrumb>svg{display:none}
+ .app .topbar .mobile-menu{min-width:44px;min-height:44px;align-items:center;justify-content:center;color:#fff;margin:0}
+ .app .topbar .topdate{font-size:0;gap:0;color:#fff}
+ .app .topbar .topdate button{font-size:16px;min-height:44px;min-width:36px;margin:0;padding:0;display:grid;place-items:center;color:#fff;border:0}
+ .mobile-bottom-nav{display:flex;flex-direction:row;gap:4px;position:fixed;z-index:20;left:0;right:0;bottom:0;background:#fffffffa;backdrop-filter:blur(12px);border-top:1px solid #dce7df;padding:5px 10px calc(5px + env(safe-area-inset-bottom));box-shadow:0 -4px 18px #174e3508}
+ .mobile-bottom-nav button{position:relative;display:flex;flex:1;min-height:58px;align-items:center;justify-content:center;flex-direction:column;gap:4px;color:#7a8981;font-size:12px;border-radius:9px}
+ .mobile-bottom-nav button.active{color:#096246;background:#eff7f2;font-weight:700}
+ .mobile-bottom-nav button.active:after{content:'';width:28px;height:3px;background:#207d59;border-radius:3px;position:absolute;bottom:0}
+ .mobile-pending-dot{position:absolute;top:6px;left:calc(50% + 10px);width:8px;height:8px;background:#d89625;border-radius:50%;border:2px solid #fff}
+ .app main{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+ .app .toast{bottom:calc(88px + env(safe-area-inset-bottom));z-index:100}
+ .employee-app main{padding-top:23px}
+ .employee-greeting{margin-bottom:24px;gap:12px}
+ .employee-greeting h1{font-size:21px}
+ .employee-greeting p{font-size:14px}
+ .employee-avatar{width:46px;height:46px}
+ .employee-section-heading h2{font-size:19px}
+ .employee-cars{display:block}
+ .employee-car{padding:16px;border-radius:15px;margin-bottom:18px}
+ .employee-car-heading h3{font-size:25px}
+ .employee-model{font-size:16px}
+ .employee-car-meta{font-size:12px}
+ .employee-car-image{max-height:165px;object-fit:contain}
+ .employee-pending dl>div{grid-template-columns:107px minmax(0,1fr);gap:8px;font-size:14px}
+ .employee-pending h4{font-size:18px;padding:11px 13px}
+ .employee-pending dl{padding:12px 13px}
+ .employee-pending .vehicle-action-card{font-size:17px}
+ .employee-history{margin-top:24px}
+ .employee-history-item{padding:15px}
+ .employee-history-bottom{align-items:flex-start}
+ .employee-history-bottom>span{font-size:12px}
+ .employee-history-bottom>strong{font-size:15px}
+ .modal-layer:has(.trip-dialog){padding:0}
+ .modal.trip-dialog{width:100%;max-width:100%;max-height:100dvh;height:100dvh;border-radius:0;margin:0;overflow:auto;overscroll-behavior:contain}
+ .trip-dialog .modal-header{position:sticky;top:0;z-index:3;min-height:70px;box-sizing:border-box;padding:18px 18px 18px 62px}
+ .trip-dialog .modal-header h2{font-size:21px}
+ .journey-form{display:flex;flex-direction:column;min-height:calc(100dvh - 70px)}
+ .journey-fields{flex:1}
+ .journey-form .modal-body{padding:20px 18px 16px}
+ .journey-vehicle{gap:12px;padding-bottom:16px}
+ .journey-vehicle img{width:111px;height:78px}
+ .journey-vehicle strong{font-size:21px}
+ .journey-vehicle p{font-size:14px}
+ .journey-driver{font-size:14px;gap:9px}
+ .journey-section-title{font-size:18px;margin-top:23px}
+ .journey-inputs{gap:18px}
+ .journey-summary dl>div{grid-template-columns:124px minmax(0,1fr);gap:8px;font-size:14px}
+ .journey-summary dl{padding:13px}
+ .journey-footer{position:sticky;bottom:0;padding:12px 18px calc(8px + env(safe-area-inset-bottom));z-index:2}
+ .journey-error{margin:0 18px 18px}
+ .journey-distance{gap:17px;padding:17px}
+ .journey-footer .vehicle-action{font-size:18px;min-height:54px;border-radius:10px}
+}
+@media(max-width:360px){.employee-car-heading h3{font-size:22px}.employee-pending dl>div,.journey-summary dl>div{grid-template-columns:1fr;gap:2px}.journey-vehicle img{width:92px}.employee-history-bottom{flex-wrap:wrap}}
+@media print{.mobile-bottom-nav,.mobile-brand{display:none!important}.employee-app main{padding:0}.employee-car{break-inside:avoid}.employee-pending{background:#fff}}
