@@ -1,0 +1,10 @@
+const target=process.env.FLEET_DEPLOY_TARGET;
+if(!['demo','production'].includes(target))throw Error('Invalid deployment target.');
+const url=target==='demo'?'https://smart-fleet-demo.kritsuwan1.workers.dev':'https://smart-fleet.kritsuwan1.workers.dev';
+const response=await fetch(url+'/login',{signal:AbortSignal.timeout(30000)});
+const html=await response.text();
+if(!response.ok||!html.includes('smartfleet')||!html.includes('<form'))throw Error('Login page check failed. Deployment may already be live: inspect Cloudflare Deployments and Worker logs.');
+if(target==='demo'&&!html.includes('DEMO — ระบบทดสอบ'))throw Error('Demo label missing.');
+if(target==='production'&&/PRODUCTION — ระบบใช้งานจริง|ข้อมูลใช้งานจริงของบริษัท/.test(html))throw Error('Production banner is still visible.');
+console.log(`Login page is available: ${url}`);
+console.log('Next: sign in and check actual records, car status, and return form. This check does not verify authenticated data.');

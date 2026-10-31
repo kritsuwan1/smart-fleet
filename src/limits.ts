@@ -1,0 +1,2 @@
+export const MAIN_DATA_LIMIT_BYTES=1500000;
+export const ACCOUNT_LIMIT=200;

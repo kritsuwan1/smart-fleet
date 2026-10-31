@@ -1,0 +1,13 @@
+{
+  "name": "smart-fleet-demo",
+  "main": "output/worker-demo.js",
+  "compatibility_date": "2026-10-28",
+  "workers_dev": true,
+  "d1_databases": [
+    {
+      "binding": "DEMO_DB",
+      "database_name": "smart-fleet-demo",
+      "database_id": "REPLACE_WITH_NEW_DEMO_DATABASE_ID"
+    }
+  ]
+}

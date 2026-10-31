@@ -1,0 +1,10 @@
+import {useEffect,useState} from 'react';
+import {Clock3,CheckCircle2,UserRound,CalendarDays,ArrowRight} from 'lucide-react';
+import type {Fleet,Trip} from './fleet';
+import {tripElapsed} from './open-trips';
+export default function OpenTripsPanel({state,onReturn,onDetail}:{state:Fleet;onReturn:(trip:Trip)=>void;onDetail?:(trip:Trip)=>void}){
+ const [clock,setClock]=useState(Date.now());
+ useEffect(()=>{const timer=setInterval(()=>setClock(Date.now()),60000);return()=>clearInterval(timer);},[]);
+ const trips=state.trips.filter(t=>!t.end).sort((a,b)=>a.start.localeCompare(b.start));
+ return <section className={'panel open-trips '+(trips.length?'awaiting-return':'all-returned')} aria-label="รายการรถที่ยังไม่คืน"><div className="panel-title"><h2><Clock3 size={23}/> รอคืนรถ <span className="badge amber">{trips.length} รายการ</span></h2></div>{!trips.length?<p className="open-trips-empty"><CheckCircle2 size={20}/> คืนรถครบแล้ว ไม่มีรายการค้าง</p>:<><div className="open-trips-list">{trips.map(t=>{const elapsed=tripElapsed(t.start,clock);return <article key={t.id} className={'open-trip '+(elapsed.review?'review':'')}><div className="pending-driver"><span className="pending-avatar"><UserRound size={23}/></span><div><strong>{state.people.find(p=>p.id===t.driverId)?.name||'ไม่ระบุผู้ขับ'}</strong><p>{t.project}</p></div></div><p className="pending-car">{state.cars.find(c=>c.id===t.carId)?.plate} · #{t.seq}</p><p className="pending-date"><CalendarDays size={19}/>{new Date(t.start+'+07:00').toLocaleDateString('th-TH',{timeZone:'Asia/Bangkok',day:'numeric',month:'short',year:'numeric'})}</p><p className="pending-date"><Clock3 size={19}/>{t.start.slice(11)} น.</p><p className="pending-date"><Clock3 size={19}/>ใช้งาน {elapsed.text}</p>{elapsed.review&&<span className="pending-review">ตั้งแต่ 24 ชั่วโมงขึ้นไป · ควรตรวจสอบ</span>}<button className="textbutton pending-detail" onClick={()=>onDetail?onDetail(t):onReturn(t)}>ดูรายละเอียด <ArrowRight size={18}/></button></article>;})}</div><p className="open-trips-note">ระยะเวลาอัปเดตทุกนาที · กดรีเฟรชเพื่อดูสถานะจากอุปกรณ์อื่น เกณฑ์ 24 ชั่วโมงเป็นการเตือนให้ตรวจสอบ ไม่ใช่กำหนดคืนรถ</p></>}</section>;
+}

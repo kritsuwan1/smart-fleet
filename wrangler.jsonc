@@ -1,0 +1,13 @@
+{
+  "name": "smart-fleet",
+  "main": "output/worker.js",
+  "compatibility_date": "2026-10-28",
+  "workers_dev": true,
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "smart-fleet-production",
+      "database_id": "ebbca318-17d1-4486-b925-d6c787472ba5"
+    }
+  ]
+}

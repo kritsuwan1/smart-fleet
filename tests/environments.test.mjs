@@ -1,0 +1,44 @@
+import assert from 'node:assert/strict';
+import {DatabaseSync} from 'node:sqlite';
+import {readFile,mkdtemp,writeFile,rm} from 'node:fs/promises';
+import {spawnSync} from 'node:child_process';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import production from '../output/worker-production.js';
+import demo from '../output/worker-demo.js';
+const schema=await readFile('schema.sql','utf8'),demoSchema=await readFile('schema-demo.sql','utf8');
+function database(sql){return {prepare(q){let args=[];const stmt=sql.prepare(q);return {bind(...a){args=a;return this;},async first(){return stmt.get(...args)||null;},async run(){return {meta:{changes:Number(stmt.run(...args).changes)}};}};}};}
+const prodSQL=new DatabaseSync(':memory:');prodSQL.exec(schema);
+const demoSQL=new DatabaseSync(':memory:');demoSQL.exec(demoSchema);
+const prodEnv={APP_PASSWORD:crypto.randomUUID(),DB:database(prodSQL)},demoEnv={APP_PASSWORD:crypto.randomUUID(),DEMO_DB:database(demoSQL)};
+const origin='https://fleet.test';
+const req=(worker,env,path,options={},cookie='')=>worker.fetch(new Request(origin+path,{...options,headers:{origin,'CF-Connecting-IP':'192.0.2.44',...(cookie?{cookie}:{}),...options.headers}}),env);
+const login=async(worker,env)=>{const r=await req(worker,env,'/login',{method:'POST',body:new URLSearchParams({username:'admin',password:env.APP_PASSWORD})});assert.equal(r.status,303);return r.headers.get('set-cookie').split(';')[0];};
+assert.match(await(await req(demo,demoEnv,'/login')).text(),/DEMO — ระบบทดสอบ/);
+assert.doesNotMatch(await(await req(production,prodEnv,'/login')).text(),/PRODUCTION — ระบบใช้งานจริง|ข้อมูลใช้งานจริงของบริษัท|<div class="environment-banner/);
+const prodCookie=await login(production,prodEnv),demoCookie=await login(demo,demoEnv);
+assert.equal((await req(demo,demoEnv,'/api/fleet',{},prodCookie)).status,401);
+assert.equal((await req(production,prodEnv,'/api/fleet',{},demoCookie)).status,401);
+let d=await(await req(demo,demoEnv,'/api/fleet',{},demoCookie)).json();assert.equal(d.state.trips.length,0);assert.equal(d.state.people[0].name,'พนักงานทดสอบ 1');
+assert.equal((await req(demo,demoEnv,'/api/fleet',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({version:d.version,action:'trip',data:{carId:'car-1',driverId:'p1',project:'ทดสอบแยกข้อมูล',destination:'Demo',start:'2026-10-31T08:00',end:'',odoStart:115784,odoEnd:null,note:'',reason:''}})},demoCookie)).status,200);
+assert.equal((await(await req(production,prodEnv,'/api/fleet',{},prodCookie)).json()).state.trips.length,0);
+const original=prodSQL.prepare("SELECT payload FROM fleet_store WHERE id='main'").get().payload;
+// A Demo schema cannot relabel an existing unmarked Production main row.
+prodSQL.exec(demoSchema);assert.equal(prodSQL.prepare("SELECT payload FROM fleet_store WHERE id='environment'").get(),undefined);
+assert.equal((await req(demo,{...demoEnv,DEMO_DB:prodEnv.DB},'/api/fleet')).status,503);
+assert.equal(prodSQL.prepare("SELECT payload FROM fleet_store WHERE id='main'").get().payload,original);
+assert.equal((await req(demo,{APP_PASSWORD:demoEnv.APP_PASSWORD,DB:prodEnv.DB},'/api/fleet')).status,503);
+assert.equal((await req(production,{...prodEnv,DB:demoEnv.DEMO_DB},'/api/fleet')).status,503);
+assert.equal((await demo.fetch(new Request('https://smart-fleet.kritsuwan1.workers.dev/'),demoEnv)).status,503);
+assert.equal((await production.fetch(new Request('https://smart-fleet-demo.kritsuwan1.workers.dev/'),prodEnv)).status,503);
+const qrDemo=await(await req(demo,demoEnv,'/qr-site.svg')).text(),qrProd=await(await req(production,prodEnv,'/qr-site.svg')).text();assert.notEqual(qrDemo,qrProd);
+assert.match(await(await req(demo,demoEnv,'/qr',{},demoCookie)).text(),/smart-fleet-demo.kritsuwan1.workers.dev/);
+const backupDemo=await(await req(demo,demoEnv,'/api/backup.sql',{},demoCookie)).text();assert.match(backupDemo,/-- environment: demo/);
+const backupProd=await(await req(production,prodEnv,'/api/backup.sql',{},prodCookie)).text();
+prodSQL.exec(backupDemo);assert.equal(prodSQL.prepare("SELECT payload FROM fleet_store WHERE id='main'").get().payload,original);
+const demoBefore=demoSQL.prepare("SELECT payload FROM fleet_store WHERE id='main'").get().payload;
+demoSQL.exec(backupProd);assert.equal(demoSQL.prepare("SELECT payload FROM fleet_store WHERE id='main'").get().payload,demoBefore);
+const freshDemo=new DatabaseSync(':memory:');freshDemo.exec(demoSchema);freshDemo.exec(backupDemo);assert.equal(JSON.parse(freshDemo.prepare("SELECT payload FROM fleet_store WHERE id='main'").get().payload).trips.length,1);
+const json=await(await req(demo,demoEnv,'/api/backup.json',{},demoCookie)).json();assert.equal(json.environment,'demo');
+const temporary=await mkdtemp(join(tmpdir(),'fleet-demo-restore-'));try{const file=join(temporary,'demo.sql');await writeFile(file,backupDemo);const command=spawnSync(process.execPath,['--experimental-sqlite','scripts/check-sql-backup.mjs',file],{encoding:'utf8'});assert.equal(command.status,0,command.stderr);}finally{await rm(temporary,{recursive:true,force:true});}
+console.log('PASS environments: separate builds/login labels/databases/secrets/sessions, Demo-only binding and required marker, demo schema refuses existing data, wrong host/database stopped, Demo edits isolated, separate QR and backup labels, cross-environment SQL cannot overwrite main, Demo SQL restore and offline rehearsal');

@@ -1,0 +1,12 @@
+node_modules/
+output/
+src/client.bundle.txt
+.qa/
+.wrangler/
+.deploy.config.json
+.env
+.env.*
+.dev.vars
+.dev.vars.*
+backups/
+*.log

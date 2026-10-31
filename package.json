@@ -1,0 +1,23 @@
+{
+  "name": "smart-fleet-cloudflare",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --experimental-sqlite tests/worker.test.mjs && node --experimental-sqlite tests/import.test.mjs && node --experimental-sqlite tests/accounts.test.mjs && node --experimental-sqlite tests/roles.test.mjs && node --experimental-sqlite tests/reports.test.mjs && node --experimental-sqlite tests/system-status.test.mjs && node --experimental-sqlite tests/backup-alerts.test.mjs && node --experimental-sqlite tests/environments.test.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "lucide-react": "1.31.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.0",
+    "wrangler": "4.92.0",
+    "typescript": "5.9.3",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3"
+  },
+  "version": "3.8.1"
+}
