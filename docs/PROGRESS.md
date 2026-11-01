@@ -115,3 +115,41 @@ All Worker/API requests were direct local function calls using in-memory SQLite 
 - Automatic Backup development has not started.
 
 - Pre-commit validation: PyYAML 6.0.3 parsed the workflow successfully; structural checks passed for branch trigger, job guard, Ubuntu/Node version, read-only permissions, credential persistence disabled, absence of custom env/secrets/reusable-workflow calls, and the four exact npm commands. git diff --check passed. Validation dependency was installed only in ignored .qa/, not application dependencies.
+
+## 2026-11-01 - Task 1.1: Linux CI verified PASS
+
+- Actual run: [Test Linux Node.js 24 #1](https://github.com/kritsuwan1/smart-fleet/actions/runs/41270976878), job [test](https://github.com/kritsuwan1/smart-fleet/actions/runs/41270976878/job/124743510780).
+- Tested commit: `4ecfd46909ddb7a2f69d94b7bbf95152eaba6b36` on `dev/smartfleet-batch-1`; event: push. Workflow setup commit adds the four missing instruction/docs files and preserves existing progress.
+- Actual runner: **Ubuntu 24.04.5 LTS**, ubuntu-24.04 image, Linux x64. Actual **Node.js v24.22.1**, npm 11.19.1; version/platform assertions passed.
+- Execution recorded in logs: 2026-11-01 10:54:18–10:54:35 Asia/Bangkok (03:54:18–03:54:35 UTC). Run and job conclusions: **success**.
+- Linux results supersede the earlier NOT_RUN status; the host running this chat remains Windows, but the tests below executed on GitHub's Linux runner.
+
+| Command | Actual Linux result |
+| --- | --- |
+| npm ci | PASS; 47 packages installed, exit 0 |
+| npm run build | PASS; Demo 956847 bytes, Production 955478 bytes, exit 0 |
+| npm run typecheck | PASS; exit 0 |
+| npm test | PASS; all 12 suites reached their success output, exit 0 |
+
+| Test file | Actual Linux result |
+| --- | --- |
+| worker.test.mjs | PASS |
+| import.test.mjs | PASS |
+| accounts.test.mjs | PASS |
+| roles.test.mjs | PASS |
+| reports.test.mjs | PASS |
+| system-status.test.mjs | PASS |
+| backup-alerts.test.mjs | PASS |
+| environments.test.mjs | PASS |
+| mobile-ui.test.mjs | PASS |
+| history-ui.test.mjs | PASS |
+| profile-ui.test.mjs | PASS |
+| trip-receipt.test.mjs | PASS |
+
+- Inspected the job steps and decoded logs, including all 12 success outputs and the Linux/Node assertion, rather than inferring success from YAML alone. GitHub accepted and executed the workflow.
+- Tests use in-memory SQLite and fixtures; no production DB access or staging-D1 restore is claimed. Optional external XLSX-fixture coverage remains conditional and was not configured.
+- npm ci additionally reported **6 dependency vulnerabilities (1 low, 5 high)** and warnings for dependency install scripts. Build and tests still passed. No npm audit fix or dependency upgrade was performed; audit details/remediation require a separate scoped review.
+- The runner warned that actions/setup-node@v4 targets deprecated Node 20 internally and was forced to Node 24; the actual project runtime was verified as v24.22.1. This warning did not fail the run.
+- No source, test assertions, schemas, real databases, Cloudflare resources, secrets or environment configuration were changed. No deploy workflow was dispatched, no deployment or merge occurred.
+- The Linux automated-test prerequisite is now satisfied for the tested commit. Automatic Backup implementation has **not** started; this task ends with CI setup and evidence only.
+- This result entry is a documentation-only follow-up commit; docs/** path filtering prevents a redundant CI run for that update.
