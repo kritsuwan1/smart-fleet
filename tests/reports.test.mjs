@@ -4,11 +4,13 @@ import {createRequire} from 'node:module';
 import {readFile,mkdtemp} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
+import {pathToFileURL} from 'node:url';
 import worker from '../output/worker.js';
 const require=createRequire(import.meta.url);let esbuild;try{esbuild=require('esbuild');}catch{esbuild=require(process.env.FLEET_ESBUILD_PATH);}
-const tmp=await mkdtemp(join(tmpdir(),'fleet-reports-'));
+// Exercise URL escaping as well as Windows drive-letter paths.
+const tmp=await mkdtemp(join(tmpdir(),'fleet-reports #%-'));
 for(const name of ['report','fuel','fleet','import-plan'])await esbuild.build({entryPoints:['src/'+name+'.ts'],outfile:tmp+'/'+name+'.mjs',bundle:true,platform:'node',format:'esm'});
-const {makeReport,jpegPdf}=await import(tmp+'/report.mjs'),{parseCsv,extractMonthlyB7,manualFuel,fuelPrice,FUEL_CSV}=await import(tmp+'/fuel.mjs'),{initial}=await import(tmp+'/fleet.mjs'),{planImport}=await import(tmp+'/import-plan.mjs');
+const {makeReport,jpegPdf}=await import(pathToFileURL(join(tmp,'report.mjs')).href),{parseCsv,extractMonthlyB7,manualFuel,fuelPrice,FUEL_CSV}=await import(pathToFileURL(join(tmp,'fuel.mjs')).href),{initial}=await import(pathToFileURL(join(tmp,'fleet.mjs')).href),{planImport}=await import(pathToFileURL(join(tmp,'import-plan.mjs')).href);
 const imported=planImport(initial,JSON.parse(await readFile('tests/fixtures/latest-import.json','utf8')),{carId:'car-1',updateExisting:false,createPeople:false}).candidate;
 const sept=makeReport(imported,'2026-09','car-1');assert.equal(sept.count,15);assert.equal(sept.closedCount,15);assert.equal(sept.total,857);assert.equal(sept.maximum,126);assert.equal(sept.odoStart,115784);assert.equal(sept.odoEnd,116641);assert.equal(sept.longest,'WNB วังน้อย');assert.equal(sept.average,857/15);
 assert.equal(makeReport(imported,'2026-10','car-1').total,908);

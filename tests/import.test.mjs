@@ -4,11 +4,13 @@ import {createRequire} from 'node:module';
 import {mkdtemp,readFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
+import {pathToFileURL} from 'node:url';
 import worker from '../output/worker.js';
 const require=createRequire(import.meta.url);let esbuild;try{esbuild=require('esbuild');}catch{esbuild=require(process.env.FLEET_ESBUILD_PATH);}
-const tmp=await mkdtemp(join(tmpdir(),'fleet-import-'));
+// Exercise URL escaping as well as Windows drive-letter paths.
+const tmp=await mkdtemp(join(tmpdir(),'fleet-import #%-'));
 for(const name of ['import-plan','xlsx-reader','fleet'])await esbuild.build({entryPoints:['src/'+name+'.ts'],bundle:true,platform:'node',format:'esm',outfile:tmp+'/'+name+'.mjs'});
-const {planImport}=await import(tmp+'/import-plan.mjs'),{initial}=await import(tmp+'/fleet.mjs'),{excelDate,excelTime,readZip}=await import(tmp+'/xlsx-reader.mjs');
+const {planImport}=await import(pathToFileURL(join(tmp,'import-plan.mjs')).href),{initial}=await import(pathToFileURL(join(tmp,'fleet.mjs')).href),{excelDate,excelTime,readZip}=await import(pathToFileURL(join(tmp,'xlsx-reader.mjs')).href);
 const rows=JSON.parse(await readFile('tests/fixtures/latest-import.json','utf8'));
 const options={carId:'car-1',updateExisting:false,createPeople:false};
 let plan=planImport(initial,rows,options);
