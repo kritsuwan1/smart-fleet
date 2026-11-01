@@ -1,0 +1,11 @@
+// DESIGN ONLY. Never apply to Production as part of Task 2A.
+{
+  "name": "REPLACE_PRODUCTION_WORKER",
+  "main": "../output/worker-production.js",
+  "compatibility_date": "2026-10-28",
+  "workers_dev": false,
+  "vars": {"AUTOMATIC_BACKUP_ENABLED": "false", "BACKUP_ENVIRONMENT": "production"},
+  "d1_databases": [{"binding": "DB", "database_name": "REPLACE_PRODUCTION_D1", "database_id": "REPLACE_PRODUCTION_D1_ID"}],
+  "r2_buckets": [{"binding": "BACKUP_BUCKET", "bucket_name": "REPLACE_DIFFERENT_PRIVATE_PRODUCTION_BUCKET"}],
+  "triggers": {"crons": []}
+}

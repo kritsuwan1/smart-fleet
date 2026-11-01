@@ -109,3 +109,9 @@ Missing from source/configuration: Worker scheduled handler, cron trigger, remot
 The only workflow, [deploy.yml](../.github/workflows/deploy.yml), is manual `workflow_dispatch`, target demo/production, with install -> build -> typecheck -> tests -> existing Worker/binding metadata check -> Wrangler deploy -> unauthenticated login-page check. There is no push/PR CI trigger, scheduled backup workflow, or explicit branch/environment approval gate in this YAML. GitHub settings outside the repository are unknown.
 
 [scripts/prepare-deploy.mjs](../scripts/prepare-deploy.mjs) reads remote binding metadata and creates deployment config; [check-deployment.mjs](../scripts/check-deployment.mjs) checks login HTML only. Neither script nor Wrangler/deployment workflow was executed during this audit. Production deployment/version, secrets, backups, infrastructure and rollback behavior remain unverified.
+
+## Task 2A development addition - not deployed
+
+The earlier sections describe the pinned Phase 0 snapshot. Development now adds src/automatic-backup.ts with a default-off scheduled entry in worker.ts, environment/build/marker guards, private R2 daily artifacts, full-state/envelope SHA-256 validation, D1 token lease and sanitized status rows using the existing fleet_store schema. It does not mutate main during backup. Retention runs only after verified read-back; the latest current-day copy is protected.
+
+Admin-only /api/backup-status feeds BackupPanel. Failure notifications use an optional separately approved HTTPS receiver; no credentials are committed or provisioned. Recovery has no HTTP route and accepts only an empty staging target with the existing Demo marker, rotating sessionKey after restore. See [AUTOMATIC_BACKUP.md](AUTOMATIC_BACKUP.md) for setup/recovery, limits and config examples. All real wrangler configurations and the deployment workflow remain unchanged. Only the test CI step label changes to avoid the old fixed 12-suite count.

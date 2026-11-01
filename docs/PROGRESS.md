@@ -153,3 +153,24 @@ All Worker/API requests were direct local function calls using in-memory SQLite 
 - No source, test assertions, schemas, real databases, Cloudflare resources, secrets or environment configuration were changed. No deploy workflow was dispatched, no deployment or merge occurred.
 - The Linux automated-test prerequisite is now satisfied for the tested commit. Automatic Backup implementation has **not** started; this task ends with CI setup and evidence only.
 - This result entry is a documentation-only follow-up commit; docs/** path filtering prevents a redundant CI run for that update.
+
+## 2026-11-01 - Task 2A: Automatic Backup development implementation
+
+- Branch/base: dev/smartfleet-batch-1 at 66db514f90b2e9f5064f9c39b011429069efd261. Read AGENTS and all four required docs first.
+- Prerequisite confirmed: Linux Node v24.22.1 run [41270976878](https://github.com/kritsuwan1/smart-fleet/actions/runs/41270976878) passed the original 12 suites. The only subsequent base change was a progress update, verified by commit comparison.
+- Implemented a default-off scheduled handler for UTC cron 0 19 * * * (02:00 Asia/Bangkok), full Fleet snapshots in private R2 by environment/day, state plus envelope SHA-256, read-back validation, immutable daily keys, D1 token lease, bounded retries and safe seven-day retention.
+- Reuses existing fleet_store structure for backup:lease/status rows; NO schema migration. Snapshot SELECT preserves main payload/version and all existing data. Retention cannot run without a verified current-day copy and never deletes its current key. Older events cannot regress the latest-success day.
+- Added redacted failure logs/optional HTTPS notification and Admin-only status API/panel. Added an empty-Staging-only restore helper and offline rehearsal; restoration rotates sessionKey but preserves all other state.
+- Added separate disabled config examples and setup/recovery documentation; current wrangler configs and deploy.yml remain unchanged. No bucket, secret, environment variable, trigger, real DB or other Cloudflare resource was created or changed.
+- Changed files:
+  - src/automatic-backup.ts; src/worker.ts; src/BackupPanel.tsx
+  - tests/automatic-backup.test.mjs; package.json (append suite); .github/workflows/test-linux.yml (remove fixed suite count from step label)
+  - scripts/rehearse-auto-restore.mjs
+  - config/backup-staging.example.jsonc; config/backup-production.example.jsonc
+  - docs/AUTOMATIC_BACKUP.md; docs/ARCHITECTURE.md; docs/TEST_PLAN.md; docs/PROGRESS.md
+- Local Windows Node v24.22.1 validation: locked dependency install PASS; final npm run build PASS (Demo 972406 / Production 971030 bytes); npm run typecheck PASS; npm test PASS (13 suite files, original 12 + automatic-backup); git diff --check PASS. Example configs parse and remain disabled with no active cron; status fields use a strict public whitelist.
+- Tests exercise success, full-state preservation, metadata/state corruption, duplicate/concurrent/expired/stolen lease cases, stale schedule, transient/ambiguous/persistent storage failures, redacted notification/status errors, paginated retention, sole-copy preservation and offline/empty-Staging-only restore with actual SQLite.
+- Actual Staging R2/D1/notification/cron/browser verification remains NOT_RUN; all backup resources in automated tests are mocks/in-memory databases with synthetic data. Provider killed-job/last-success monitoring and private bucket/IAM settings require an approved Staging exercise.
+- New Linux CI result for this implementation is pending at preparation; record its tested SHA and actual run result after push.
+- Existing dependency audit findings from Task 1.1 remain open; no dependency upgrades were attempted.
+- Development only: no deployment, merge, production access or real resource/configuration change. Stop for review after development; real Staging provisioning/activation/recovery requires separate approval. Setup and operational limitations are in AUTOMATIC_BACKUP.md.

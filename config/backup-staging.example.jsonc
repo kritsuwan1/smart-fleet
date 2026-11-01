@@ -1,0 +1,12 @@
+// REVIEW ONLY. No resources/credentials supplied. Requires separate approval before use.
+{
+  "name": "smart-fleet-staging",
+  "main": "../output/worker-demo.js",
+  "compatibility_date": "2026-10-28",
+  "workers_dev": false,
+  "vars": {"AUTOMATIC_BACKUP_ENABLED": "false", "BACKUP_ENVIRONMENT": "staging"},
+  "d1_databases": [{"binding": "DEMO_DB", "database_name": "REPLACE_STAGING_D1", "database_id": "REPLACE_STAGING_D1_ID"}],
+  "r2_buckets": [{"binding": "BACKUP_BUCKET", "bucket_name": "REPLACE_PRIVATE_STAGING_BUCKET"}],
+  "triggers": {"crons": []}
+  // After approval and validation ONLY: enable flag and crons ["0 19 * * *"].
+}

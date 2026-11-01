@@ -236,3 +236,31 @@ Production deployment: NOT AUTHORIZED
 3. Identify missing automated tests.
 4. Update ARCHITECTURE.md and PROGRESS.md.
 5. Begin development on an isolated branch.
+
+## 16. Task 2A - Automatic Backup development verification
+
+The earlier NOT_RUN statuses describe the original planning snapshot. Current execution results are recorded in PROGRESS.md; mock/offline results do not imply a real R2/D1 or scheduled deployment was tested.
+
+New suite: tests/automatic-backup.test.mjs, appended to npm test (13 suite files total). Uses synthetic state, in-memory SQLite, an R2 mock, mocked notifications and both built Worker variants.
+
+| Case | Automated coverage |
+| --- | --- |
+| AB-001 / TC-101 | UTC cron constant and Bangkok date boundary; default-off handler; separate build/binding/environment markers |
+| AB-002 / TC-103 | Full state and unknown legacy fields preserved, source version/counts/bytes metadata, SHA-256 of state and envelope, corrupt metadata/body/reference rejection |
+| AB-003 | Immutable daily object, duplicate invocation, concurrent jobs, active/expired/stolen token leases, ambiguous successful put acknowledgement |
+| AB-004 / TC-102 | Paginated retention, today plus six previous dates, exact boundary, environment/unrelated-key isolation, sole last-valid-copy preservation when new upload fails |
+| AB-005 / TC-106 | Transient and persistent R2 failures, bounded retry count, read-back missing/corrupt, list/delete failures, D1 status failure fallback, retry from an existing valid artifact |
+| AB-006 / TC-105/108 | Admin 200/employee 403/anonymous 401 status access, no authentication fields in status, raw failures/secrets excluded from logs and notification payloads, notification failure/unconfigured outcomes |
+| AB-007 / TC-104 | Actual SQLite restoration into empty Demo-marked target, full normalized state equality/session rotation, production/occupied/corrupt targets rejected before writes, production-source-to-staging restore |
+| AB-008 / TC-006 | Source main payload AND version unchanged after backup success/failure; missing main is never initialized |
+| AB-009 | Offline CLI rehearsal uses a local temporary private fixture and in-memory DB; output excludes state/session/account secrets |
+
+Before Staging activation (NOT_RUN in Task 2A):
+
+1. Verify actual R2 bucket privacy, IAM/bindings/environment separation and absence of unsafe object lifecycle rules.
+2. Run approved Staging cron and verify the actual 02:00 Asia/Bangkok timestamp; test provider retries, storage latency/timeouts and a process killed before status completion.
+3. Inject Staging R2/D1/webhook failures, verify redacted provider logs, last-success-age monitoring and failure delivery.
+4. Execute the documented empty-Staging-D1 recovery drill and compare historical trip/odometer/account integrity.
+5. Review BackupPanel in a browser including disabled, never, running, success, failed and unavailable states.
+
+No Production trigger/resource/configuration change, deployment, merge, migration or real restore is authorized by these tests.

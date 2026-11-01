@@ -43,5 +43,5 @@ jobs:
         run: npm run build
       - name: Typecheck
         run: npm run typecheck
-      - name: Run all 12 automated test suites
+      - name: Run automated test suites
         run: npm test

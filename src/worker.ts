@@ -1,5 +1,6 @@
 import {IS_DEMO,ENVIRONMENT,SITE_URL,ENVIRONMENT_HTML} from './environment';
 import {createBackup} from './backup';
+import {BACKUP_CRON,runAutomaticBackup,automaticBackupStatus} from './automatic-backup';
 import {APP_VERSION} from './version';
 import {systemStatus} from './system-status';
 import {fuelPrice} from './fuel';
@@ -38,7 +39,11 @@ async function backup(env:any){
  return response(lines.join('\n'),200,{'Content-Type':'application/sql; charset=utf-8','Content-Disposition':`attachment; filename="smart-fleet-${ENVIRONMENT}-backup-${new Date().toISOString().slice(0,10)}.sql"`});
 }
 function qrPage(){return `<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Smart Fleet — QR สำหรับพนักงาน</title><style>body{font:16px system-ui,sans-serif;background:#f3f7f4;color:#183d2c;margin:0;padding:30px}main{max-width:900px;margin:auto}.cards{display:flex;gap:24px;flex-wrap:wrap}.card{background:white;border:1px solid #d9e5dc;border-radius:18px;text-align:center;padding:28px;flex:1;min-width:230px}svg{width:240px;max-width:100%;height:auto}h1{font-size:26px}h2{font-size:20px}p{line-height:1.8;font-size:14px}small{display:block;font-size:11px;overflow-wrap:anywhere;color:#7c9281}a{color:#14684e}.note{margin-top:25px}@media print{body{background:white;padding:10px}.no-print{display:none}.card{break-inside:avoid}}</style></head><body><main>${ENVIRONMENT_HTML}<p class="no-print"><a href="/">กลับหน้าหลัก</a> · กด Ctrl + P เพื่อพิมพ์</p><h1>Smart Fleet — บันทึกการใช้รถยนต์</h1><div class="cards"><section class="card"><h2>สแกนเพื่อเข้าสู่ระบบ</h2>${siteQr}<p>พนักงานเดิม: เข้าสู่ระบบ<br>พนักงานใหม่: กดสมัครใช้งาน</p><small>${SITE_URL.replace('https://','')}</small></section><section class="card"><h2>รถทะเบียน 8กน3362</h2>${carQr}<p>สแกนเพื่อเริ่มใช้รถหรือคืนรถ<br>เข้าสู่ระบบก่อนบันทึกทุกครั้ง</p><small>กรุงเทพมหานคร · Smart Machine & Software</small></section></div><p class="note">สมัครด้วยชื่อ ชื่อผู้ใช้ และรหัสผ่านอย่างน้อย 6 ตัวอักษร</p></main></body></html>`;}
-export default {async fetch(req:Request,env:any){
+export default {async scheduled(event:{cron:string;scheduledTime:number},env:any){
+ if(event.cron!==BACKUP_CRON)return;
+ const result=await runAutomaticBackup(IS_DEMO?{...env,DB:env.DEMO_DB}:env,event.scheduledTime);
+ if(result.state==='failed')throw Error('AUTOMATIC_BACKUP_FAILED:'+result.code);
+},async fetch(req:Request,env:any){
  const url=new URL(req.url),path=url.pathname;
  if(IS_DEMO)env={...env,DB:env.DEMO_DB};
  try{
@@ -78,6 +83,10 @@ export default {async fetch(req:Request,env:any){
    return html(screen('<p>ต้องการออกจากระบบหรือไม่?</p><form action="/logout" method="post"><button>ออกจากระบบ</button></form><p><a href="/">กลับหน้าหลัก</a></p>'));
   }
   if(path==='/api/system-status'&&req.method==='GET'){const latest=await readState(env),access=await sessionUser(req,env,latest.state);if(!access)return json({error:'UNAUTHORIZED'},401);if(access.role!=='admin')return json({error:'FORBIDDEN'},403);return json(systemStatus(latest.state,latest.payloadBytes));}
+  if(path==='/api/backup-status'&&req.method==='GET'){
+   if(user.role!=='admin')return json({error:'FORBIDDEN'},403);
+   try{return json(await automaticBackupStatus(env));}catch{return json({error:'BACKUP_STATUS_UNAVAILABLE'},503);}
+  }
   if(path==='/api/fuel-price'&&req.method==='GET'){
    try{return json(await fuelPrice(env,state,url.searchParams.get('month')||''));}catch(e){return json({error:e instanceof Error?e.message:'ตรวจราคาไม่ได้'},400);}
   }
