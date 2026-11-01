@@ -1,5 +1,11 @@
 # SmartFleet - Test Plan
 
+## Task 3C.2F — Initialization safety regression
+
+- Added tests/d1-initialization.test.mjs to npm test: 17 suites total. 28 fixtures cover both staging/recovery empty targets, exact empty fleet_store, unexpected user tables/views/indexes/triggers/provider-like objects, incompatible schema, occupied/repeated targets, identity/binding/account failures and malformed/query errors.
+- Preflight reads sqlite_schema and row counts only; rejected targets issue no writes and identity failures issue no query. SQL assertion errors before DDL preserve entire synthetic schema/rows on unrelated-table targets. Repeated/occupied initialization now throws with unchanged data; existing staging suite updated accordingly.
+- Actual Windows Node v24.22.1 build/typecheck/all 17 suites PASS. No Cloudflare/real DB initialization. See D1_INITIALIZATION_SAFETY.md for strict schema allowlist, point-in-time/concurrency limitations, operator prerequisites and unverified provider internals. Linux result is recorded separately in PROGRESS.md; no inference from Windows.
+
 ## Task 3C.2B — Approved dependency compatibility
 
 - User-approved parent upgrade: Wrangler 4.116.0, Miniflare 4.20260730.0, scoped sharp 0.35.5/undici 7.30.1; ws 8.21.0 supplied by parent, esbuild 0.28.1 deduplicates old vulnerable copy. Production lock entries unchanged; no force fix, app source/config/schema change or real Cloudflare access.

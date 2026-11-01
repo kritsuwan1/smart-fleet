@@ -1,8 +1,19 @@
+-- Fail closed BEFORE DDL if any unexpected user schema object exists.
+-- Invalid JSON deliberately aborts execution; operators must stop on the first error.
+SELECT json(CASE WHEN EXISTS (
+ SELECT 1 FROM sqlite_schema WHERE name NOT GLOB 'sqlite_*'
+ AND NOT (type='table' AND name='fleet_store' AND tbl_name='fleet_store'
+ AND lower(replace(replace(replace(replace(sql,' ',''),char(9),''),char(10),''),char(13),''))=
+ 'createtablefleet_store(idtextprimarykeynotnull,payloadtextnotnull,versionintegernotnulldefault0)')
+) THEN 'INITIALIZATION_REFUSED_UNEXPECTED_SCHEMA' ELSE 'null' END);
 -- REVIEW ONLY. Run only after verifying the existing STAGING D1 identity.
 -- Existing schema structure, not a migration. Never run against Production.
 CREATE TABLE IF NOT EXISTS fleet_store(id TEXT PRIMARY KEY NOT NULL,payload TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 0);
+-- Repeated or occupied targets are rejected, never reset or overwritten.
+SELECT json(CASE WHEN EXISTS(SELECT 1 FROM fleet_store)
+ THEN 'INITIALIZATION_REFUSED_OCCUPIED' ELSE 'null' END);
 -- Both rows are inserted by one statement only if the table is completely empty.
--- Re-running or using any occupied/marked database inserts zero rows.
+-- Re-running or using any occupied/marked database fails before insertion.
 INSERT INTO fleet_store(id,payload,version)
 SELECT id,payload,0 FROM (
  SELECT 'environment' AS id,'demo' AS payload

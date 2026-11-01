@@ -1,5 +1,7 @@
 # Task 3C.1 — Staging readiness (NO DEPLOY / NO R2)
 
+Task 3C.2F initialization update: [D1_INITIALIZATION_SAFETY.md](D1_INITIALIZATION_SAFETY.md) supersedes the raw initialization command drafts and silent rerun/no-op description below. Use the exact-target read-only whole-schema preflight before any future approved initialization; SQL files now refuse unexpected schema and occupied targets. No cloud operation is authorized here. Dependency remediation status is in current PROGRESS.md; the old High/Low findings below describe the historical 3C.1 snapshot.
+
 Development branch: dev/smartfleet-batch-1. Base: 346f4db7be6f7fee3755b68ea81d562a9cd4b4b9 (includes Task 3B). Prerequisite [Linux run 41283265689](https://github.com/kritsuwan1/smart-fleet/actions/runs/41283265689), job 124779346094 succeeded on this exact SHA: Ubuntu 24.04.5, Node 24.22.1, npm ci/build/typecheck/all 14 suites PASS. Logs were inspected. Task 3B history-edit gap is addressed below; historical review findings remain in MAINTENANCE_STAGING_REVIEW.md.
 
 ## Current readiness
