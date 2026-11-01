@@ -174,3 +174,16 @@ All Worker/API requests were direct local function calls using in-memory SQLite 
 - New Linux CI result for this implementation is pending at preparation; record its tested SHA and actual run result after push.
 - Existing dependency audit findings from Task 1.1 remain open; no dependency upgrades were attempted.
 - Development only: no deployment, merge, production access or real resource/configuration change. Stop for review after development; real Staging provisioning/activation/recovery requires separate approval. Setup and operational limitations are in AUTOMATIC_BACKUP.md.
+
+## 2026-11-01 - Task 2A: Linux CI evidence and review handoff
+
+- Implementation commit: [deeefc5ea498a7c3e564f702073eb830f84aaf88](https://github.com/kritsuwan1/smart-fleet/commit/deeefc5ea498a7c3e564f702073eb830f84aaf88).
+- Actual test-only run: [41275329310](https://github.com/kritsuwan1/smart-fleet/actions/runs/41275329310), job [124756245377](https://github.com/kritsuwan1/smart-fleet/actions/runs/41275329310/job/124756245377). Branch dev/smartfleet-batch-1; both run and job concluded success.
+- Inspected decoded logs: actual **Ubuntu 24.04.5 LTS / Linux x64 / Node.js v24.22.0 / npm 11.19.1**. Platform/major-version assertion matched the tested implementation SHA. The patch version differs from the earlier prerequisite run; both are Node 24.
+- Execution: 2026-11-01 approximately 12:02:15–12:02:27 Asia/Bangkok (05:02:15–05:02:27 UTC).
+- npm ci PASS (47 packages); npm run build PASS (Demo 971358 / Production 969982 bytes); npm run typecheck PASS; npm test PASS, all exit 0.
+- **All 13 suites PASS on Linux**: worker, import, accounts, roles, reports, system-status, backup-alerts, environments, mobile-ui, history-ui, profile-ui, trip-receipt, automatic-backup. Each success output was present in the job log.
+- New backup-suite assertions ran on Linux as well as Windows; no new application fixes were needed after the successful Windows run.
+- npm reported the existing 6 vulnerabilities (1 low, 5 high); setup-node@v4 action runtime deprecation warning also remains. Neither failed CI; no out-of-scope dependency/action upgrade was performed.
+- Real Cloudflare R2 privacy/bindings, notification delivery, daily trigger and Staging D1 recovery remain **NOT_RUN**. No real resources were provisioned and no production settings/data were changed.
+- Development complete for review. Automatic Backup is still default-off; examples have no active cron. Stop here: real Staging setup/activation/recovery requires separate approval. This documentation-only evidence commit does not rerun CI due to the existing docs path filter.

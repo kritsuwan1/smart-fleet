@@ -264,3 +264,9 @@ Before Staging activation (NOT_RUN in Task 2A):
 5. Review BackupPanel in a browser including disabled, never, running, success, failed and unavailable states.
 
 No Production trigger/resource/configuration change, deployment, merge, migration or real restore is authorized by these tests.
+
+## 17. Task 2A automated execution evidence
+
+2026-11-01: Windows Node v24.22.1 build/typecheck/test PASS; then actual [Linux CI run 41275329310](https://github.com/kritsuwan1/smart-fleet/actions/runs/41275329310) on Ubuntu 24.04.5 / Node v24.22.0 passed npm ci, build, typecheck and all 13 test files, including AB-001 through AB-009 assertions in automatic-backup.test.mjs. Tested source commit: deeefc5ea498a7c3e564f702073eb830f84aaf88. Details and limitations are in PROGRESS.md.
+
+These are mock/offline integration results. Real Staging R2/cron/webhook/D1 restore and browser UAT remain NOT_RUN; no production release or activation is implied.
