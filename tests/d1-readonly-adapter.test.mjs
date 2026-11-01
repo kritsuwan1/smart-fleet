@@ -51,4 +51,20 @@ for(const meta of [{changed_db:true},{rows_written:1}])await fixture(async db=>{
 await fixture(async db=>{
  const args=mock(db),adapter=await createD1ReadonlyAdapter(args);args.config.d1_databases[0].database_id='attempted-mutation';assert.equal((await adapter.review()).metadata.database_id,config('staging').d1_databases[0].database_id);
 });
-console.log(`PASS D1 read-only adapter: ${checks} mock fixtures, provider metadata identity, exact target/SQL/URL allowlists, unknown schema/occupied refusal, permission/query/network failures, no writes or credential access; actual Cloudflare NOT_VERIFIED`);
+// Schema evidence only: never create/query/modify a real or simulated _cf_KV table.
+// A matching reserved-table definition alone does not establish database provenance.
+const reserved={type:'table',name:'_cf_KV',tbl_name:'_cf_KV',sql:'CREATE TABLE _cf_KV ( key TEXT PRIMARY KEY, value BLOB ) WITHOUT ROWID'};
+for(const target of ['staging','recovery'])for(const schema of [
+ [reserved],
+ [reserved,{type:'table',name:'fleet_store',tbl_name:'fleet_store',sql:fleetSchema}],
+ [{...reserved,sql:'CREATE TABLE _cf_KV ( key TEXT PRIMARY KEY, value TEXT )'}],
+ [{...reserved,type:'view',sql:'CREATE VIEW _cf_KV AS SELECT 1'}],
+ [reserved,{type:'table',name:'unrelated',tbl_name:'unrelated',sql:'CREATE TABLE unrelated(value TEXT)'}]
+])await fixture(async db=>{
+ const before=db.prepare('SELECT * FROM sqlite_schema').all();
+ const args=mock(db,target,n=>n===2?response([{success:true,results:schema,meta:{rows_written:0,changed_db:false}}]):undefined);
+ const adapter=await createD1ReadonlyAdapter(args);await assert.rejects(adapter.review(),/INITIALIZATION_REFUSED_SCHEMA/);
+ assert.equal(args.calls.length,3);assert.deepEqual(args.calls.filter(c=>c.options.body).map(c=>JSON.parse(c.options.body).sql),[SCHEMA_QUERY]);
+ assert.deepEqual(db.prepare('SELECT * FROM sqlite_schema').all(),before);
+});
+console.log(`PASS D1 read-only adapter: ${checks} mock fixtures, provider metadata identity, exact target/SQL/URL allowlists, unknown schema/occupied refusal, permission/query/network failures, reserved-table evidence fails closed separately for staging/recovery without value reads; actual Cloudflare NOT_VERIFIED`);

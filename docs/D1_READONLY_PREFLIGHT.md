@@ -1,5 +1,7 @@
 # Task 3C.2H — Cloudflare D1 read-only preflight
 
+Task 3C.2I evidence update: user supplied Account ID and an unlabelled Console schema description containing _cf_KV. Missing-input/history statements below describe Task H; account input is now supplied, but actual API identity and complete target-linked schema remain NOT_VERIFIED for both databases. No Allowlist relaxation or protected-table value access. See [D1_SCHEMA_EVIDENCE_REVIEW.md](D1_SCHEMA_EVIDENCE_REVIEW.md).
+
 Branch dev/smartfleet-batch-1. **Adapter/mock validation PASS; actual Cloudflare NOT_VERIFIED.** User answered that Dashboard schema has not been checked. No verified Account ID or schema/count evidence has been supplied. Do not conclude that either database is empty. User reports no Staging Worker; no Worker is required by this adapter, and no provider-side Worker existence check was performed.
 
 ## Interface and trust boundary

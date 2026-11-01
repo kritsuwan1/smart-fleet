@@ -1,5 +1,10 @@
 # SmartFleet - Test Plan
 
+## Task 3C.2I — Reserved-table schema evidence
+
+- Added ten metadata-only Mock cases to the existing read-only adapter suite: five each for Staging/Recovery, covering the documented _cf_KV definition alone/with fleet_store, altered DDL, same-name view and additional user table. All must refuse under the unchanged strict Allowlist, send only sqlite_schema SELECT and never query/create/modify _cf_KV or count its rows.
+- Actual Windows Node v24.22.1 Build/Typecheck/npm test PASS all 18 suites; adapter fixtures now 47, initialization-safety fixtures 28. No runtime/schema/config/SQL guard changes. User-supplied unlabelled schema description is not live identity/emptiness evidence; per-target Dashboard/API confirmation remains NOT_VERIFIED. See D1_SCHEMA_EVIDENCE_REVIEW.md for source and conditional policy proposal. Linux evidence follows in PROGRESS.md.
+
 ## Task 3C.2H — D1 read-only adapter
 
 - Added tests/d1-readonly-adapter.test.mjs to npm test (18 suites): 37 Mock/SQLite fixtures cover exact provider Account/UUID/name identity, both allowlisted targets, binding/config refusal, unknown schema/occupied data, permission failure at all request stages, network/query/JSON/redirect/result failure, unexpected write metadata and config mutation isolation.
