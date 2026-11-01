@@ -1,3 +1,5 @@
+import {backupSQL} from './backup-sql';
+import {captureBackup,automaticBackupStatus,backupControl,savedBackup} from './auto-backup';
 import {IS_DEMO,ENVIRONMENT,SITE_URL,ENVIRONMENT_HTML} from './environment';
 import {createBackup} from './backup';
 import {APP_VERSION} from './version';
@@ -15,6 +17,7 @@ import journeyCSS from './journey.css';
 import historyCSS from './history.css';
 import accountCSS from './account.css';
 import receiptCSS from './receipt.css';
+import careCSS from './care.css';
 import revoImage from '../assets/vehicle-revo-canopy.base64.txt';
 import qrSite from '../assets/smart-fleet-qr.svg';
 import qrCar from '../assets/smart-fleet-car-8kn3362-qr.svg';
@@ -29,18 +32,15 @@ const response=(body:any,status=200,extra:any={})=>new Response(body,{status,hea
 const html=(body:string,status=200)=>response(body,status,{'Content-Type':'text/html; charset=utf-8'});
 const json=(value:any,status=200,extra:any={})=>response(JSON.stringify(value),status,{'Content-Type':'application/json; charset=utf-8',...extra});
 const redirect=(to:string,cookie?:string)=>response(null,303,{Location:to,...(cookie?{'Set-Cookie':cookie}:{})});
-const q=(s:string)=>"'"+s.replaceAll("'","''")+"'";
 async function backup(env:any){
- const row=await env.DB.prepare("SELECT payload FROM fleet_store WHERE id='main'").first();if(!row)return response('ยังไม่มีข้อมูล',404);const id='restore-'+crypto.randomUUID();const restoreGuard=IS_DEMO?"(SELECT payload FROM fleet_store WHERE id='environment')='demo'":"COALESCE((SELECT payload FROM fleet_store WHERE id='environment'),'production')='production'";
- const lines=['-- Smart Fleet '+APP_VERSION+' backup '+new Date().toISOString(),'-- environment: '+ENVIRONMENT,'-- PRIVATE: contains salted password hashes and session-signing material. Keep offline and private.','-- Restores all fleet data AND employee accounts. Existing main state is replaced only after valid JSON staging.','CREATE TABLE IF NOT EXISTS fleet_store(id TEXT PRIMARY KEY NOT NULL,payload TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 0);',`INSERT OR REPLACE INTO fleet_store(id,payload,version) VALUES(${q(id)},'',0);`];
- for(let i=0;i<row.payload.length;i+=10000)lines.push(`UPDATE fleet_store SET payload=payload || ${q(row.payload.slice(i,i+10000))} WHERE id=${q(id)};`);
- lines.push(`INSERT INTO fleet_store(id,payload,version) SELECT 'main',json_set(payload,'$.sessionKey',lower(hex(randomblob(32)))),0 FROM fleet_store WHERE id=${q(id)} AND json_valid(payload) AND ${restoreGuard} ON CONFLICT(id) DO UPDATE SET payload=excluded.payload,version=fleet_store.version+1;`,`DELETE FROM fleet_store WHERE id=${q(id)};`);
- return response(lines.join('\n'),200,{'Content-Type':'application/sql; charset=utf-8','Content-Disposition':`attachment; filename="smart-fleet-${ENVIRONMENT}-backup-${new Date().toISOString().slice(0,10)}.sql"`});
+ const row=await env.DB.prepare("SELECT payload FROM fleet_store WHERE id='main'").first();
+ if(!row)return response('ยังไม่มีข้อมูล',404);
+ return response(backupSQL(row.payload,ENVIRONMENT,APP_VERSION),200,{'Content-Type':'application/sql; charset=utf-8','Content-Disposition':`attachment; filename="smart-fleet-${ENVIRONMENT}-backup-${new Date().toISOString().slice(0,10)}.sql"`});
 }
 function qrPage(){return `<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Smart Fleet — QR สำหรับพนักงาน</title><style>body{font:16px system-ui,sans-serif;background:#f3f7f4;color:#183d2c;margin:0;padding:30px}main{max-width:900px;margin:auto}.cards{display:flex;gap:24px;flex-wrap:wrap}.card{background:white;border:1px solid #d9e5dc;border-radius:18px;text-align:center;padding:28px;flex:1;min-width:230px}svg{width:240px;max-width:100%;height:auto}h1{font-size:26px}h2{font-size:20px}p{line-height:1.8;font-size:14px}small{display:block;font-size:11px;overflow-wrap:anywhere;color:#7c9281}a{color:#14684e}.note{margin-top:25px}@media print{body{background:white;padding:10px}.no-print{display:none}.card{break-inside:avoid}}</style></head><body><main>${ENVIRONMENT_HTML}<p class="no-print"><a href="/">กลับหน้าหลัก</a> · กด Ctrl + P เพื่อพิมพ์</p><h1>Smart Fleet — บันทึกการใช้รถยนต์</h1><div class="cards"><section class="card"><h2>สแกนเพื่อเข้าสู่ระบบ</h2>${siteQr}<p>พนักงานเดิม: เข้าสู่ระบบ<br>พนักงานใหม่: กดสมัครใช้งาน</p><small>${SITE_URL.replace('https://','')}</small></section><section class="card"><h2>รถทะเบียน 8กน3362</h2>${carQr}<p>สแกนเพื่อเริ่มใช้รถหรือคืนรถ<br>เข้าสู่ระบบก่อนบันทึกทุกครั้ง</p><small>กรุงเทพมหานคร · Smart Machine & Software</small></section></div><p class="note">สมัครด้วยชื่อ ชื่อผู้ใช้ และรหัสผ่านอย่างน้อย 6 ตัวอักษร</p></main></body></html>`;}
-export default {async fetch(req:Request,env:any){
+export default {async scheduled(controller:any,rawEnv:any){const env=IS_DEMO?{...rawEnv,DB:rawEnv.DEMO_DB,BACKUP_DB:rawEnv.DEMO_BACKUP_DB}:rawEnv;await captureBackup(env,false,controller.scheduledTime||Date.now());},async fetch(req:Request,env:any){
  const url=new URL(req.url),path=url.pathname;
- if(IS_DEMO)env={...env,DB:env.DEMO_DB};
+ if(IS_DEMO)env={...env,DB:env.DEMO_DB,BACKUP_DB:env.DEMO_BACKUP_DB};
  try{
   if(typeof env.APP_PASSWORD!=='string'||env.APP_PASSWORD.length<6)return html(screen('<p>ผู้ดูแลต้องตั้ง Secret ชื่อ <strong>APP_PASSWORD</strong> อย่างน้อย 6 ตัวอักษรใน Cloudflare แล้ว Deploy</p>'),503);
   if(!env.DB)return html(screen('<p>กรุณาเชื่อม D1 binding ชื่อ '+(IS_DEMO?'DEMO_DB → smart-fleet-demo':'DB → smart-fleet-production')+'</p>'),503);
@@ -77,6 +77,25 @@ export default {async fetch(req:Request,env:any){
    if(req.method==='POST')return redirect('/login',clearSession());
    return html(screen('<p>ต้องการออกจากระบบหรือไม่?</p><form action="/logout" method="post"><button>ออกจากระบบ</button></form><p><a href="/">กลับหน้าหลัก</a></p>'));
   }
+  if(path==='/api/auto-backup'){
+   if(user.role!=='admin')return json({error:'FORBIDDEN'},403);
+   try{
+    if(req.method==='POST'){
+     const b=await req.json() as any;
+     if(b.action==='run')await captureBackup(env,true);
+     else if(b.action==='enabled'&&typeof b.enabled==='boolean'){await backupControl(env);await env.BACKUP_DB.prepare('UPDATE backup_control SET enabled=? WHERE id=?').bind(b.enabled?1:0,ENVIRONMENT).run();}
+     else return json({error:'คำสั่งไม่ถูกต้อง'},400);
+    }
+    return json(await automaticBackupStatus(env));
+   }catch{return json({error:'ระบบสำรองยังไม่พร้อมหรือสำรองไม่สำเร็จ กรุณาลองใหม่และตรวจการเชื่อมฐานสำรอง'},503);}
+  }
+  if(path==='/api/auto-backup/download'&&req.method==='GET'){
+   if(user.role!=='admin')return json({error:'FORBIDDEN'},403);
+   try{const b=await savedBackup(env,url.searchParams.get('id')||'');if(!b)return json({error:'ไม่พบไฟล์สำรอง'},404);
+    const sql=url.searchParams.get('format')==='sql';
+    return response(sql?backupSQL(JSON.stringify(b.state),ENVIRONMENT,b.appVersion,b.exportedAt):JSON.stringify(b),200,{'Content-Type':sql?'application/sql; charset=utf-8':'application/json; charset=utf-8','Content-Disposition':`attachment; filename="smart-fleet-${ENVIRONMENT}-${b.exportedAt.slice(0,10)}.${sql?'sql':'json'}"`});
+   }catch{return json({error:'ไม่สามารถอ่านไฟล์สำรองได้'},400);}
+  }
   if(path==='/api/system-status'&&req.method==='GET'){const latest=await readState(env),access=await sessionUser(req,env,latest.state);if(!access)return json({error:'UNAUTHORIZED'},401);if(access.role!=='admin')return json({error:'FORBIDDEN'},403);return json(systemStatus(latest.state,latest.payloadBytes));}
   if(path==='/api/fuel-price'&&req.method==='GET'){
    try{return json(await fuelPrice(env,state,url.searchParams.get('month')||''));}catch(e){return json({error:e instanceof Error?e.message:'ตรวจราคาไม่ได้'},400);}
@@ -108,7 +127,7 @@ export default {async fetch(req:Request,env:any){
   if(path==='/qr'){if(user.role!=='admin')return json({error:'FORBIDDEN'},403);return html(qrPage());}
   if(path==='/app.js')return response(appJS,200,{'Content-Type':'text/javascript; charset=utf-8'});
   if(path==='/vehicle-revo-canopy.webp')return response(Uint8Array.from(atob(revoImage),c=>c.charCodeAt(0)),200,{'Content-Type':'image/webp','Cache-Control':'private, max-age=86400'});
-  if(path==='/app.css')return response(appCSS+'\n'+journeyCSS+'\n'+historyCSS+'\n'+accountCSS+'\n'+receiptCSS,200,{'Content-Type':'text/css; charset=utf-8'});
+  if(path==='/app.css')return response(appCSS+'\n'+journeyCSS+'\n'+historyCSS+'\n'+accountCSS+'\n'+receiptCSS+'\n'+careCSS,200,{'Content-Type':'text/css; charset=utf-8'});
   if(path==='/')return html('<!doctype html><html lang="th"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Smart Fleet | บันทึกการใช้รถยนต์</title><link rel="stylesheet" href="/app.css"></head><body><div id="root"></div><script src="/app.js" defer></script></body></html>');
   return response('Not found',404);
  }catch(error){if(error instanceof Error&&error.message==='ENVIRONMENT_MISMATCH'){const message='ฐานข้อมูลไม่ตรงกับ '+ENVIRONMENT+' ระบบหยุดเพื่อป้องกันข้อมูล กรุณาตรวจ Binding และใช้ schema ของฝั่งที่ถูกต้อง';return path.startsWith('/api/')?json({error:message},503):html(screen('<p>'+message+'</p>'),503);}console.error('Smart Fleet request failed',error);return path.startsWith('/api/')?json({error:'ระบบยังไม่พร้อม กรุณาตรวจฐานข้อมูลและลองใหม่'},503):html(screen('<p>ระบบไม่สามารถทำรายการได้ในขณะนี้ กรุณาตรวจว่า DB เชื่อมฐานข้อมูลที่มีตาราง fleet_store แล้ว</p>'),503);}

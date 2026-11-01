@@ -1,3 +1,4 @@
+import {applyCare} from './maintenance';
 import {validateTrip,type Fleet,type Trip} from './fleet';
 import {readState,writeState} from './storage';
 import {currentUser,viewForUser,passwordValid,hashPassword,type User,hex,cleanName,clearSession} from './auth';
@@ -33,6 +34,8 @@ async function POST(req:Request){try{
   if(!old&&(!s.cars.find(c=>c.id===t.carId)?.active||!s.people.find(p=>p.id===t.driverId)?.active))throw Error('รถหรือพนักงานถูกปิดใช้งานแล้ว');
   s.trips=old?s.trips.map(x=>x.id===t.id?t:x):[...s.trips,t];after=t;action=old?'แก้ไขรายการ / คืนรถ':'เพิ่มรายการใช้รถ';
   tripResult={id:t.id,operation:old?(!old.end&&t.end?'return':'edit'):(t.end?'historical':'start')};
+ }else if(b.action==='care'){
+  ({before,after,action}=applyCare(s,b.data,actor));
  }else if(b.action==='fuelPrice'){
   if(!validMonth(String(b.data?.month||'')))throw Error('เดือนไม่ถูกต้อง');
   before=s.fuelPrices?.find(p=>p.month===b.data.month&&p.product==='b7')||null;

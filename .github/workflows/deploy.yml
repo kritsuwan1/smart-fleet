@@ -42,6 +42,12 @@ jobs:
           FLEET_DEMO_DATABASE_ID: ${{ vars.DEMO_DATABASE_ID }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      - name: Prepare separate backups and save checkpoint
+        run: node scripts/prepare-backups.mjs
+        env:
+          FLEET_DEPLOY_TARGET: ${{ inputs.target }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       - name: Deploy selected Worker
         run: ./node_modules/.bin/wrangler deploy --config .deploy.config.json --keep-vars
         env:
