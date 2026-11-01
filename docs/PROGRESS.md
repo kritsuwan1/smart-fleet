@@ -359,3 +359,12 @@ All Worker/API requests were direct local function calls using in-memory SQLite 
 - npm ci PASS (found 0 vulnerabilities); build PASS (Demo 996199 / Production 994825 / Staging 994972 bytes); typecheck PASS; npm test PASS all 18 suites. Inspected every suite success output, including 37 read-only adapter Mock fixtures and 28 initialization-safety fixtures. No actual Cloudflare connection, credentials, database writes or deployment steps.
 - Implementation/documentation committed and pushed only to dev/smartfleet-batch-1. Actual Cloudflare identity/permissions/schema/counts and Dashboard confirmation remain NOT_VERIFIED; user explicitly has not checked Schema. Adapter/mock development PASS does not make actual initialization READY. No Production/Demo/resources/secrets/env/R2/Cron/routes, Initialize/Deploy/Merge.
 - This evidence-only follow-up changes PROGRESS.md; docs path filtering skips redundant CI. Executable/config snapshot stays exactly the tested commit. Existing action/runtime/install-script warnings remain unrelated and did not fail CI.
+
+## Task 3C.2I — actual Linux verification
+
+- [Run 41299571314](https://github.com/kritsuwan1/smart-fleet/actions/runs/41299571314), job 124827529230: completed/success for commit 1429eebffd4cfcf9147eaf2758e012d2778aedeb on dev/smartfleet-batch-1. Decoded logs verify Ubuntu 24.04.5 LTS / Linux x64 / Node v24.22.1, 2026-11-01 17:55 Asia/Bangkok.
+- npm ci PASS (found 0 vulnerabilities); build PASS (Demo 996199 / Production 994825 / Staging 994972 bytes); typecheck PASS; npm test PASS all 18 suites. Inspected all suite success outputs including 47 read-only adapter fixtures (10 new reserved-schema refusal cases across both targets) and 28 initialization safety fixtures.
+- Reviewed six-file test/documentation-only diff committed/pushed to the Development branch. Allowlist, runtime, SQL guards, dependencies and configs unchanged. No Cloudflare requests, protected-table value access/modification, credentials, real data/resource/Production/Demo/R2/Cron or Initialize/Deploy/Merge.
+- Official reserved-table finding PASS; actual image-to-target mapping/full schema/account API verification remain NOT_VERIFIED separately for Staging and Recovery. Initialization NOT_READY. This evidence-only follow-up changes PROGRESS.md and is excluded from CI by docs path filtering; tested executable snapshot remains 1429eeb.
+
+
