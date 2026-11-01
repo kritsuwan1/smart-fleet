@@ -1,5 +1,7 @@
 # Task 3C.2F — D1 initialization safety
 
+Task 3C.2H adds a separate injected-transport read-only adapter; see [D1_READONLY_PREFLIGHT.md](D1_READONLY_PREFLIGHT.md). Only Mock transport was tested; Account ID/Dashboard schema evidence is still missing. This does not certify actual Cloudflare identity/emptiness or authorize initialization. The adapter has no write/deploy interface and supersedes the historical "no live preflight adapter" gap below at the implementation level only; live integration remains NOT_VERIFIED.
+
 Development branch dev/smartfleet-batch-1 only. No Cloudflare SQL, initialization, deployment or resource change is authorized/performed by this task. This procedure supersedes the raw initialization-command drafts and silent rerun/no-op behavior in earlier Staging reports.
 
 ## Required read-only preflight

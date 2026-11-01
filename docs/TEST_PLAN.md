@@ -1,5 +1,11 @@
 # SmartFleet - Test Plan
 
+## Task 3C.2H — D1 read-only adapter
+
+- Added tests/d1-readonly-adapter.test.mjs to npm test (18 suites): 37 Mock/SQLite fixtures cover exact provider Account/UUID/name identity, both allowlisted targets, binding/config refusal, unknown schema/occupied data, permission failure at all request stages, network/query/JSON/redirect/result failure, unexpected write metadata and config mutation isolation.
+- Capture every request: only two fixed metadata GET endpoints and same-target query POST with one of two exact read-only SELECTs. No arbitrary SQL, payload reads, write/resource/deploy endpoints, credentials or default live transport. Existing 28 initialization-safety fixtures remain PASS.
+- Actual Windows Node v24.22.1 Build/Typecheck/all 18 suites PASS after correcting a Mock-only mutable identity fixture. No app/schema/dependency/config/SQL-initialization changes. Linux CI result follows publication in PROGRESS.md. User confirmed Dashboard schema has not been checked; actual Cloudflare and database emptiness remain NOT_VERIFIED. See D1_READONLY_PREFLIGHT.md.
+
 ## Task 3C.2F — Initialization safety regression
 
 - Added tests/d1-initialization.test.mjs to npm test: 17 suites total. 28 fixtures cover both staging/recovery empty targets, exact empty fleet_store, unexpected user tables/views/indexes/triggers/provider-like objects, incompatible schema, occupied/repeated targets, identity/binding/account failures and malformed/query errors.
