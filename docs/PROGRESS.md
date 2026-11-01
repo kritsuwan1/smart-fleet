@@ -379,3 +379,10 @@ All Worker/API requests were direct local function calls using in-memory SQLite 
 - Official reserved-table finding PASS; actual image-to-target mapping/full schema/account API verification remain NOT_VERIFIED separately for Staging and Recovery. Initialization NOT_READY. This evidence-only follow-up changes PROGRESS.md and is excluded from CI by docs path filtering; tested executable snapshot remains 1429eeb.
 
 
+
+## Task 3C.2K — actual Linux reserved-schema compatibility verification
+
+- [Run 41316492164](https://github.com/kritsuwan1/smart-fleet/actions/runs/41316492164), job 124877548382: completed/success for commit 981bff52d3713c2bb6f5dfaafc91ac54cc941520, dev/smartfleet-batch-1. Decoded logs verify Ubuntu 24.04.5 LTS / Linux x64 / Node v24.22.1, 2026-11-01 21:30 Asia/Bangkok.
+- npm ci PASS (found 0 vulnerabilities); build PASS (Demo 996199 / Production 994825 / Staging 994972 bytes); typecheck PASS; npm test PASS all 19 suites. Inspected each suite success output including 60 new reserved-schema Mock cases, 47 existing adapter and 28 initialization-safety fixtures. Windows and Linux compatibility requirements both PASS.
+- Reviewed 13-file Development-only implementation/docs diff committed and pushed. Dashboard evidence for Staging/Recovery is recorded from user confirmation separately; actual API account/D1 verification and live schema execution remain NOT_VERIFIED/NOT_RUN. No Credentials/Secret Values, protected-table contents/creation/changes, real Cloudflare SQL/resources/Production/Demo/R2/Cron/routes, Initialize/Deploy/Merge.
+- Compatibility implementation PASS; actual initialization NOT_READY pending real read-only API verification and separate approval. This evidence-only follow-up changes PROGRESS.md, skipped by the existing docs CI path filter; executable/config snapshot remains the tested commit. No claim of live provider verification from Mock-issued identity capabilities.
