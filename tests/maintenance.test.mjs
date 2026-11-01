@@ -30,10 +30,20 @@ const id=s.maintenancePlans[0].id;
 changeMaintenance(s,{operation:'complete',planId:id,record:{date:today,odometer:1100,details:'Synthetic private service',costSatang:123456}},today);
 assert.equal(s.maintenancePlans[0].dueOdo,2100);assert.equal(s.maintenancePlans[0].dueDate,'2026-12-01');assert.equal(s.maintenanceHistory[0].costSatang,123456);
 assert.deepEqual(s.cars,state.cars);assert.deepEqual(s.trips,state.trips);
+const corrected=structuredClone(s),originalRecord=corrected.maintenanceHistory[0];
+const correction=changeMaintenance(corrected,{operation:'editHistory',id:originalRecord.id,record:{date:'2026-10-31',odometer:1090,details:'Corrected synthetic',costSatang:5000}},today);
+assert.equal(corrected.maintenanceHistory[0].id,originalRecord.id);assert.equal(corrected.maintenancePlans[0].dueOdo,2090);assert.equal(corrected.maintenancePlans[0].dueDate,'2026-11-30');assert.deepEqual(correction.before.record,originalRecord);assert.deepEqual(corrected.cars,state.cars);assert.deepEqual(corrected.trips,state.trips);
+const manualOverride=structuredClone(s);manualOverride.maintenancePlans[0].dueDate='2027-01-01';const untouched=structuredClone(manualOverride);
+assert.throws(()=>changeMaintenance(manualOverride,{operation:'editHistory',id:originalRecord.id,record:{...originalRecord,date:'2026-10-31',odometer:1090}},today),/แผนถูกปรับภายหลัง/);assert.deepEqual(manualOverride,untouched);
+const invalidCorrection=structuredClone(s);assert.throws(()=>changeMaintenance(invalidCorrection,{operation:'editHistory',id:originalRecord.id,record:{...originalRecord,costSatang:-1}},today));assert.deepEqual(invalidCorrection,s);
+const older=structuredClone(s);changeMaintenance(older,{operation:'complete',planId:id,record:{date:'2026-11-02',odometer:1200,details:'Later service',costSatang:0}},'2026-11-02');const laterPlan=structuredClone(older.maintenancePlans[0]);
+changeMaintenance(older,{operation:'editHistory',id:originalRecord.id,record:{...originalRecord,details:'Correct earlier details',costSatang:1}},'2026-11-02');assert.deepEqual(older.maintenancePlans[0],laterPlan);
+assert.throws(()=>changeMaintenance(older,{operation:'editHistory',id:originalRecord.id,record:{...originalRecord,date:'2026-11-03'}},'2026-11-03'));
 for(const patch of [{date:'2026-11-02'},{date:'2026-10-01'},{odometer:1099},{costSatang:-1},{costSatang:1.5},{details:'x'.repeat(2001)}])assert.throws(()=>changeMaintenance(structuredClone(s),{operation:'complete',planId:id,record:{date:today,odometer:1100,details:'test',costSatang:0,...patch}},today));
 const edited=structuredClone(s);changeMaintenance(edited,{operation:'plan',plan:{...edited.maintenancePlans[0],name:'Renamed',active:false}},today);assert.equal(edited.maintenanceHistory.length,1);assert.throws(()=>changeMaintenance(edited,{operation:'complete',planId:id,record:{}},today));
 assert.throws(()=>changeMaintenance(structuredClone(s),{operation:'plan',plan:{...s.maintenancePlans[0],carId:'other'}},today));
 const one=structuredClone(state);changeMaintenance(one,{operation:'plan',plan:{...plan,intervalKm:undefined,intervalDays:undefined}},today);changeMaintenance(one,{operation:'complete',planId:one.maintenancePlans[0].id,record:{date:today,odometer:100,details:'',costSatang:0}},today);assert.equal(one.maintenancePlans[0].active,false);
+changeMaintenance(one,{operation:'editHistory',id:one.maintenanceHistory[0].id,record:{...one.maintenanceHistory[0],details:'One-off correction'}},today);assert.equal(one.maintenancePlans[0].active,false);assert.equal(one.maintenanceHistory.length,1);
 const single=structuredClone(state);changeMaintenance(single,{operation:'plan',plan:{...plan,intervalDays:undefined}},today);changeMaintenance(single,{operation:'complete',planId:single.maintenancePlans[0].id,record:{date:today,odometer:100,details:'',costSatang:0}},today);assert.equal(single.maintenancePlans[0].dueDate,undefined);
 for(const type of ['oil','inspection','insurance','tax','other']){const typed=structuredClone(state);changeMaintenance(typed,{operation:'plan',plan:{...plan,type}},today);assert.equal(typed.maintenancePlans[0].type,type);}
 const dateOnly=structuredClone(state);changeMaintenance(dateOnly,{operation:'plan',plan:{...plan,dueOdo:undefined,intervalKm:undefined,dueDate:'2026-11-01',intervalDays:1}},today);changeMaintenance(dateOnly,{operation:'complete',planId:dateOnly.maintenancePlans[0].id,record:{date:today,odometer:100,details:'',costSatang:0}},today);assert.equal(dateOnly.maintenancePlans[0].dueDate,'2026-11-02');assert.equal(dateOnly.maintenancePlans[0].dueOdo,undefined);
@@ -63,7 +73,7 @@ try{
  assert.equal((await post(api,2,{operation:'complete',planId:first.maintenancePlans[0].id,record:{date:bangkokDay(),odometer:100,details:'private detail',costSatang:25000}})).status,400);assert.deepEqual(read(),serviced);
  const duplicatePlan={...serviced.maintenancePlans[0]};delete duplicatePlan.id;
  assert.equal((await post(api,2,{operation:'plan',plan:duplicatePlan})).status,400);assert.deepEqual(read(),serviced);
- // History editing is intentionally absent: record the review gap, never erase it.
+ // Unknown history IDs cannot mutate any existing history.
  assert.equal((await post(api,2,{operation:'editHistory',record:{id:serviced.maintenanceHistory[0].id,details:'changed'}})).status,400);assert.deepEqual(read(),serviced);
  // Existing vehicle edits and trip writes must retain Maintenance and unrelated state.
  assert.equal((await post(api,2,{...state.cars[0],model:'Updated'},'car')).status,200);
@@ -84,6 +94,10 @@ try{
  const sqlTarget=database();sqlTarget.sql.exec(await sqlResponse.text());const manual=JSON.parse(sqlTarget.sql.prepare("SELECT payload FROM fleet_store WHERE id='main'").get().payload);assert.deepEqual(manual.maintenanceHistory,after.maintenanceHistory);assert.deepEqual(manual.maintenancePlans,after.maintenancePlans);
  const concurrent=await Promise.all([post(api,4,{operation:'plan',plan:{...plan,name:'Concurrent synthetic'}}),post(api,4,{operation:'plan',plan:{...plan,name:'Concurrent synthetic'}})]);
  assert.deepEqual(concurrent.map(r=>r.status).sort(),[200,409]);assert.equal(read().maintenancePlans.filter(p=>p.name==='Concurrent synthetic').length,1);
+ const oldRecord=read().maintenanceHistory[0],historyChange={operation:'editHistory',id:oldRecord.id,record:{...oldRecord,details:'Admin corrected',costSatang:1}};
+ assert.equal((await post(fleetApi(env,employee),5,historyChange)).status,403);
+ assert.equal((await post(api,5,historyChange)).status,200);const changed=read();assert.equal(changed.maintenanceHistory[0].details,'Admin corrected');assert.deepEqual(changed.audit[0].before.record,oldRecord);assert.deepEqual(changed.cars,after.cars);assert.deepEqual(changed.trips,after.trips);
+ assert.equal((await post(api,5,historyChange)).status,409);assert.deepEqual(read(),changed);
  const ui=join(dir,'ui.cjs');await build({stdin:{contents:`import React from 'react';import {renderToStaticMarkup} from 'react-dom/server';import Panel from './src/MaintenancePanel';export const render=p=>renderToStaticMarkup(<Panel {...p}/>);`,loader:'tsx',resolveDir:process.cwd()},bundle:true,platform:'node',format:'cjs',jsx:'automatic',outfile:ui,nodePaths:[resolve('node_modules')]});
  const {render}=createRequire(import.meta.url)(ui),props={state:s,version:0,onSaved(){},async onRefresh(){}};
  const admin=render({...props,admin:true});assert.match(admin,/เพิ่มแผนบำรุงรักษา|แก้ไขแผน|ประวัติการบำรุงรักษา/);assert.match(admin,/Synthetic oil &lt;script&gt;/);assert.doesNotMatch(admin,/<script>/);

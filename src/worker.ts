@@ -1,4 +1,4 @@
-import {IS_DEMO,ENVIRONMENT,SITE_URL,ENVIRONMENT_HTML} from './environment';
+import {IS_DEMO,IS_STAGING,ENVIRONMENT,SITE_URL,ENVIRONMENT_HTML} from './environment';
 import {createBackup} from './backup';
 import {BACKUP_CRON,runAutomaticBackup,automaticBackupStatus} from './automatic-backup';
 import {APP_VERSION} from './version';
@@ -46,6 +46,8 @@ export default {async scheduled(event:{cron:string;scheduledTime:number},env:any
  if(result.state==='failed')throw Error('AUTOMATIC_BACKUP_FAILED:'+result.code);
 },async fetch(req:Request,env:any){
  const url=new URL(req.url),path=url.pathname;
+ if(IS_STAGING&&(url.hostname==='smart-fleet.kritsuwan1.workers.dev'||url.hostname==='smart-fleet-demo.kritsuwan1.workers.dev'))return response('STAGING_HOST_MISMATCH',503);
+ if(IS_STAGING&&['/qr','/qr-site.svg','/qr-car.svg'].includes(path))return response('QR disabled in Staging',404);
  if(IS_DEMO)env={...env,DB:env.DEMO_DB};
  try{
   if(typeof env.APP_PASSWORD!=='string'||env.APP_PASSWORD.length<6)return html(screen('<p>ผู้ดูแลต้องตั้ง Secret ชื่อ <strong>APP_PASSWORD</strong> อย่างน้อย 6 ตัวอักษรใน Cloudflare แล้ว Deploy</p>'),503);

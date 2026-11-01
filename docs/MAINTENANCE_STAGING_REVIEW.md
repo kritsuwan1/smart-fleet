@@ -1,5 +1,7 @@
 # Task 3B — Maintenance review and Staging readiness
 
+Historical Task 3B snapshot. Task 3C.1 now addresses history correction and prepares a separate no-R2 Staging build/config; see [STAGING_READINESS.md](STAGING_READINESS.md). Security/resource identity/remote setup and deployment approval remain pending. Task 3B's actual final Linux run 41283265689 passed all 14 suites on 346f4db7be6f7fee3755b68ea81d562a9cd4b4b9; subsequent Task 3C results are recorded separately.
+
 Date: 2026-11-01. Branch: dev/smartfleet-batch-1. Review baseline: be44cd58e33ed0bcc085469c9dea9b2b84179bea. Read AGENTS.md and all eight docs files. Task 3A implementation 338580ff118f1f3afac52ff2f09002164b2bee99 is complete; latest prerequisite Linux run 41282614540 succeeded with all 14 suites. The subsequent baseline commit changes progress evidence only.
 
 **Decision: NOT READY for Staging deployment approval.** Development regression checks pass, but history editing is missing and the setup/security gates below remain unresolved. No deployment is performed or requested by this report.

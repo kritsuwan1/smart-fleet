@@ -5,7 +5,7 @@ let esbuild;
 try {esbuild=require('esbuild');}catch {esbuild=require(process.env.FLEET_ESBUILD_PATH);}
 const {build}=esbuild;
 import fs from 'node:fs/promises';
-for(const mode of ['demo','production']){
+for(const mode of ['demo','production','staging']){
  const define={'process.env.NODE_ENV':'"production"','__FLEET_ENV__':JSON.stringify(mode)};
  await build({entryPoints:['src/client.tsx'],outfile:'src/client.bundle.txt',bundle:true,minify:true,format:'iife',target:'es2022',jsx:'automatic',define,nodePaths:[process.env.FLEET_NODE_MODULES||resolve('node_modules')]});
  const outfile=`output/worker-${mode}.js`;

@@ -1,0 +1,13 @@
+// REVIEW ONLY: existing resource IDs must be independently verified before use.
+// No deploy, subscriptions, secret values, routes or scheduled activation supplied.
+{
+  "name": "smart-fleet-staging",
+  "main": "../output/worker-staging.js",
+  "compatibility_date": "2026-10-28",
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [],
+  "vars": {"AUTOMATIC_BACKUP_ENABLED": "false", "BACKUP_ENVIRONMENT": "staging"},
+  "d1_databases": [{"binding": "DEMO_DB", "database_name": "smart-fleet-staging-db", "database_id": "REPLACE_EXISTING_STAGING_D1_ID"}],
+  "triggers": {"crons": []}
+}

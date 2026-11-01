@@ -1,5 +1,13 @@
 # SmartFleet - Test Plan
 
+## Task 3C.1 — History correction and no-R2 Staging readiness
+
+- Prerequisite Task 3B Linux run 41283265689 PASS for 346f4db7be6f7fee3755b68ea81d562a9cd4b4b9, 14 suites, Node 24.22.1; logs verified.
+- Maintenance suite now tests Admin correction/audit, immutable record identity, employee denial, stale version rejection, negative-cost rollback, chronological bounds, older-record edits not changing the current schedule, latest-derived due recalculation, manual-plan override rejection with zero in-memory/persisted rollback damage, and archived one-off plan preservation. The previous unsupported-history test now checks unknown-ID rejection; history editing is implemented.
+- New staging.test.mjs is appended to npm test (15 suite files): no-R2/no-cron/private config properties and non-production IDs; source/recovery initialization on SQLite and rerun/occupied refusal; staging build label, QR disabled, Demo/Production host rejection, production marker rejection, synthetic fallback, Admin login and Employee write denial; scheduled handler disabled with unchanged source state. No cloud DB is accessed.
+- Optional Edge browser test now fills/saves a history correction at 360px and checks satang cost/audit/original record identity and unchanged cars/trips; earlier responsive/double-submit checks remain. Local identities are injected; physical/Safari/remote Staging UAT remains NOT_RUN.
+- Final Windows Node 24 build/typecheck/15 suites PASS; actual Linux result is recorded in PROGRESS.md. Security audit remains FAIL (High 3 / Low 1), actual existing D1 identities and remote initialization NOT_VERIFIED/NOT_RUN. Deployment remains NOT AUTHORIZED; do not infer Cloudflare readiness from SQLite tests. See STAGING_READINESS.md for future commands requiring separate approval.
+
 ## Task 3B — Maintenance review evidence
 
 - Extended existing maintenance suite (still 14 npm test suites): nine-case date/km/either matrix, inactive-plan/car Employee response filtering, fresh-version duplicate retries, concurrent same-version writes (one 200 / one 409), unsupported editHistory request rejected without writes. Initial duplicate regression reproduced a 200 response where rejection was required; fixed by exact-match guards.

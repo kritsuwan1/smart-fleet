@@ -29,7 +29,25 @@ export function maintenanceStatus(s:Fleet,p:MaintenancePlan,today=bangkokDay()){
  return km<=0||days<0?'overdue':km<=p.warnKm||days<=p.warnDays?'near':'normal';
 }
 export function changeMaintenance(s:Fleet,input:any,today=bangkokDay()){
- if(!input||!['plan','complete'].includes(input.operation))invalid();
+ if(!input||!['plan','complete','editHistory'].includes(input.operation))invalid();
+ if(input.operation==='editHistory'){
+  const original=s.maintenanceHistory?.find(r=>r.id===input.id),d=input.record;
+  if(!original||!d||!validDay(d.date)||d.date>today||!integer(d.odometer)||d.odometer<(s.cars.find(c=>c.id===original.carId)?.initialOdo||0))invalid();
+  const storedPlan=s.maintenancePlans?.find(p=>p.id===original.planId);if(!storedPlan)invalid();const p=structuredClone(storedPlan);
+  const history=s.maintenanceHistory!.filter(r=>r.planId===p.id).sort((a,b)=>a.date.localeCompare(b.date)||a.odometer-b.odometer),index=history.findIndex(r=>r.id===original.id),previous=history[index-1],next=history[index+1];
+  if(previous&&(d.date<previous.date||d.odometer<previous.odometer)||next&&(d.date>next.date||d.odometer>next.odometer))throw Error('การแก้ไขต้องไม่สลับลำดับวันที่หรือเลขไมล์ในประวัติ');
+  const record:MaintenanceRecord={...original,date:d.date,odometer:d.odometer,details:d.details,costSatang:d.costSatang};
+  if(history.some(r=>r.id!==original.id&&r.date===record.date&&r.odometer===record.odometer&&r.details===record.details&&r.costSatang===record.costSatang))throw Error('มีประวัติบำรุงรักษานี้แล้ว');
+  const before={record:structuredClone(original),plan:structuredClone(p)};
+  // Recalculate only the latest service and only when due values still derive
+  // from that service. Never roll back a later manual plan adjustment.
+  if(!next){
+   if(p.intervalKm!==undefined&&record.odometer!==original.odometer){if(p.dueOdo!==original.odometer+p.intervalKm)throw Error('แผนถูกปรับภายหลัง กรุณาตรวจรอบบำรุงรักษาก่อนแก้เลขไมล์ประวัติ');p.dueOdo=record.odometer+p.intervalKm;}
+   if(p.intervalDays!==undefined&&record.date!==original.date){const due=(date:string)=>new Date(Date.parse(date+'T00:00:00Z')+p.intervalDays!*86400000).toISOString().slice(0,10);if(p.dueDate!==due(original.date))throw Error('แผนถูกปรับภายหลัง กรุณาตรวจรอบบำรุงรักษาก่อนแก้วันที่ประวัติ');p.dueDate=due(record.date);}
+  }
+  const candidate={...s,maintenancePlans:s.maintenancePlans!.map(plan=>plan.id===p.id?p:plan),maintenanceHistory:s.maintenanceHistory!.map(r=>r.id===original.id?record:r)};validateMaintenance(candidate);
+  s.maintenancePlans=candidate.maintenancePlans;s.maintenanceHistory=candidate.maintenanceHistory;return {before,after:{record,plan:p}};
+ }
  if(input.operation==='plan'){
   const d=input.plan;if(!d||typeof d!=='object')invalid();
   const old=s.maintenancePlans?.find(p=>p.id===d.id);

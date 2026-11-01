@@ -1,5 +1,7 @@
 # Maintenance Reminder — Task 3A (Development only)
 
+Task 3C.1 supersedes the earlier missing-history-edit finding: Admin can now correct history with before/after Audit, immutable IDs/car/plan references, duplicate/chronology validation, atomic candidate validation and guarded latest-service recalculation. Older history edits do not roll back current plans; manual due adjustments cannot be silently overwritten. See [STAGING_READINESS.md](STAGING_READINESS.md) for exact correction/rollback rules and current approval blockers. No schema/new Fleet fields are added. The earlier Task 3A/3B append-only descriptions below are historical design evidence, not the current correction capability.
+
 Task 3B review: see [MAINTENANCE_STAGING_REVIEW.md](MAINTENANCE_STAGING_REVIEW.md) for current browser evidence and the NOT READY Staging decision. Exact duplicate plan/service retries are now rejected server-side; Employee API responses omit inactive plans/cars as well as all history. This is exact-value duplicate detection, not a general request-ID idempotency guarantee. Existing history is still append-only; editing history is a documented unmet Task 3B acceptance item. No stored records were rewritten by the fix.
 
 The user approved the additive Fleet State design before implementation. No SQL schema, database, production configuration, resource or R2 change is required. This feature is an in-app Dashboard reminder; it sends no external notifications and registers no cron.

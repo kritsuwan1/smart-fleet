@@ -1,0 +1,4 @@
+// Operator D1 metadata only: no Worker entrypoint, app binding or deploy target.
+{
+  "d1_databases": [{"binding": "RECOVERY_DB", "database_name": "smart-fleet-recovery-db", "database_id": "REPLACE_EXISTING_RECOVERY_D1_ID"}]
+}
