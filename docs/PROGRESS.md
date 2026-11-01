@@ -1,5 +1,12 @@
 # SmartFleet - Development Progress
 
+## 2026-11-01 — Task 3C.1 follow-up: user-supplied D1 IDs, configuration only
+
+- User explicitly supplied existing Staging ID f71ba325-027c-4b3f-abb2-71492493a8cf and Recovery ID 5ec99f9c-4919-41f4-9bc4-c8c564a60296; authorized config preparation/validation only. Updated config/staging-no-r2.example.jsonc (DEMO_DB → smart-fleet-staging-db) and config/recovery-d1.example.jsonc (RECOVERY_DB → smart-fleet-recovery-db). Exact UUID mapping/format/distinctness and JSONC guard checks PASS offline; no provider identity check or real database access claimed.
+- URL does not exist per user: https://REPLACE_APPROVED_STAGING_HOST remains a comment placeholder. Proposed future workers.dev URL shape and the need to verify actual deployment output are documented in STAGING_READINESS.md; no URL is assigned or activated. workers_dev=false, preview_urls=false, routes=[], no R2 binding, backup=false and cron=[] remain intact. Recovery is not bound to the app and has no Worker deploy entrypoint.
+- Actual Windows Node v24.22.1 validation: build PASS (Demo 996863 / Production 995489 / Staging 995636 bytes); typecheck PASS; npm test PASS all 15 suites. All execution uses synthetic/mocked/in-memory data, not these real DB connections. No source, schema, dependency/lockfile, Production config/data, secrets or real environment changes; no resources, R2/Cron, Deploy or Merge. Changed files only the two config examples, STAGING_READINESS.md and this PROGRESS.md.
+- Provider metadata verification, initialization, secrets/access setup and deployment remain NOT_RUN / separately approval-gated; security High 3 / Low 1 still open. IDs are now supplied/configured, superseding earlier missing-ID notes; this does not imply cloud integration readiness. Linux CI for this config-only update will be checked after commit.
+
 ## 2026-11-01 — Task 3C.1: Staging preparation, NO DEPLOY
 
 - Branch/base dev/smartfleet-batch-1 at 346f4db7be6f7fee3755b68ea81d562a9cd4b4b9, includes Task 3B. Read AGENTS and docs; prerequisite [Linux run 41283265689](https://github.com/kritsuwan1/smart-fleet/actions/runs/41283265689), job 124779346094, success on that SHA, Ubuntu 24.04.5 / Node v24.22.1 / npm 11.19.1. Verified decoded logs: npm ci/build/typecheck/all 14 suites PASS, Demo 991552 / Production 990178 bytes. This closes the preceding Task 3B pending-CI entry.

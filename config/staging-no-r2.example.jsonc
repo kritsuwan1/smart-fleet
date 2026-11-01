@@ -1,4 +1,5 @@
-// REVIEW ONLY: existing resource IDs must be independently verified before use.
+// REVIEW ONLY: user-supplied existing D1 ID; provider identity not verified here.
+// Future URL: https://REPLACE_APPROVED_STAGING_HOST (no route configured).
 // No deploy, subscriptions, secret values, routes or scheduled activation supplied.
 {
   "name": "smart-fleet-staging",
@@ -8,6 +9,6 @@
   "preview_urls": false,
   "routes": [],
   "vars": {"AUTOMATIC_BACKUP_ENABLED": "false", "BACKUP_ENVIRONMENT": "staging"},
-  "d1_databases": [{"binding": "DEMO_DB", "database_name": "smart-fleet-staging-db", "database_id": "REPLACE_EXISTING_STAGING_D1_ID"}],
+  "d1_databases": [{"binding": "DEMO_DB", "database_name": "smart-fleet-staging-db", "database_id": "f71ba325-027c-4b3f-abb2-71492493a8cf"}],
   "triggers": {"crons": []}
 }

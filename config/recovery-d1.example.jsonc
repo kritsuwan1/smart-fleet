@@ -1,4 +1,5 @@
 // Operator D1 metadata only: no Worker entrypoint, app binding or deploy target.
+// User-supplied existing D1 ID; provider identity not verified here.
 {
-  "d1_databases": [{"binding": "RECOVERY_DB", "database_name": "smart-fleet-recovery-db", "database_id": "REPLACE_EXISTING_RECOVERY_D1_ID"}]
+  "d1_databases": [{"binding": "RECOVERY_DB", "database_name": "smart-fleet-recovery-db", "database_id": "5ec99f9c-4919-41f4-9bc4-c8c564a60296"}]
 }
