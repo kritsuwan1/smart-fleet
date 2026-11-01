@@ -270,3 +270,14 @@ No Production trigger/resource/configuration change, deployment, merge, migratio
 2026-11-01: Windows Node v24.22.1 build/typecheck/test PASS; then actual [Linux CI run 41275329310](https://github.com/kritsuwan1/smart-fleet/actions/runs/41275329310) on Ubuntu 24.04.5 / Node v24.22.0 passed npm ci, build, typecheck and all 13 test files, including AB-001 through AB-009 assertions in automatic-backup.test.mjs. Tested source commit: deeefc5ea498a7c3e564f702073eb830f84aaf88. Details and limitations are in PROGRESS.md.
 
 These are mock/offline integration results. Real Staging R2/cron/webhook/D1 restore and browser UAT remain NOT_RUN; no production release or activation is implied.
+
+## 18. Task 2C.3 — No R2 subscription / offline coverage
+
+Reuse the existing bucket() Map mock and independent SQLite :memory: databases in automatic-backup.test.mjs. Run npm run test:backup:offline (build plus the existing backup suite); npm test still runs all 13 suites. See [BACKUP_OFFLINE.md](BACKUP_OFFLINE.md).
+
+- AB-010: compare both state and envelope digests to independent Node crypto SHA-256.
+- AB-011: create nine valid previous daily artifacts, create today's copy and assert exactly the seven current-window copies remain, validating each retained artifact.
+- AB-012: inspect all repository Wrangler configs and backup examples for empty/absent cron lists and disabled/absent enable flags. This does not query deployed Cloudflare settings.
+- Existing AB-001–009 cover failure injection, final-valid-copy retention, source preservation, redaction and actual offline SQLite recovery. Production-named scenarios use only synthetic data.
+
+2026-11-01 Windows Node v24.22.1: offline command/build, typecheck and all 13 suites PASS. No R2 bucket, subscription, real D1 or credentials required. Cloud R2 integration and Staging D1 integration remain NOT_RUN. Future cloud provisioning, subscription, secrets, deployment and trigger activation each require explicit approval; no activation is implied by these results.

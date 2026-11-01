@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
 import {DatabaseSync} from 'node:sqlite';
 import {build} from 'esbuild';
 import {readFile,mkdtemp,writeFile,rm} from 'node:fs/promises';
@@ -39,10 +40,19 @@ function setup(options={}){
 }
 async function run(s){return runAutomaticBackup(s.env,scheduled,s.deps);}
 try{
+ // Repository configuration only: no provider credentials or Cloudflare calls.
+ for(const file of ['wrangler.jsonc','wrangler.demo.jsonc','wrangler.production.jsonc','config/backup-staging.example.jsonc','config/backup-production.example.jsonc']){
+  const config=JSON.parse((await readFile(file,'utf8')).replace(/^\s*\/\/.*$/gm,''));
+  assert.deepEqual(config.triggers?.crons||[],[],file+' must have no active cron');
+  assert.notEqual(config.vars?.AUTOMATIC_BACKUP_ENABLED,'true',file+' must not enable backup');
+ }
  assert.equal(BACKUP_CRON,'0 19 * * *');assert.equal(backupDay(scheduled),date);assert.equal(backupDay(scheduled-1),'2026-11-02');assert.equal(backupDay(Date.parse('2026-11-01T16:59:59Z')),'2026-11-01');
  const disabled=setup();assert.deepEqual(await runAutomaticBackup({...disabled.env,AUTOMATIC_BACKUP_ENABLED:'false',DB:undefined},scheduled,disabled.deps),{state:'disabled'});assert.equal(disabled.r2.calls.get,0);
  const s=setup(),before=s.snapshot();assert.equal((await run(s)).state,'success');assert.deepEqual(s.snapshot(),before);
  const artifact=await inspectAutomaticBackup(s.r2.values.get(key),'staging',date);assert.deepEqual(artifact.state,state);assert.equal(artifact.metadata.sourceVersion,5);assert.equal(artifact.metadata.counts.trips,1);
+ const sha256=value=>createHash('sha256').update(JSON.stringify(value),'utf8').digest('hex');
+ assert.equal(artifact.metadata.stateSha256,sha256(state));
+ const {sha256:envelopeDigest,...envelope}=artifact;assert.equal(envelopeDigest,sha256(envelope));
  const status=await automaticBackupStatus(s.env);assert.equal(status.state,'success');assert.equal(status.lastSuccess.date,date);assert.ok(!JSON.stringify(status).includes('PRIVATE_'));assert.equal(s.notifications.length,0);
  const poisoned=setup();poisoned.sql.prepare('INSERT INTO fleet_store VALUES (?,?,0)').run('backup:status:staging',JSON.stringify({state:'failed',code:'PRIVATE_STATUS_SECRET',lastSuccess:{date,completedAt:'2026-11-01 (PRIVATE_STATUS_SECRET)',sourceVersion:5,sha256:'a'.repeat(64),bytes:10},stateDump:state}));assert.ok(!JSON.stringify(await automaticBackupStatus(poisoned.env)).includes('PRIVATE_'));
  const original=s.r2.values.get(key);assert.equal((await run(s)).state,'success');assert.equal(s.r2.calls.put,1);assert.equal(s.r2.values.get(key),original);
@@ -80,6 +90,16 @@ try{
  retention.r2.values.set('unrelated.json','untouched');retention.r2.values.set('fleet/v1/staging/operator-note.txt','untouched');
  assert.equal((await run(retention)).state,'success');assert.ok(retention.r2.values.has('fleet/v1/staging/2026-10-27.json'));assert.ok(!retention.r2.values.has('fleet/v1/staging/2026-10-26.json'));assert.ok(retention.r2.calls.list>1);assert.ok(retention.r2.values.has(key));assert.ok(retention.r2.values.has('fleet/v1/production/2026-10-01.json'));assert.ok(retention.r2.values.has('unrelated.json'));assert.ok(retention.r2.values.has('fleet/v1/staging/operator-note.txt'));
  const lastCopy=setup();const oldKey='fleet/v1/staging/2026-10-01.json';lastCopy.r2.values.set(oldKey,JSON.stringify(await automaticBackupArtifact(state,4,'staging','2026-10-01','2026-10-01T00:00:00Z')));lastCopy.r2.failures.put=10;await run(lastCopy);assert.ok(lastCopy.r2.values.has(oldKey));assert.equal(lastCopy.r2.calls.delete,0);
+ // Real valid synthetic artifacts across ten dates: retain precisely seven days.
+ const sevenDays=setup(),expectedKeys=[];
+ for(let age=1;age<=9;age++){
+  const day=backupDay(scheduled-age*86400000),dailyKey='fleet/v1/staging/'+day+'.json';
+  sevenDays.r2.values.set(dailyKey,JSON.stringify(await automaticBackupArtifact(state,4,'staging',day,new Date(scheduled-age*86400000).toISOString())));
+  if(age<=6)expectedKeys.push(dailyKey);
+ }
+ assert.equal((await run(sevenDays)).state,'success');
+ assert.deepEqual([...sevenDays.r2.values.keys()].sort(),[key,...expectedKeys].sort());
+ for(const [dailyKey,text] of sevenDays.r2.values)await inspectAutomaticBackup(text,'staging',dailyKey.slice(-15,-5));
  const deleteFail=setup();deleteFail.r2.values.set(oldKey,'old');deleteFail.r2.failures.delete=10;assert.equal((await run(deleteFail)).code,'RETENTION_FAILED');assert.ok(deleteFail.r2.values.has(key));assert.equal((await automaticBackupStatus(deleteFail.env)).lastSuccess.date,date);
  const listFail=setup();listFail.r2.failures.list=10;assert.equal((await run(listFail)).code,'RETENTION_FAILED');assert.ok(listFail.r2.values.has(key));
  // After a failed job, next attempt reuses its immutable object and can complete retention.

@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "test:backup:offline": "npm run build && node --experimental-sqlite tests/automatic-backup.test.mjs",
     "build": "node build.mjs",
     "test": "node --experimental-sqlite tests/worker.test.mjs && node --experimental-sqlite tests/import.test.mjs && node --experimental-sqlite tests/accounts.test.mjs && node --experimental-sqlite tests/roles.test.mjs && node --experimental-sqlite tests/reports.test.mjs && node --experimental-sqlite tests/system-status.test.mjs && node --experimental-sqlite tests/backup-alerts.test.mjs && node --experimental-sqlite tests/environments.test.mjs && node tests/mobile-ui.test.mjs && node tests/history-ui.test.mjs && node tests/profile-ui.test.mjs && node --experimental-sqlite tests/trip-receipt.test.mjs && node --experimental-sqlite tests/automatic-backup.test.mjs",
     "typecheck": "tsc --noEmit"

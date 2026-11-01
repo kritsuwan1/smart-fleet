@@ -1,5 +1,7 @@
 # Automatic Backup - Development Design and Recovery
 
+Task 2C.3: R2 subscription/activation is deferred. Use [BACKUP_OFFLINE.md](BACKUP_OFFLINE.md) for the existing mock storage/isolated SQLite workflow and the future Staging checklist. These tests do not establish cloud integration or operational automatic backups; all real-resource/activation steps below still require separate approval.
+
 Task 2A implementation only. No Cloudflare resources, credentials, secrets, deployed configuration or production records were changed. Existing wrangler*.jsonc and deploy.yml remain unchanged. Both example configs are disabled, contain placeholders and have empty cron lists.
 
 ## Schedule and snapshot
