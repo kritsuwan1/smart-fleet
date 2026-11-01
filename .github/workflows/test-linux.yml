@@ -1,0 +1,47 @@
+name: Test Linux Node.js 24
+
+on:
+  push:
+    branches:
+      - dev/smartfleet-batch-1
+    paths-ignore:
+      - 'docs/**'
+      - 'AGENTS.md'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: test-linux-smartfleet-batch-1
+  cancel-in-progress: false
+
+jobs:
+  test:
+    if: github.repository == 'kritsuwan1/smart-fleet' && github.ref == 'refs/heads/dev/smartfleet-batch-1'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout development branch
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Verify Linux and Node.js 24
+        run: |
+          uname -a
+          cat /etc/os-release
+          node --version
+          npm --version
+          node -e "console.log(JSON.stringify({platform:process.platform,arch:process.arch,node:process.version,commit:process.argv[1]})); if(process.platform!=='linux'||process.versions.node.split('.')[0]!=='24') process.exit(1)" "${{ github.sha }}"
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Run all 12 automated test suites
+        run: npm test

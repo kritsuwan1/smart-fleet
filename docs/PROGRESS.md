@@ -100,3 +100,18 @@ All Worker/API requests were direct local function calls using in-memory SQLite 
 - After approval: commit only the new test workflow on this branch; observe the push-triggered run; record runner OS, exact Node version, tested SHA, run URL and actual per-suite results here. Investigate only compatibility failures if any occur.
 - This entry records observed environment and CI capability only. Workflow creation/execution awaits the user's review under task item 4. No application/test logic, production, remote DB, secrets or environment variables changed. Automatic Backup work was not started.
 
+
+## 2026-11-01 - Task 1.1: Approved Linux CI setup
+
+- User approved a test-only GitHub Actions workflow on `dev/smartfleet-batch-1`.
+- Inspected both branch heads before editing: development `f813c21b51a8b0c4f30b7884681fd8eb93d7565e`; documentation source `7cdceab7dc4724df6ddbc2f88f3645158b12baa1`.
+- Development contained only docs/PROGRESS.md among the five required instruction/document files. Copied missing AGENTS.md, docs/ROADMAP.md, docs/ARCHITECTURE.md and docs/TEST_PLAN.md unchanged from that documentation snapshot. Read all five before implementation. Existing development progress and the newer Windows test fixes are preserved; no merge was performed.
+- Added `.github/workflows/test-linux.yml`: push trigger only for this branch, repository/ref job guard, Ubuntu 24.04, Node.js 24, contents:read permission and checkout without persisted credentials.
+- Workflow prints actual runner OS, architecture, Node/npm versions and commit SHA, asserts Linux/Node major 24, then executes npm ci, npm run build, npm run typecheck and npm test.
+- Documentation-only pushes (docs/** and AGENTS.md) are ignored so recording results does not start redundant runs. Changes to the workflow itself trigger validation.
+- No deployment/workflow-dispatch step, Cloudflare credential reference, custom environment variable, real DB binding or resource creation is present. Existing deploy.yml is unchanged.
+- Copied architecture/test-plan status sections are the historical Phase 0 snapshot; this development progress file is the current execution record.
+- Linux execution status at workflow preparation: **NOT_RUN** for install/build/typecheck and all 12 suites. A later entry will record the actual GitHub Actions result if available.
+- Automatic Backup development has not started.
+
+- Pre-commit validation: PyYAML 6.0.3 parsed the workflow successfully; structural checks passed for branch trigger, job guard, Ubuntu/Node version, read-only permissions, credential persistence disabled, absence of custom env/secrets/reusable-workflow calls, and the four exact npm commands. git diff --check passed. Validation dependency was installed only in ignored .qa/, not application dependencies.
