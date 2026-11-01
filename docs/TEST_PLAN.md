@@ -1,5 +1,12 @@
 # SmartFleet - Test Plan
 
+## Task 3B — Maintenance review evidence
+
+- Extended existing maintenance suite (still 14 npm test suites): nine-case date/km/either matrix, inactive-plan/car Employee response filtering, fresh-version duplicate retries, concurrent same-version writes (one 200 / one 409), unsupported editHistory request rejected without writes. Initial duplicate regression reproduced a 200 response where rejection was required; fixed by exact-match guards.
+- Optional tests/maintenance-browser.mjs: local real React Dashboard + fleetApi + synthetic SQLite, identity injected. Edge 156.0.4314.58 actual browser PASS for plan add/edit, history creation/view, Employee read-only UI, two same-task submits yielding one request for both forms, and no document overflow at 360/390/768/1280px. At 360, plan/service forms and history were exercised and screenshots visually reviewed. Optional browser test is not part of npm test/Linux CI; setup/command are in MAINTENANCE_STAGING_REVIEW.md.
+- npm ci/build/typecheck/all 14 suites PASS on Windows Node v24.22.1; final Linux results recorded in PROGRESS.md. No real cloud DB/credentials used.
+- Acceptance FAIL: history editing NOT_IMPLEMENTED. Security gate remains High 3 / Low 1. Remote Staging D1/auth/access integration, real-device Safari/UAT NOT_RUN. Overall Staging deployment readiness: NOT READY; passing regression tests do not close these gaps. See [review/report](MAINTENANCE_STAGING_REVIEW.md) for PASS/FAIL matrix and required fixes. No deployment or resource activation authorized.
+
 ## Task 3A — Maintenance tests (current development)
 
 New tests/maintenance.test.mjs is appended to npm test (14 suites total). Uses synthetic fleet state and independent in-memory SQLite; no schema/resources/production access.

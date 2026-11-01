@@ -50,6 +50,7 @@ export function viewForUser(state:Fleet,version:number,user:User,payloadBytes?:n
  const occupiedCars=state.trips.filter(t=>!t.end&&t.ownerUserId!==user.id).map(t=>t.carId);
  if(user.role!=='admin'){
   delete view.maintenanceHistory;
+  if(view.maintenancePlans)view.maintenancePlans=view.maintenancePlans.filter(p=>p.active&&state.cars.some(c=>c.id===p.carId&&c.active));
   view.cars=view.cars.map(c=>({...c,currentOdo:latestOdo(state,c.id)}));
   view.trips=view.trips.filter(t=>t.ownerUserId===user.id);view.audit=[];view.people=view.people.filter(p=>p.id===user.driverId);
  }

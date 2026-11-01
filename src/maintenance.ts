@@ -37,10 +37,13 @@ export function changeMaintenance(s:Fleet,input:any,today=bangkokDay()){
   if(old&&d.carId!==old.carId)throw Error('ไม่สามารถย้ายแผนไปยังรถอื่น');
   const p:MaintenancePlan={id:old?.id||crypto.randomUUID(),carId:d.carId,type:d.type,name:typeof d.name==='string'?d.name.trim():'',active:d.active,warnKm:d.warnKm,warnDays:d.warnDays,
    ...(d.dueOdo!==undefined?{dueOdo:d.dueOdo}:{}),...(d.dueDate!==undefined?{dueDate:d.dueDate}:{}),...(d.intervalKm!==undefined?{intervalKm:d.intervalKm}:{}),...(d.intervalDays!==undefined?{intervalDays:d.intervalDays}:{})};
+  const fields:readonly (keyof MaintenancePlan)[]=['carId','type','name','active','dueOdo','dueDate','intervalKm','intervalDays','warnKm','warnDays'];
+  if(s.maintenancePlans?.some(existing=>existing.id!==p.id&&fields.every(field=>existing[field]===p[field])))throw Error('มีแผนบำรุงรักษานี้แล้ว');
   s.maintenancePlans=old?s.maintenancePlans!.map(x=>x.id===old.id?p:x):[...(s.maintenancePlans||[]),p];validateMaintenance(s);return {before:old||null,after:p};
  }
  const p=s.maintenancePlans?.find(p=>p.id===input.planId);if(!p||!p.active)invalid();
  const d=input.record;if(!d||!validDay(d.date)||d.date>today)invalid();
+ if(s.maintenanceHistory?.some(r=>r.planId===p.id&&r.date===d.date&&r.odometer===d.odometer&&r.details===d.details&&r.costSatang===d.costSatang))throw Error('บันทึกงานบำรุงรักษานี้แล้ว');
  const previous=(s.maintenanceHistory||[]).filter(r=>r.planId===p.id).sort((a,b)=>b.date.localeCompare(a.date)||b.odometer-a.odometer)[0];
  if(previous&&(d.date<previous.date||d.odometer<previous.odometer))throw Error('วันที่หรือเลขไมล์ก่อนประวัติล่าสุด');
  if(!integer(d.odometer)||d.odometer<(s.cars.find(c=>c.id===p.carId)?.initialOdo||0))invalid();

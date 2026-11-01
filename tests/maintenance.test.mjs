@@ -21,6 +21,7 @@ assert.equal(maintenanceStatus(state,{...p,dueDate:today},today),'near');
 assert.equal(maintenanceStatus(state,{...p,dueDate:'2026-10-31'},today),'overdue');
 assert.equal(maintenanceStatus(state,{...p,dueOdo:undefined},today),'normal');
 assert.equal(maintenanceStatus(state,{...p,dueDate:undefined},today),'normal');
+for(const [dueOdo,dueDate,expected] of [[1000,undefined,'normal'],[200,undefined,'near'],[99,undefined,'overdue'],[undefined,'2026-12-01','normal'],[undefined,'2026-11-08','near'],[undefined,'2026-10-31','overdue'],[1000,'2026-11-08','near'],[99,'2026-12-01','overdue'],[1000,'2026-10-31','overdue']])assert.equal(maintenanceStatus(state,{...p,dueOdo,dueDate},today),expected);
 assert.equal(bangkokDay(Date.parse('2026-10-31T17:00:00Z')),today);
 validateMaintenance(state);assert.equal(state.maintenancePlans,undefined);
 const s=structuredClone(state);changeMaintenance(s,{operation:'plan',plan},today);assert.equal(s.maintenancePlans.length,1);
@@ -38,6 +39,8 @@ for(const type of ['oil','inspection','insurance','tax','other']){const typed=st
 const dateOnly=structuredClone(state);changeMaintenance(dateOnly,{operation:'plan',plan:{...plan,dueOdo:undefined,intervalKm:undefined,dueDate:'2026-11-01',intervalDays:1}},today);changeMaintenance(dateOnly,{operation:'complete',planId:dateOnly.maintenancePlans[0].id,record:{date:today,odometer:100,details:'',costSatang:0}},today);assert.equal(dateOnly.maintenancePlans[0].dueDate,'2026-11-02');assert.equal(dateOnly.maintenancePlans[0].dueOdo,undefined);
 const privateView=viewForUser(s,0,employee);assert.equal(privateView.state.maintenanceHistory,undefined);assert.equal(privateView.state.maintenancePlans.length,1);assert.ok(!JSON.stringify(privateView).includes('Synthetic private service'));
 assert.equal(viewForUser(s,0,root).state.maintenanceHistory.length,1);
+const hidden=structuredClone(s);hidden.maintenancePlans[0].active=false;assert.deepEqual(viewForUser(hidden,0,employee).state.maintenancePlans,[]);
+hidden.maintenancePlans[0].active=true;hidden.cars[0].active=false;assert.deepEqual(viewForUser(hidden,0,employee).state.maintenancePlans,[]);assert.equal(viewForUser(hidden,0,root).state.maintenancePlans.length,1);
 await inspectBackup(JSON.stringify(await createBackup(state,'3.8.5','demo')));await inspectBackup(JSON.stringify(await createBackup(s,'3.8.5','demo')));
 const bad=structuredClone(s);bad.maintenanceHistory[0].carId='other';await assert.rejects(inspectBackup(JSON.stringify(await createBackup(bad,'3.8.5','demo'))));
 const duplicate=structuredClone(s);duplicate.maintenancePlans.push(duplicate.maintenancePlans[0]);assert.throws(()=>validateMaintenance(duplicate));
@@ -56,6 +59,12 @@ try{
  assert.equal((await post(api,1,{operation:'plan',plan:{...plan,carId:'missing'}})).status,400);assert.deepEqual(read(),first);
  assert.equal((await post(api,1,{operation:'complete',planId:first.maintenancePlans[0].id,record:{date:bangkokDay(),odometer:100,details:'private detail',costSatang:25000}})).status,200);
  const serviced=read();
+ // Fresh-version retries must not create a second plan/service after a lost reply.
+ assert.equal((await post(api,2,{operation:'complete',planId:first.maintenancePlans[0].id,record:{date:bangkokDay(),odometer:100,details:'private detail',costSatang:25000}})).status,400);assert.deepEqual(read(),serviced);
+ const duplicatePlan={...serviced.maintenancePlans[0]};delete duplicatePlan.id;
+ assert.equal((await post(api,2,{operation:'plan',plan:duplicatePlan})).status,400);assert.deepEqual(read(),serviced);
+ // History editing is intentionally absent: record the review gap, never erase it.
+ assert.equal((await post(api,2,{operation:'editHistory',record:{id:serviced.maintenanceHistory[0].id,details:'changed'}})).status,400);assert.deepEqual(read(),serviced);
  // Existing vehicle edits and trip writes must retain Maintenance and unrelated state.
  assert.equal((await post(api,2,{...state.cars[0],model:'Updated'},'car')).status,200);
  const trip={carId:'car',driverId:'person',project:'Synthetic',destination:'Test',start:'2026-11-01T08:00',end:'2026-11-01T09:00',odoStart:100,odoEnd:110,note:'',reason:''};
@@ -73,6 +82,8 @@ try{
  const cookie=login.headers.get('set-cookie').split(';')[0];
  const sqlResponse=await demo.fetch(new Request('https://fleet.test/api/backup.sql',{headers:{cookie}}),workerEnv);assert.equal(sqlResponse.status,200);
  const sqlTarget=database();sqlTarget.sql.exec(await sqlResponse.text());const manual=JSON.parse(sqlTarget.sql.prepare("SELECT payload FROM fleet_store WHERE id='main'").get().payload);assert.deepEqual(manual.maintenanceHistory,after.maintenanceHistory);assert.deepEqual(manual.maintenancePlans,after.maintenancePlans);
+ const concurrent=await Promise.all([post(api,4,{operation:'plan',plan:{...plan,name:'Concurrent synthetic'}}),post(api,4,{operation:'plan',plan:{...plan,name:'Concurrent synthetic'}})]);
+ assert.deepEqual(concurrent.map(r=>r.status).sort(),[200,409]);assert.equal(read().maintenancePlans.filter(p=>p.name==='Concurrent synthetic').length,1);
  const ui=join(dir,'ui.cjs');await build({stdin:{contents:`import React from 'react';import {renderToStaticMarkup} from 'react-dom/server';import Panel from './src/MaintenancePanel';export const render=p=>renderToStaticMarkup(<Panel {...p}/>);`,loader:'tsx',resolveDir:process.cwd()},bundle:true,platform:'node',format:'cjs',jsx:'automatic',outfile:ui,nodePaths:[resolve('node_modules')]});
  const {render}=createRequire(import.meta.url)(ui),props={state:s,version:0,onSaved(){},async onRefresh(){}};
  const admin=render({...props,admin:true});assert.match(admin,/เพิ่มแผนบำรุงรักษา|แก้ไขแผน|ประวัติการบำรุงรักษา/);assert.match(admin,/Synthetic oil &lt;script&gt;/);assert.doesNotMatch(admin,/<script>/);
