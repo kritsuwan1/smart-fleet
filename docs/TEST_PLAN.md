@@ -1,5 +1,13 @@
 # SmartFleet - Test Plan
 
+## Task 3C.2B — Approved dependency compatibility
+
+- User-approved parent upgrade: Wrangler 4.116.0, Miniflare 4.20260730.0, scoped sharp 0.35.5/undici 7.30.1; ws 8.21.0 supplied by parent, esbuild 0.28.1 deduplicates old vulnerable copy. Production lock entries unchanged; no force fix, app source/config/schema change or real Cloudflare access.
+- Actual full audit before Critical 0 / High 3 / Low 1; after all severities 0, exit 0. Fresh production-only audit 0, exit 0. B1 dependency gate resolved for this snapshot; remaining cloud/setup/deploy gates stay pending.
+- New tests/toolchain.test.mjs is appended to npm test (16 suites): resolved version pins/Node 24, native sharp PNG/JPEG/resize, undici HTTP/ws echo on loopback, Miniflare/workerd ephemeral D1 query persistence, and actual compiled Staging Worker login/role protection/synthetic D1/maintenance create-complete-correct/manual backup/disabled automatic backup and QR. No R2 binding/real services required. Test login uses redirect:manual, preserving auth behavior.
+- npm ci/build/typecheck/all 16 suites PASS on Windows Node v24.22.1. Native workerd smoke compatibility date is 2026-07-30 (supported local runtime); provider config-date/real cloud integration remains NOT_RUN. New Linux CI result is recorded by SHA/run/log evidence in PROGRESS.md. No lint script exists.
+- No Deploy/Merge/Production/real DB/Secrets/environment/resource/R2/Cron changes. Security remediation success alone is not a Staging deployment authorization.
+
 ## Task 3C.2A — Safe rollback fix / remaining blockers
 
 - New regression initially FAIL: invalid plan creation threw but left maintenancePlans mutated in the caller. Fixed changeMaintenance with staged maintenance-field copies and commit-after-validation for all operations. Invalid plan and invalid completion now preserve the full input state; earlier history-correction/manual-override rollback checks remain. Success rules, API roles, schema and vehicle/trip logic are unchanged.

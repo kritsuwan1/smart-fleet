@@ -1,5 +1,7 @@
 # Task 3C.2A — Blocker resolution (Development only)
 
+Task 3C.2B update: user approved the concrete dependency experiment below. Wrangler 4.116.0 / Miniflare major 4 / sharp 0.35.5 now pass both full and production-only npm audits with zero findings, plus Windows Node 24 build/typecheck/all 16 suites including native local Worker/D1 compatibility. See [DEPENDENCY_SECURITY_REVIEW.md](DEPENDENCY_SECURITY_REVIEW.md) and PROGRESS.md for exact Linux evidence. **B1 is resolved for the tested package snapshot**; the old B1/audit/approval-required text below is the historical 3C.2A state. B2–B7 cloud identity/access/setup/containment/approval and post-deploy acceptance remain pending; no cloud action or deployment was approved/performed by this dependency task.
+
 Date: 2026-11-01. Branch dev/smartfleet-batch-1, base d1aa6ab32680670aef99fe8182480a066669463e. Read AGENTS.md and docs. **Overall NOT_READY remains truthful.** This task fixes a Maintenance state-rollback defect and verifies existing repository controls; it does not bypass security/operational approval gates or change real resources.
 
 ## Blocker inventory and evidence

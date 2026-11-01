@@ -5,7 +5,7 @@
   "scripts": {
     "test:backup:offline": "npm run build && node --experimental-sqlite tests/automatic-backup.test.mjs",
     "build": "node build.mjs",
-    "test": "node --experimental-sqlite tests/worker.test.mjs && node --experimental-sqlite tests/import.test.mjs && node --experimental-sqlite tests/accounts.test.mjs && node --experimental-sqlite tests/roles.test.mjs && node --experimental-sqlite tests/reports.test.mjs && node --experimental-sqlite tests/system-status.test.mjs && node --experimental-sqlite tests/backup-alerts.test.mjs && node --experimental-sqlite tests/environments.test.mjs && node tests/mobile-ui.test.mjs && node tests/history-ui.test.mjs && node tests/profile-ui.test.mjs && node --experimental-sqlite tests/trip-receipt.test.mjs && node --experimental-sqlite tests/automatic-backup.test.mjs && node --experimental-sqlite tests/maintenance.test.mjs && node --experimental-sqlite tests/staging.test.mjs",
+    "test": "node --experimental-sqlite tests/worker.test.mjs && node --experimental-sqlite tests/import.test.mjs && node --experimental-sqlite tests/accounts.test.mjs && node --experimental-sqlite tests/roles.test.mjs && node --experimental-sqlite tests/reports.test.mjs && node --experimental-sqlite tests/system-status.test.mjs && node --experimental-sqlite tests/backup-alerts.test.mjs && node --experimental-sqlite tests/environments.test.mjs && node tests/mobile-ui.test.mjs && node tests/history-ui.test.mjs && node tests/profile-ui.test.mjs && node --experimental-sqlite tests/trip-receipt.test.mjs && node --experimental-sqlite tests/automatic-backup.test.mjs && node --experimental-sqlite tests/maintenance.test.mjs && node --experimental-sqlite tests/staging.test.mjs && node tests/toolchain.test.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -15,16 +15,16 @@
   },
   "devDependencies": {
     "esbuild": "0.28.1",
-    "wrangler": "4.92.0",
+    "wrangler": "4.116.0",
     "typescript": "5.9.3",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3"
   },
   "version": "3.8.5",
   "overrides": {
-    "miniflare@4.20260515.0": {
-      "undici": "7.30.1",
-      "ws": "8.21.0"
+    "miniflare@4.20260730.0": {
+      "sharp": "0.35.5",
+      "undici": "7.30.1"
     }
   }
 }

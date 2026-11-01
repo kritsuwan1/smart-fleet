@@ -1,5 +1,38 @@
 # Dependency security review — Task 2B.1
 
+## Current result — Task 3C.2B approved remediation (2026-11-01)
+
+User explicitly approved the dependency experiment from BLOCKER_RESOLUTION.md on dev/smartfleet-batch-1, without deployment or real Cloudflare access. Base: 5ea2a28c7afd98d5fa7a51e40c623bb1e8eb6923. The earlier Task 2B.1/3C.2A findings below are historical; current audit results supersede the open B1 dependency blocker for this tested package snapshot.
+
+| Audit scope | Before | After | Actual result |
+| --- | --- | --- | --- |
+| All dependencies | Critical 0 / High 3 / Low 1, total 4, exit 1 | Critical 0 / High 0 / Moderate 0 / Low 0, total 0 | PASS, npm audit --json exit 0 |
+| Production only | 0 in preceding Task 3C.2A baseline verification | 0 | PASS, fresh npm audit --omit=dev --json exit 0 |
+
+Fresh before/after full audits were executed during this task. Before-production-only result comes from the preceding recorded baseline; production lock entries were also compared exactly to the base commit and are unchanged. Counts are affected package nodes, not unique CVE counts. No npm audit fix --force was used.
+
+| Tool / dependency | Before | After |
+| --- | --- | --- |
+| Wrangler | 4.92.0 | 4.116.0 |
+| Miniflare | 4.20260515.0 | 4.20260730.0 (major 4 retained) |
+| sharp | 0.34.5 | 0.35.5 (scoped override under that Miniflare) |
+| workerd | 1.20260515.1 | 1.20260730.1 |
+| esbuild | root 0.28.1 plus vulnerable Wrangler copy 0.27.3 | 0.28.1, old nested copy removed/deduplicated |
+| undici | 7.30.1 via old-parent override | 7.30.1 via new-parent scoped override |
+| ws | 8.21.0 via old-parent override | 8.21.0 supplied by Miniflare; redundant override removed |
+
+Only Wrangler direct dev pin and necessary parent-scoped overrides were changed; native/tool transitive lock entries follow that parent upgrade. Compared current lock against the exact GitHub base lock: all production entries and root production dependencies remain identical; 63 development/platform lock nodes changed/removed. No application source, Business Logic, Fleet structure, schema, real config/environment, secret or production record changed.
+
+Compatibility evidence: installed Wrangler/Miniflare engines require Node >=22 and sharp >=20.9, satisfied by tested Node 24.22.1. Approved sharp/esbuild pre-1.0 breaking boundaries were exercised without application changes. Added tests/toolchain.test.mjs (npm test now 16 suites): exact resolved versions, native synthetic PNG/JPEG/resize via sharp, loopback undici HTTP and ws echo, local Miniflare/workerd D1 queries across requests, then the actual compiled Staging Worker running in local workerd with synthetic D1. The latter checks unauthenticated denial/login cookie, synthetic car state, maintenance plan/complete/correction, retained private manual backup fields/SHA-256 format and disabled automatic backup/QR without any R2 binding.
+
+The native-runtime fixture initially followed login's 303 automatically; fixed the test request to redirect:manual so it verifies the intended response/cookie. No production authentication rule was relaxed. No other compatibility failures required source changes. npm ci PASS (42 installed packages); final Windows Node v24.22.1 build PASS (Demo 997247 / Production 995873 / Staging 996020 bytes), typecheck PASS and all 16 suites PASS. The app build bytes are unchanged from the pre-upgrade direct-esbuild build. Existing install-script warnings for esbuild/workerd remain; no script approvals were changed. sharp 0.35 has no old install-script warning; native processing passed using its packaged binary.
+
+Local workerd smoke uses its supported compatibility date 2026-07-30, not a claim of provider execution under the repository's 2026-10-28 config date. Existing Node/SQLite suites and the compiled Worker are additionally exercised, but actual Cloudflare compatibility/config/IAM and remote D1 remain NOT_RUN. Node-side Miniflare D1 proxy bridge behavior is not claimed fixed; the smoke queries D1 from inside the emulated Worker. No R2 bucket/emulation subscription, real credentials or real DB are used. No Wrangler deployment command, dry-run deployment or resource discovery was invoked.
+
+Linux CI results for the new exact commit are recorded in PROGRESS.md after publication; the new native-runtime suite is part of CI, not just a manual Windows smoke. B1 dependency remediation is successful for the verified audit snapshot. B2–B7 provider identity/setup/access/containment/approval and post-deploy UAT gates from BLOCKER_RESOLUTION.md remain separate; audit success does not grant deployment approval or make overall Staging READY automatically.
+
+Changed files: package.json, package-lock.json, tests/toolchain.test.mjs, docs/DEPENDENCY_SECURITY_REVIEW.md, docs/BLOCKER_RESOLUTION.md, docs/TEST_PLAN.md, docs/PROGRESS.md. No Deploy/Merge, Cloudflare resource/real DB access/change, Secrets/environment modification, R2 or Cron activation.
+
 Date: 2026-11-01. Branch: `dev/smartfleet-batch-1`. Baseline: `98e30cc058fcb73b65bef6fdb478675d9385dbb3`.
 
 ## Actual audit results
