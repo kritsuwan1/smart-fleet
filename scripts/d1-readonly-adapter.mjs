@@ -1,5 +1,6 @@
 // No default transport, credential discovery, CLI, initialization or deployment.
 import {prepareD1Initialization,validateInitializationTarget,SCHEMA_QUERY,COUNT_QUERY} from './d1-initialization-safety.mjs';
+import {verifyCloudflareD1Identity} from './d1-provider-identity.mjs';
 const refuse=code=>{throw new Error('D1_PREFLIGHT_'+code);};
 const origin='https://api.cloudflare.com/client/v4';
 
@@ -26,11 +27,7 @@ export async function createD1ReadonlyAdapter({target,config,expectedAccountId,t
   if(body?.success!==true||body.errors?.length||body.result==null){failed=true;refuse('RESPONSE');}
   return body.result;
  }
- const account=await call(accountPath);
- if(account.id!==expectedAccountId)refuse('IDENTITY');
- const database=await call(databasePath);
- if(database.uuid!==expected.id||database.name!==expected.name)refuse('IDENTITY');
- const metadata=Object.freeze({account_id:account.id,database_id:database.uuid,database_name:database.name});
+ const metadata=await verifyCloudflareD1Identity({target,expectedAccountId,read:call});
  let schemaAccepted=false;
  const query=async sql=>{
   if(sql!==SCHEMA_QUERY&&sql!==COUNT_QUERY)refuse('SQL');

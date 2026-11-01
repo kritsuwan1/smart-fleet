@@ -1,10 +1,15 @@
--- Fail closed BEFORE DDL if any unexpected user schema object exists.
--- Invalid JSON deliberately aborts execution; operators must stop on the first error.
-SELECT json(CASE WHEN EXISTS (
+-- Raw template is strict. Only the verified provider planner enables the reserved branch.
+-- Read schema metadata only; never query or modify reserved-table contents.
+SELECT json(CASE WHEN
+ EXISTS(SELECT 1 FROM sqlite_schema WHERE name NOT GLOB 'sqlite_*' GROUP BY name HAVING COUNT(*)>1)
+ OR EXISTS (
  SELECT 1 FROM sqlite_schema WHERE name NOT GLOB 'sqlite_*'
- AND NOT (type='table' AND name='fleet_store' AND tbl_name='fleet_store'
+ AND NOT COALESCE((type='table' AND name='fleet_store' AND tbl_name='fleet_store'
  AND lower(replace(replace(replace(replace(sql,' ',''),char(9),''),char(10),''),char(13),''))=
  'createtablefleet_store(idtextprimarykeynotnull,payloadtextnotnull,versionintegernotnulldefault0)')
+ OR (/* VERIFIED_D1_RESERVED_CONTEXT */ 0=1
+ AND type='table' COLLATE BINARY AND name='_cf_KV' COLLATE BINARY AND tbl_name='_cf_KV' COLLATE BINARY
+ AND sql='CREATE TABLE _cf_KV ( key TEXT PRIMARY KEY, value BLOB ) WITHOUT ROWID' COLLATE BINARY),0)
 ) THEN 'INITIALIZATION_REFUSED_UNEXPECTED_SCHEMA' ELSE 'null' END);
 -- REVIEW ONLY. Run only after verifying the existing STAGING D1 identity.
 -- Existing schema structure, not a migration. Never run against Production.

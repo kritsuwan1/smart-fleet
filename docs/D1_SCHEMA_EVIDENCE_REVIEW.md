@@ -1,5 +1,7 @@
 # Task 3C.2I — D1 schema evidence review
 
+Task 3C.2K supersedes this historical incomplete-image/default-rejection decision: user-confirmed target-linked Dashboard evidence is now recorded separately and narrow provider-verified compatibility is implemented. See [D1_RESERVED_SCHEMA_COMPATIBILITY.md](D1_RESERVED_SCHEMA_COMPATIBILITY.md). Actual API verification and initialization remain NOT_VERIFIED/NOT_READY; general/local/raw SQL contexts retain strict reserved-table rejection.
+
 2026-11-01, dev/smartfleet-batch-1. **Review/tests PASS; Staging and Recovery identity/schema NOT_VERIFIED; initialization NOT_READY.** No real Cloudflare access or SQL executed. No Allowlist relaxation, runtime/config/schema/initialization SQL changes or protected-table data access.
 
 ## Evidence classification

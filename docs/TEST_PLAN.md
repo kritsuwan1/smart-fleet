@@ -1,5 +1,11 @@
 # SmartFleet - Test Plan
 
+## Task 3C.2K — Verified reserved schema compatibility
+
+- Added tests/d1-reserved-schema.test.mjs to npm test (19 suites): 60 Mock cases cover exact approved-account/provider capability and DDL acceptance for both targets, strict generic/raw rejection, copied/forged/expired/wrong-target identity, malformed/altered/null DDL, extra columns/objects, duplicate names, same-name views and occupied preservation. Existing adapter 47 / initialization 28 fixtures remain PASS.
+- Evaluate actual SQL guards with synthetic sqlite_schema CTEs, never create or read _cf_KV. Compare planner/SQL acceptance and assert schema/payload preservation on refusal. Duplicate metadata regression initially exposed a parity gap; duplicate-name/null-safe SQL guard fixes pass final validation. No real database or protected-table changes.
+- Actual Windows Node v24.22.1 Build/Typecheck/all 19 suites PASS. Linux evidence follows publication in PROGRESS.md. User-confirmed Dashboard evidence is recorded separately for Staging/Recovery dated 2026-11-01; live API verification NOT_VERIFIED, initialization NOT_READY. See D1_RESERVED_SCHEMA_COMPATIBILITY.md.
+
 ## Task 3C.2I — Reserved-table schema evidence
 
 - Added ten metadata-only Mock cases to the existing read-only adapter suite: five each for Staging/Recovery, covering the documented _cf_KV definition alone/with fleet_store, altered DDL, same-name view and additional user table. All must refuse under the unchanged strict Allowlist, send only sqlite_schema SELECT and never query/create/modify _cf_KV or count its rows.

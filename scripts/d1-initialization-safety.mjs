@@ -1,11 +1,7 @@
 // Read-only planning API. No network client, credentials, SQL executor or CLI.
 import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
-
-const targets=Object.freeze({
- staging:Object.freeze({binding:'DEMO_DB',name:'smart-fleet-staging-db',id:'f71ba325-027c-4b3f-abb2-71492493a8cf'}),
- recovery:Object.freeze({binding:'RECOVERY_DB',name:'smart-fleet-recovery-db',id:'5ec99f9c-4919-41f4-9bc4-c8c564a60296'})
-});
+import {INITIALIZATION_TARGETS as targets,RESERVED_DDL,hasVerifiedReservedIdentity} from './d1-provider-identity.mjs';
 export const fleetSchema='CREATE TABLE fleet_store(id TEXT PRIMARY KEY NOT NULL,payload TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 0)';
 const normalize=sql=>typeof sql==='string'?sql.replace(/\s/g,'').toLowerCase():'';
 const refuse=code=>{throw new Error('INITIALIZATION_REFUSED_'+code);};
@@ -32,14 +28,23 @@ export async function prepareD1Initialization({target,config,metadata,expectedAc
  let objects;
  try{objects=await query(SCHEMA_QUERY);}catch{refuse('SCHEMA_QUERY');}
  if(!Array.isArray(objects))refuse('SCHEMA_QUERY');
- // No guessed exemptions for _cf_* or other provider/user tables. Unknown means stop.
- if(objects.length>1||objects.some(o=>o.type!=='table'||o.name!=='fleet_store'||o.tbl_name!=='fleet_store'||normalize(o.sql)!==normalize(fleetSchema)))refuse('SCHEMA');
- if(objects.length){
+ const reservedAllowed=hasVerifiedReservedIdentity(metadata,target);
+ const reserved=objects.filter(o=>o?.name==='_cf_KV');
+ if(reserved.length>1||reserved.some(o=>!reservedAllowed||o.type!=='table'||o.tbl_name!=='_cf_KV'||o.sql!==RESERVED_DDL))refuse('SCHEMA');
+ const application=objects.filter(o=>o?.name!=='_cf_KV');
+ if(application.length>1||application.some(o=>!o||o.type!=='table'||o.name!=='fleet_store'||o.tbl_name!=='fleet_store'||normalize(o.sql)!==normalize(fleetSchema)))refuse('SCHEMA');
+ if(application.length){
   let rows;
   try{rows=await query(COUNT_QUERY);}catch{refuse('COUNT_QUERY');}
   if(!Array.isArray(rows)||rows.length!==1||rows[0].row_count!==0)refuse('OCCUPIED');
  }
- const sql=await readFile(new URL('../config/initialize-'+target+'.example.sql',import.meta.url),'utf8');
+ // The raw SQL template stays strict. Only a fresh provider-verified plan can
+ // activate its exact reserved-object branch; SQL cannot verify remote identity.
+ let sql=await readFile(new URL('../config/initialize-'+target+'.example.sql',import.meta.url),'utf8');
+ if(reservedAllowed){
+  if(!hasVerifiedReservedIdentity(metadata,target))refuse('IDENTITY_EXPIRED');
+  sql=sql.replace('/* VERIFIED_D1_RESERVED_CONTEXT */ 0','/* VERIFIED_D1_RESERVED_CONTEXT */ 1');
+ }
  // A plan is a point-in-time review artifact, not permission or a remote executor.
  return Object.freeze({target,databaseId:expected.id,binding:expected.binding,sql,sha256:createHash('sha256').update(sql).digest('hex'),requiresApproval:true});
 }

@@ -1,5 +1,7 @@
 # Task 3C.2F — D1 initialization safety
 
+Task 3C.2K: [D1_RESERVED_SCHEMA_COMPATIBILITY.md](D1_RESERVED_SCHEMA_COMPATIBILITY.md) records both target-labelled Dashboard findings and a narrow exact-_cf_KV exception requiring fresh provider-response identity for the approved account/D1. Generic/copied/expired metadata and raw SQL templates stay strict. Planner-generated SQL uses the same context-gated predicate; no live API verification or initialization is claimed/authorized.
+
 Task 3C.2I: Account ID supplied by user, but the reported _cf_KV schema image is not labelled with target name/UUID. Official Cloudflare documentation confirms the reserved table generally; it does not certify this image's provenance. Strict Allowlist remains unchanged. See [D1_SCHEMA_EVIDENCE_REVIEW.md](D1_SCHEMA_EVIDENCE_REVIEW.md) for value-free metadata checks, per-target evidence gates and a conditional future exception design.
 
 Task 3C.2H adds a separate injected-transport read-only adapter; see [D1_READONLY_PREFLIGHT.md](D1_READONLY_PREFLIGHT.md). Only Mock transport was tested; Account ID/Dashboard schema evidence is still missing. This does not certify actual Cloudflare identity/emptiness or authorize initialization. The adapter has no write/deploy interface and supersedes the historical "no live preflight adapter" gap below at the implementation level only; live integration remains NOT_VERIFIED.
