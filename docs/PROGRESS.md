@@ -80,3 +80,23 @@ All Worker/API requests were direct local function calls using in-memory SQLite 
 - No secrets or environment-variable changes.
 - No deployment, deployment-script execution or merge into main.
 - Only the two test files and this progress file are part of this change.
+
+## 2026-11-01 - Task 1.1: Linux Node.js 24 environment check
+
+- Checked only repository kritsuwan1/smart-fleet and branch `dev/smartfleet-batch-1`, remote head `4deee9517407e6b63919e41ad30760157ec9067d`.
+- Read this progress document before investigation. AGENTS.md is still absent on this branch (GitHub contents lookup returned 404); the previously read instructions remain the reference, without importing files from another branch.
+- Actual host: Microsoft Windows 10.0.26200, win32/x64; actual Node.js: v24.22.1, obtained from the bundled Node executable using process.platform/process.arch/process.version.
+- WSL executable exists but `wsl --list --quiet` reports WSL is not installed. Docker and Podman commands are unavailable.
+- The required Linux environment is unavailable. Under task item 4, no Linux install/build/typecheck/test execution is claimed, and no CI workflow was added or triggered before presenting a proposal.
+- Current Linux results for **all 12 suites** (worker, import, accounts, roles, reports, system-status, backup-alerts, environments, mobile-ui, history-ui, profile-ui, trip-receipt): **NOT_RUN**, not PASS or FAIL. The Windows PASS results above belong to the preceding task and are not Linux evidence.
+
+### CI inspection and proposal - awaiting user approval
+
+- The branch contains only `.github/workflows/deploy.yml`. It uses ubuntu-latest with Node 24, but successful tests continue into Cloudflare metadata access, Wrangler deployment and login-page checking. It has no test-only input, so it was not dispatched.
+- GitHub Actions runs filtered to this branch returned total_count 0 at inspection time. No existing branch run can substantiate Linux results.
+- Proposed new file: `.github/workflows/test-linux.yml`, a separate test-only workflow triggered by pushes to `dev/smartfleet-batch-1`, with an explicit matching branch guard. A branch push trigger allows execution without adding workflow files to main.
+- Proposed job: ubuntu-24.04, read-only contents permission, checkout with persist-credentials false, setup-node 24, then print OS/Node version and assert Linux plus Node major 24; run `npm ci`, `npm run build`, `npm run typecheck`, `npm test`.
+- It would contain no Cloudflare steps, Wrangler command, secrets references, custom environment variables, database bindings, deployment or merge operation. Existing deploy.yml would remain unchanged.
+- After approval: commit only the new test workflow on this branch; observe the push-triggered run; record runner OS, exact Node version, tested SHA, run URL and actual per-suite results here. Investigate only compatibility failures if any occur.
+- This entry records observed environment and CI capability only. Workflow creation/execution awaits the user's review under task item 4. No application/test logic, production, remote DB, secrets or environment variables changed. Automatic Backup work was not started.
+
