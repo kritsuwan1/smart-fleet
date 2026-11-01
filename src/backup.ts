@@ -1,5 +1,6 @@
 import type {Fleet} from './fleet';
 import {portableChecksum} from './checksum';
+import {validateMaintenance} from './maintenance';
 export async function backupDigest(state:unknown){
  const input=new TextEncoder().encode(JSON.stringify(state));
  if(!globalThis.crypto?.subtle)return portableChecksum(input);
@@ -20,6 +21,7 @@ export async function inspectBackup(text:string){
  if(s.projects.some((p:unknown)=>typeof p!=='string'))fail();
  for(const t of s.trips){if(!cars.has(t.carId)||!people.has(t.driverId)||!Number.isInteger(t.seq)||t.seq<1||!Number.isInteger(t.odoStart)||t.odoStart<0||typeof t.start!=='string'||!Number.isFinite(Date.parse(t.start+'+07:00'))||typeof t.end!=='string'||(t.end&&(!Number.isFinite(Date.parse(t.end+'+07:00'))||!Number.isInteger(t.odoEnd)||t.odoEnd<t.odoStart)))fail();}
  if(s.accounts!==undefined){if(!Array.isArray(s.accounts))fail();ids(s.accounts);for(const a of s.accounts)if(!people.has(a.driverId)||typeof a.username!=='string'||typeof a.passwordHash!=='string'||typeof a.salt!=='string')fail();}
+ validateMaintenance(s);
  if(typeof b.exportedAt!=='string'||!Number.isFinite(Date.parse(b.exportedAt)))fail();
  const verified=b.format==='smart-fleet-backup';
  if(verified){if(b.schemaVersion!==1)throw Error('ยังไม่รองรับเวอร์ชันไฟล์สำรองนี้');if(typeof b.sha256!=='string'||b.sha256!==await backupDigest(s))throw Error('รหัส SHA-256 ไม่ตรง ข้อมูลอาจถูกแก้ไขหรือไฟล์ไม่ครบ กรุณาสำรองใหม่');}

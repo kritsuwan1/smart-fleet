@@ -1,0 +1,82 @@
+import assert from 'node:assert/strict';
+import {DatabaseSync} from 'node:sqlite';
+import {build} from 'esbuild';
+import {readFile,mkdtemp,rm} from 'node:fs/promises';
+import {join,resolve} from 'node:path';
+import {tmpdir} from 'node:os';
+import {createRequire} from 'node:module';
+import demo from '../output/worker-demo.js';
+const built=await build({stdin:{contents:`export * from './src/maintenance';export * from './src/fleet';export * from './src/backup';export * from './src/automatic-backup';export * from './src/api';export {viewForUser} from './src/auth';export {planImport} from './src/import-plan';`,resolveDir:process.cwd()},bundle:true,write:false,platform:'node',format:'esm',define:{__FLEET_ENV__:'"demo"'}});
+const {initial,maintenanceStatus,bangkokDay,changeMaintenance,validateMaintenance,createBackup,inspectBackup,automaticBackupArtifact,restoreAutomaticBackupToStaging,fleetApi,viewForUser,planImport}=await import('data:text/javascript;base64,'+Buffer.from(built.outputFiles[0].text).toString('base64'));
+const today='2026-11-01';
+const root={id:'admin',name:'Synthetic Admin',role:'admin',username:'admin',driverId:'',passwordVersion:0};
+const state={...structuredClone(initial),people:[{id:'person',name:'Synthetic',active:true}],sessionKey:'synthetic-session',cars:[{id:'car',plate:'TEST-01',province:'Test',model:'Synthetic',active:true,initialOdo:100},{id:'other',plate:'TEST-02',province:'Test',model:'Synthetic',active:true,initialOdo:0}],accounts:[{id:'employee',username:'synthetic',name:'Synthetic',role:'employee',driverId:'person',active:true,passwordVersion:0,salt:'test-salt',passwordHash:'test-hash',createdAt:'2026-01-01T00:00:00Z'}]};
+const employee={...state.accounts[0]};
+const plan={carId:'car',type:'oil',name:'Synthetic oil <script>',active:true,dueOdo:1100,dueDate:'2026-12-01',intervalKm:1000,intervalDays:30,warnKm:100,warnDays:7};
+const p={...plan,id:'plan'};
+assert.equal(maintenanceStatus(state,p,today),'normal');
+assert.equal(maintenanceStatus(state,{...p,dueOdo:200},today),'near');
+assert.equal(maintenanceStatus(state,{...p,dueOdo:100},today),'overdue');
+assert.equal(maintenanceStatus(state,{...p,dueDate:today},today),'near');
+assert.equal(maintenanceStatus(state,{...p,dueDate:'2026-10-31'},today),'overdue');
+assert.equal(maintenanceStatus(state,{...p,dueOdo:undefined},today),'normal');
+assert.equal(maintenanceStatus(state,{...p,dueDate:undefined},today),'normal');
+assert.equal(bangkokDay(Date.parse('2026-10-31T17:00:00Z')),today);
+validateMaintenance(state);assert.equal(state.maintenancePlans,undefined);
+const s=structuredClone(state);changeMaintenance(s,{operation:'plan',plan},today);assert.equal(s.maintenancePlans.length,1);
+for(const patch of [{dueDate:'2026-02-30'},{dueOdo:-1},{dueOdo:1.5},{dueDate:undefined,dueOdo:undefined},{intervalDays:0},{warnDays:-1},{carId:'missing'},{type:'bad'},{active:'true'}])assert.throws(()=>changeMaintenance(structuredClone(state),{operation:'plan',plan:{...plan,...patch}},today));
+const id=s.maintenancePlans[0].id;
+changeMaintenance(s,{operation:'complete',planId:id,record:{date:today,odometer:1100,details:'Synthetic private service',costSatang:123456}},today);
+assert.equal(s.maintenancePlans[0].dueOdo,2100);assert.equal(s.maintenancePlans[0].dueDate,'2026-12-01');assert.equal(s.maintenanceHistory[0].costSatang,123456);
+assert.deepEqual(s.cars,state.cars);assert.deepEqual(s.trips,state.trips);
+for(const patch of [{date:'2026-11-02'},{date:'2026-10-01'},{odometer:1099},{costSatang:-1},{costSatang:1.5},{details:'x'.repeat(2001)}])assert.throws(()=>changeMaintenance(structuredClone(s),{operation:'complete',planId:id,record:{date:today,odometer:1100,details:'test',costSatang:0,...patch}},today));
+const edited=structuredClone(s);changeMaintenance(edited,{operation:'plan',plan:{...edited.maintenancePlans[0],name:'Renamed',active:false}},today);assert.equal(edited.maintenanceHistory.length,1);assert.throws(()=>changeMaintenance(edited,{operation:'complete',planId:id,record:{}},today));
+assert.throws(()=>changeMaintenance(structuredClone(s),{operation:'plan',plan:{...s.maintenancePlans[0],carId:'other'}},today));
+const one=structuredClone(state);changeMaintenance(one,{operation:'plan',plan:{...plan,intervalKm:undefined,intervalDays:undefined}},today);changeMaintenance(one,{operation:'complete',planId:one.maintenancePlans[0].id,record:{date:today,odometer:100,details:'',costSatang:0}},today);assert.equal(one.maintenancePlans[0].active,false);
+const single=structuredClone(state);changeMaintenance(single,{operation:'plan',plan:{...plan,intervalDays:undefined}},today);changeMaintenance(single,{operation:'complete',planId:single.maintenancePlans[0].id,record:{date:today,odometer:100,details:'',costSatang:0}},today);assert.equal(single.maintenancePlans[0].dueDate,undefined);
+for(const type of ['oil','inspection','insurance','tax','other']){const typed=structuredClone(state);changeMaintenance(typed,{operation:'plan',plan:{...plan,type}},today);assert.equal(typed.maintenancePlans[0].type,type);}
+const dateOnly=structuredClone(state);changeMaintenance(dateOnly,{operation:'plan',plan:{...plan,dueOdo:undefined,intervalKm:undefined,dueDate:'2026-11-01',intervalDays:1}},today);changeMaintenance(dateOnly,{operation:'complete',planId:dateOnly.maintenancePlans[0].id,record:{date:today,odometer:100,details:'',costSatang:0}},today);assert.equal(dateOnly.maintenancePlans[0].dueDate,'2026-11-02');assert.equal(dateOnly.maintenancePlans[0].dueOdo,undefined);
+const privateView=viewForUser(s,0,employee);assert.equal(privateView.state.maintenanceHistory,undefined);assert.equal(privateView.state.maintenancePlans.length,1);assert.ok(!JSON.stringify(privateView).includes('Synthetic private service'));
+assert.equal(viewForUser(s,0,root).state.maintenanceHistory.length,1);
+await inspectBackup(JSON.stringify(await createBackup(state,'3.8.5','demo')));await inspectBackup(JSON.stringify(await createBackup(s,'3.8.5','demo')));
+const bad=structuredClone(s);bad.maintenanceHistory[0].carId='other';await assert.rejects(inspectBackup(JSON.stringify(await createBackup(bad,'3.8.5','demo'))));
+const duplicate=structuredClone(s);duplicate.maintenancePlans.push(duplicate.maintenancePlans[0]);assert.throws(()=>validateMaintenance(duplicate));
+const databases=[];
+function database(main){const sql=new DatabaseSync(':memory:');databases.push(sql);sql.exec('CREATE TABLE fleet_store(id TEXT PRIMARY KEY NOT NULL,payload TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 0)');sql.prepare('INSERT INTO fleet_store VALUES (?,?,0)').run('environment','demo');if(main)sql.prepare('INSERT INTO fleet_store VALUES (?,?,0)').run('main',JSON.stringify(main));const db={prepare(q){const st=sql.prepare(q);let args=[];return{bind(...a){args=a;return this;},async first(){return st.get(...args)||null;},async run(){return{meta:{changes:Number(st.run(...args).changes)}};}};}};return{sql,db};}
+const dir=await mkdtemp(join(tmpdir(),'fleet-maintenance-'));
+try{
+ const source=database(state),env={DB:source.db},api=fleetApi(env,root);
+ const read=()=>JSON.parse(source.sql.prepare("SELECT payload FROM fleet_store WHERE id='main'").get().payload);
+ const post=(api,version,data,action='maintenance')=>api.POST(new Request('https://fleet.test/api/fleet',{method:'POST',headers:{'Content-Type':'application/json',origin:'https://fleet.test'},body:JSON.stringify({action,version,data})}));
+ assert.equal((await api.GET()).status,200);assert.deepEqual(read(),state); // No eager Maintenance migration.
+ assert.equal((await post(api,0,{operation:'plan',plan})).status,200);
+ const first=read();assert.equal(first.maintenancePlans.length,1);assert.equal(first.audit[0].action,'บำรุงรักษารถยนต์');
+ assert.equal((await post(api,0,{operation:'plan',plan})).status,409);assert.deepEqual(read(),first);
+ assert.equal((await post(fleetApi(env,employee),1,{operation:'plan',plan})).status,403);assert.deepEqual(read(),first);
+ assert.equal((await post(api,1,{operation:'plan',plan:{...plan,carId:'missing'}})).status,400);assert.deepEqual(read(),first);
+ assert.equal((await post(api,1,{operation:'complete',planId:first.maintenancePlans[0].id,record:{date:bangkokDay(),odometer:100,details:'private detail',costSatang:25000}})).status,200);
+ const serviced=read();
+ // Existing vehicle edits and trip writes must retain Maintenance and unrelated state.
+ assert.equal((await post(api,2,{...state.cars[0],model:'Updated'},'car')).status,200);
+ const trip={carId:'car',driverId:'person',project:'Synthetic',destination:'Test',start:'2026-11-01T08:00',end:'2026-11-01T09:00',odoStart:100,odoEnd:110,note:'',reason:''};
+ assert.equal((await post(api,3,trip,'trip')).status,200);
+ const after=read();assert.deepEqual(after.maintenanceHistory,serviced.maintenanceHistory);assert.deepEqual(after.maintenancePlans,serviced.maintenancePlans);assert.deepEqual(after.cars[1],state.cars[1]);
+ // Import planner keeps the additive fields; import API mutates existing state.
+ const imported=planImport(after,[],{carId:'car',createPeople:false,updateExisting:false});assert.deepEqual(imported.candidate.maintenanceHistory,after.maintenanceHistory);
+ const artifact=JSON.stringify(await automaticBackupArtifact(after,4,'staging',today,today+'T00:00:00Z')),target=database();
+ await restoreAutomaticBackupToStaging(target.db,artifact,'staging');const restored=JSON.parse(target.sql.prepare("SELECT payload FROM fleet_store WHERE id='main'").get().payload);
+ assert.notEqual(restored.sessionKey,after.sessionKey);assert.deepEqual({...restored,sessionKey:''},{...after,sessionKey:''});
+ await assert.rejects(restoreAutomaticBackupToStaging(target.db,artifact,'staging'));
+ // Manual SQL export/restore through the built, authenticated Demo Worker.
+ const workerEnv={DEMO_DB:source.db,APP_PASSWORD:'synthetic-password'};
+ const login=await demo.fetch(new Request('https://fleet.test/login',{method:'POST',headers:{origin:'https://fleet.test','CF-Connecting-IP':'192.0.2.80'},body:new URLSearchParams({username:'admin',password:workerEnv.APP_PASSWORD})}),workerEnv);
+ const cookie=login.headers.get('set-cookie').split(';')[0];
+ const sqlResponse=await demo.fetch(new Request('https://fleet.test/api/backup.sql',{headers:{cookie}}),workerEnv);assert.equal(sqlResponse.status,200);
+ const sqlTarget=database();sqlTarget.sql.exec(await sqlResponse.text());const manual=JSON.parse(sqlTarget.sql.prepare("SELECT payload FROM fleet_store WHERE id='main'").get().payload);assert.deepEqual(manual.maintenanceHistory,after.maintenanceHistory);assert.deepEqual(manual.maintenancePlans,after.maintenancePlans);
+ const ui=join(dir,'ui.cjs');await build({stdin:{contents:`import React from 'react';import {renderToStaticMarkup} from 'react-dom/server';import Panel from './src/MaintenancePanel';export const render=p=>renderToStaticMarkup(<Panel {...p}/>);`,loader:'tsx',resolveDir:process.cwd()},bundle:true,platform:'node',format:'cjs',jsx:'automatic',outfile:ui,nodePaths:[resolve('node_modules')]});
+ const {render}=createRequire(import.meta.url)(ui),props={state:s,version:0,onSaved(){},async onRefresh(){}};
+ const admin=render({...props,admin:true});assert.match(admin,/เพิ่มแผนบำรุงรักษา|แก้ไขแผน|ประวัติการบำรุงรักษา/);assert.match(admin,/Synthetic oil &lt;script&gt;/);assert.doesNotMatch(admin,/<script>/);
+ const employeeHtml=render({...props,state:privateView.state,admin:false});assert.doesNotMatch(employeeHtml,/บันทึกงานที่เสร็จ|แก้ไขแผน|ค่าใช้จ่าย|Synthetic private service/);assert.match(employeeHtml,/Synthetic oil/);
+ assert.match(render({...props,state,admin:true}),/ยังไม่มีแผนบำรุงรักษา/);
+ console.log('PASS maintenance: legacy optional state, per-car km/date/either rules, Bangkok day, validation, recurrence and one-off history, admin/employee permissions, stale version atomicity, trip/car/import preservation, SQL/JSON/automatic backup and isolated restore, escaped read-only employee/mobile markup');
+}finally{for(const db of databases)db.close();await rm(dir,{recursive:true,force:true});}

@@ -1,5 +1,21 @@
 # SmartFleet - Test Plan
 
+## Task 3A — Maintenance tests (current development)
+
+New tests/maintenance.test.mjs is appended to npm test (14 suites total). Uses synthetic fleet state and independent in-memory SQLite; no schema/resources/production access.
+
+| Case | Validation |
+| --- | --- |
+| MT-001 | Missing optional fields accepted; GET preserves legacy state without eagerly adding arrays |
+| MT-002 | Per-car km/date/either urgency, exact thresholds, Bangkok day boundary, all five work types |
+| MT-003 | Reject invalid dates/references/numbers, negative/fractional costs, oversized details, invalid recurrence and duplicate IDs |
+| MT-004 | Complete/advance km or day cycles; archive one-off plans; retain history and car/trip data; disallow car reassignment/history regression |
+| MT-005 | Admin writes/audit, employee write denial and history/cost redaction, stale version conflict and failed-write atomicity |
+| MT-006 | Existing car/trip writes and import planning preserve maintenance; JSON/SQL/automatic backups retain it; isolated SQLite recovery matches full state except rotated sessionKey |
+| MT-007 | Static UI role separation, empty state and escaped names; responsive CSS added with labelled controls/44px touch targets |
+
+Actual Windows Node 24 build/typecheck/all 14 suites PASS; final Linux evidence is recorded in PROGRESS.md. Real browser form interactions, 360px mobile overflow/focus checks and Staging UAT remain NOT_RUN; static rendering does not replace them. Cloud R2/D1 integration remains NOT_RUN and R2 activation stays deferred. Security findings from Task 2B.1 remain open; test success does not authorize release.
+
 ## 1. Project Information
 - Project: SmartFleet Vehicle Usage Web Application
 - Baseline Version: v3.8.5

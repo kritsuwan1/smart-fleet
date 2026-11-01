@@ -4,6 +4,7 @@ import {currentUser,viewForUser,passwordValid,hashPassword,type User,hex,cleanNa
 import {importedTrips} from './seed';
 import {manualFuel,validMonth} from './fuel';
 import {planImport} from './import-plan';
+import {changeMaintenance} from './maintenance';
 export function fleetApi(env:any,user:User){
 const json=(v:unknown,status=200)=>Response.json(v,{status,headers:{'Cache-Control':'no-store'}});
 async function GET(){try{const {state,version,payloadBytes}=await readState(env);return json(viewForUser(state,version,user,payloadBytes));}catch(e){return fail(e);}}
@@ -33,6 +34,8 @@ async function POST(req:Request){try{
   if(!old&&(!s.cars.find(c=>c.id===t.carId)?.active||!s.people.find(p=>p.id===t.driverId)?.active))throw Error('รถหรือพนักงานถูกปิดใช้งานแล้ว');
   s.trips=old?s.trips.map(x=>x.id===t.id?t:x):[...s.trips,t];after=t;action=old?'แก้ไขรายการ / คืนรถ':'เพิ่มรายการใช้รถ';
   tripResult={id:t.id,operation:old?(!old.end&&t.end?'return':'edit'):(t.end?'historical':'start')};
+ }else if(b.action==='maintenance'){
+  const change=changeMaintenance(s,b.data);before=change.before;after=change.after;action='บำรุงรักษารถยนต์';
  }else if(b.action==='fuelPrice'){
   if(!validMonth(String(b.data?.month||'')))throw Error('เดือนไม่ถูกต้อง');
   before=s.fuelPrices?.find(p=>p.month===b.data.month&&p.product==='b7')||null;

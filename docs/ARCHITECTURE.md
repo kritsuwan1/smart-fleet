@@ -1,5 +1,9 @@
 # SmartFleet - System Architecture
 
+## Task 3A current development addition
+
+The pinned Phase 0 sections below remain historical audit evidence. Development now adds optional Fleet maintenancePlans/maintenanceHistory arrays (approved by the user), not new SQL tables. src/maintenance.ts validates per-car plans/history and calculates km/date/either reminder states. Admin-only maintenance actions reuse fleetApi authorization, audit and optimistic main-row versioning. MaintenancePanel renders in both Dashboards, with responsive admin forms/history and read-only employee reminders; auth.ts removes maintenanceHistory from employee responses. Existing trip logic and latestOdo are reused unchanged. Backup validation accepts missing legacy fields and validates present maintenance data; full SQL/JSON/automatic snapshots preserve it. See [MAINTENANCE.md](MAINTENANCE.md) for recurrence, date rules, access, limits and recovery compatibility. No deployment, cloud scheduling or external notification is added; R2 remains deferred.
+
 ## Audit scope and evidence
 
 - Audited 2026-11-01 (Asia/Bangkok), branch `docs/smartfleet-master-plan`.

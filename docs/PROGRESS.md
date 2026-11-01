@@ -1,5 +1,16 @@
 # SmartFleet - Development Progress
 
+## 2026-11-01 — Task 3A: Maintenance Reminder (Development only)
+
+- Branch dev/smartfleet-batch-1, baseline a7140cd2365556658e3114be215160ab05f5ac70. Read AGENTS and all required docs, inspected Fleet/Cars/Trips/storage/auth/API/backup. Confirmed Task 2C.3 complete and Linux run 41281778799 PASS, 13 suites. User explicitly approved the proposed optional Fleet State extension before implementation.
+- Added optional maintenancePlans/maintenanceHistory keyed by carId/planId. Legacy data reads without eager field migration; no SQL schema or real DB change. Per-car oil/inspection/insurance/tax/custom work supports km, date or either condition, warning windows and normal/near/overdue states. Recurrence uses km/fixed days from actual service; one-off plans archive. Documented exact date/threshold and mixed-recurrence behavior in MAINTENANCE.md.
+- Admin-only API plan edits/service records reuse role revalidation, audit and optimistic versions. History stores date/odometer/details/integer satang; existing cars/trips are not changed. Employee sees active reminders and no service history/costs. Responsive Dashboard panel includes admin forms/history, request lock, conflict refresh, validation/errors and Bangkok day refresh; no external messages/cron.
+- Backup inspection validates present fields while accepting legacy snapshots. Synthetic tests verify manual SQL/JSON and automatic SQLite recovery preservation; source/trip/import/other-car data stays intact. Existing data-size guard still applies to history growth.
+- Actual Windows x64 Node v24.22.1: final npm run build PASS (Demo 991843 / Production 990469 bytes); npm run typecheck PASS; npm test PASS, all 14 suites. npm invoked via bundled pnpm dlx npm. New suite covers statuses, categories, recurrence, validation, old state, permissions/redaction, conflicts, audit, preservation and backups/isolated restore; static UI checks role controls and escaping. Initial test-only login fixture lacked CF-Connecting-IP and was corrected; no production auth relaxation. Direct sandboxed esbuild invocation hit host filesystem restrictions; normal authorized runtime test invocation passed. No lint script exists.
+- Files changed in this task: src/maintenance.ts, src/MaintenancePanel.tsx, src/maintenance.css; src/fleet.ts, src/api.ts, src/auth.ts, src/backup.ts, src/App.tsx, src/worker.ts; tests/maintenance.test.mjs; package.json (append suite only); docs/MAINTENANCE.md, docs/ARCHITECTURE.md, docs/TEST_PLAN.md, docs/PROGRESS.md. No dependency/lockfile/schema/production-config change.
+- Real browser/mobile form interaction, physical-device UAT and Staging integration remain NOT_RUN. Cloud R2 remains deferred/NOT_RUN; repository no-cron/default-off guards still pass. Existing High 3 / Low 1 development dependency findings remain open, not remediated by this task. No deploy/merge/production/secrets/resources/environment or real database access/change.
+- Post-commit Linux CI for the Maintenance implementation is pending; record actual tested SHA/run/log results after publication. Next review: Dashboard/forms on mobile, concurrent-session refresh and synthetic Staging UAT only after separate setup approval; no cloud activation is authorized.
+
 ## 2026-11-01 - Batch 1: Phase 0 test portability fix
 
 - Repository: kritsuwan1/smart-fleet.
