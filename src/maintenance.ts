@@ -29,6 +29,17 @@ export function maintenanceStatus(s:Fleet,p:MaintenancePlan,today=bangkokDay()){
  return km<=0||days<0?'overdue':km<=p.warnKm||days<=p.warnDays?'near':'normal';
 }
 export function changeMaintenance(s:Fleet,input:any,today=bangkokDay()){
+ // Keep all operations atomic for callers, including failed plan/completion
+ // validation. Copy only maintenance data; vehicle/trip/account state is read-only.
+ const candidate:Fleet={...s};
+ if(s.maintenancePlans!==undefined)candidate.maintenancePlans=structuredClone(s.maintenancePlans);
+ if(s.maintenanceHistory!==undefined)candidate.maintenanceHistory=structuredClone(s.maintenanceHistory);
+ const result=applyMaintenance(candidate,input,today);validateMaintenance(candidate);
+ if(candidate.maintenancePlans!==undefined)s.maintenancePlans=candidate.maintenancePlans;
+ if(candidate.maintenanceHistory!==undefined)s.maintenanceHistory=candidate.maintenanceHistory;
+ return result;
+}
+function applyMaintenance(s:Fleet,input:any,today:string){
  if(!input||!['plan','complete','editHistory'].includes(input.operation))invalid();
  if(input.operation==='editHistory'){
   const original=s.maintenanceHistory?.find(r=>r.id===input.id),d=input.record;

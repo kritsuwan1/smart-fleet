@@ -1,5 +1,13 @@
 # SmartFleet - Test Plan
 
+## Task 3C.2A — Safe rollback fix / remaining blockers
+
+- New regression initially FAIL: invalid plan creation threw but left maintenancePlans mutated in the caller. Fixed changeMaintenance with staged maintenance-field copies and commit-after-validation for all operations. Invalid plan and invalid completion now preserve the full input state; earlier history-correction/manual-override rollback checks remain. Success rules, API roles, schema and vehicle/trip logic are unchanged.
+- Actual Windows Node v24.22.1 npm ci/build/typecheck/npm test PASS, still all 15 suites. Optional local Edge history-correction/mobile/double-submit checks PASS. New Linux CI evidence is recorded in PROGRESS.md after commit.
+- Fresh audit remains FAIL: Critical 0 / High 3 / Low 1; production-only audit PASS (zero). No safe patch-only closure confirmed; explicit breaking-change proposal is documented in BLOCKER_RESOLUTION.md and was not installed. No force fix or package/lockfile change.
+- Local config entrypoint/bindings/exact user UUIDs/separation/no-R2/no-Cron/QR isolation verified. Actual provider identities/Worker/access/secrets/initialization/recovery/UAT remain NOT_VERIFIED/NOT_RUN and are blockers, not inferred PASS. Overall NOT_READY; no real initialization/deploy/rollback command run. Full risk/evidence/FIXED/REMAINING/approval inventory: [BLOCKER_RESOLUTION.md](BLOCKER_RESOLUTION.md).
+- Gate sequencing clarification: security/identity/target/access/containment and deployment approval are pre-deployment gates. Remote Staging integration/recovery/UAT are post-deployment acceptance checks whose plan must be approved first; they are not a circular prerequisite to uploading the first isolated Staging version. R2/Cron remain unnecessary for the explicitly no-R2 mode.
+
 ## Task 3C.1 — History correction and no-R2 Staging readiness
 
 - Prerequisite Task 3B Linux run 41283265689 PASS for 346f4db7be6f7fee3755b68ea81d562a9cd4b4b9, 14 suites, Node 24.22.1; logs verified.
