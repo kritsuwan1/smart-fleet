@@ -1,5 +1,7 @@
 # Task 3C.2H — Cloudflare D1 read-only preflight
 
+Task 3C.2M: [D1_MOCK_BROKER.md](D1_MOCK_BROKER.md) documents the implemented offline broker/CLI, independent request/response checks and redacted synthetic evidence. No live/auth/credential path exists; live mode stays disabled even with mock approval. Actual Cloudflare remains NOT_VERIFIED and future per-target operator approval is separate.
+
 Task 3C.2L: [LIVE_D1_VERIFICATION_PREPARATION.md](LIVE_D1_VERIFICATION_PREPARATION.md) supplies current endpoint/permission review, operator-owned transport proposal, approval-before-adapter-creation sequence and redacted evidence plan. Adapter/verifier now enforce the exact approved account before any request/read; no new account/database added. Only Mock tests run; live authentication/transport/metadata/schema NOT_VERIFIED and no live CLI/broker is implied.
 
 Task 3C.2K update: target-labelled Dashboard evidence now recorded; actual API metadata still NOT_VERIFIED. Adapter uses a shared provider identity verifier and a private short-lived capability for the exact approved-account/target reserved-schema exception. No _cf_KV values/counts are queried; arbitrary/generic contexts remain strict. See [D1_RESERVED_SCHEMA_COMPATIBILITY.md](D1_RESERVED_SCHEMA_COMPATIBILITY.md) for current rules and evidence; earlier statements below are historical.

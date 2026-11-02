@@ -1,5 +1,11 @@
 # SmartFleet - Test Plan
 
+## Task 3C.2M — Mock-only Broker
+
+- Added tests/d1-broker.test.mjs to npm test (20 suites), 75 cases: both targets, exact host/account/UUID/method/body/SQL/order, default mock/live denial, no injected network/credential options, permission/network/identity/schema failures, redirect/abort/concurrency/budget/replay/expiry refusal and redacted evidence persistence/no-overwrite/hash.
+- Shared the unchanged pure schema policy between planner and broker. Broker response fixtures are JSON only; no _cf_KV table/value/count operations or Cloudflare calls. Global fetch tripwire verifies zero calls. No SQL executor, initialization or deploy method is exposed. Mock manifest checker cannot authorize live mode.
+- Actual Windows Node v24.22.1 Build/Typecheck/all 20 suites PASS; existing adapter 48/reserved 61/initialization 28 fixtures remain PASS. Offline Staging and Recovery CLI rehearsals PASS with separate ignored mock evidence files. Linux evidence follows in PROGRESS.md. See D1_MOCK_BROKER.md for limits and future live approvals.
+
 ## Task 3C.2L — Live read-only preparation / account scope
 
 - Found request-scope gap: prior adapter/verifier accepted another syntactically valid account before schema checks. Tightened both to the already-approved Account ID; new tests assert wrong valid-format account produces zero transport/read calls. No Account/DB tuple added.

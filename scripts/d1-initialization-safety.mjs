@@ -21,6 +21,15 @@ export function validateInitializationTarget(target,config){
 }
 export const SCHEMA_QUERY="SELECT type,name,tbl_name,sql FROM sqlite_schema WHERE name NOT GLOB 'sqlite_*' ORDER BY type,name";
 export const COUNT_QUERY='SELECT COUNT(*) AS row_count FROM fleet_store';
+// Pure schema policy, shared with the offline broker. This issues no identity proof.
+export function validateInitializationSchema(objects,reservedAllowed=false){
+ if(!Array.isArray(objects))refuse('SCHEMA');
+ const reserved=objects.filter(o=>o?.name==='_cf_KV');
+ if(reserved.length>1||reserved.some(o=>!reservedAllowed||o.type!=='table'||o.tbl_name!=='_cf_KV'||o.sql!==RESERVED_DDL))refuse('SCHEMA');
+ const application=objects.filter(o=>o?.name!=='_cf_KV');
+ if(application.length>1||application.some(o=>!o||o.type!=='table'||o.name!=='fleet_store'||o.tbl_name!=='fleet_store'||normalize(o.sql)!==normalize(fleetSchema)))refuse('SCHEMA');
+ return application.length===1;
+}
 export async function prepareD1Initialization({target,config,metadata,expectedAccountId,query}){
  const expected=validateInitializationTarget(target,config);
  if(typeof expectedAccountId!=='string'||!expectedAccountId.trim()||metadata?.account_id!==expectedAccountId||metadata?.database_id!==expected.id||metadata?.database_name!==expected.name)refuse('IDENTITY');
@@ -29,11 +38,8 @@ export async function prepareD1Initialization({target,config,metadata,expectedAc
  try{objects=await query(SCHEMA_QUERY);}catch{refuse('SCHEMA_QUERY');}
  if(!Array.isArray(objects))refuse('SCHEMA_QUERY');
  const reservedAllowed=hasVerifiedReservedIdentity(metadata,target);
- const reserved=objects.filter(o=>o?.name==='_cf_KV');
- if(reserved.length>1||reserved.some(o=>!reservedAllowed||o.type!=='table'||o.tbl_name!=='_cf_KV'||o.sql!==RESERVED_DDL))refuse('SCHEMA');
- const application=objects.filter(o=>o?.name!=='_cf_KV');
- if(application.length>1||application.some(o=>!o||o.type!=='table'||o.name!=='fleet_store'||o.tbl_name!=='fleet_store'||normalize(o.sql)!==normalize(fleetSchema)))refuse('SCHEMA');
- if(application.length){
+ const hasFleetStore=validateInitializationSchema(objects,reservedAllowed);
+ if(hasFleetStore){
   let rows;
   try{rows=await query(COUNT_QUERY);}catch{refuse('COUNT_QUERY');}
   if(!Array.isArray(rows)||rows.length!==1||rows[0].row_count!==0)refuse('OCCUPIED');
