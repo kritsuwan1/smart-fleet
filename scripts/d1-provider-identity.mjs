@@ -9,7 +9,7 @@ export const INITIALIZATION_TARGETS=Object.freeze({
 const verified=new WeakMap();
 export async function verifyCloudflareD1Identity({target,expectedAccountId,read}){
  const expected=Object.hasOwn(INITIALIZATION_TARGETS,target)?INITIALIZATION_TARGETS[target]:null;
- if(!expected||typeof expectedAccountId!=='string'||!/^[a-f0-9]{32}$/.test(expectedAccountId)||typeof read!=='function')throw Error('D1_PREFLIGHT_IDENTITY');
+ if(!expected||expectedAccountId!==DASHBOARD_ACCOUNT_ID||typeof read!=='function')throw Error('D1_PREFLIGHT_IDENTITY');
  const path='/accounts/'+expectedAccountId;
  const account=await read(path);
  if(account?.id!==expectedAccountId)throw Error('D1_PREFLIGHT_IDENTITY');

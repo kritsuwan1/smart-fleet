@@ -3,7 +3,8 @@ import {readFileSync} from 'node:fs';
 import {DatabaseSync} from 'node:sqlite';
 import {createD1ReadonlyAdapter} from '../scripts/d1-readonly-adapter.mjs';
 import {fleetSchema,SCHEMA_QUERY,COUNT_QUERY} from '../scripts/d1-initialization-safety.mjs';
-const accountId='a'.repeat(32);
+import {DASHBOARD_ACCOUNT_ID} from '../scripts/d1-provider-identity.mjs';
+const accountId=DASHBOARD_ACCOUNT_ID; // Public approved identifier; all responses remain Mock.
 const config=target=>JSON.parse(readFileSync(`config/${target==='staging'?'staging-no-r2':'recovery-d1'}.example.jsonc`,'utf8').replace(/^\s*\/\/.*$/gm,''));
 const response=(result,status=200)=>new Response(JSON.stringify({success:true,result}),{status});
 let checks=0;
@@ -62,9 +63,16 @@ for(const target of ['staging','recovery'])for(const schema of [
  [reserved,{type:'table',name:'unrelated',tbl_name:'unrelated',sql:'CREATE TABLE unrelated(value TEXT)'}]
 ])await fixture(async db=>{
  const before=db.prepare('SELECT * FROM sqlite_schema').all();
- const args=mock(db,target,n=>n===2?response([{success:true,results:schema,meta:{rows_written:0,changed_db:false}}]):undefined);
- const adapter=await createD1ReadonlyAdapter(args);await assert.rejects(adapter.review(),/INITIALIZATION_REFUSED_SCHEMA/);
- assert.equal(args.calls.length,3);assert.deepEqual(args.calls.filter(c=>c.options.body).map(c=>JSON.parse(c.options.body).sql),[SCHEMA_QUERY]);
+ const compatible=schema.every(row=>row.sql===reserved.sql||row.sql===fleetSchema);
+ const args=mock(db,target,n=>n===2?response([{success:true,results:schema,meta:{rows_written:0,changed_db:false}}]):n===3?response([{success:true,results:[{row_count:0}],meta:{rows_written:0,changed_db:false}}]):undefined);
+ const adapter=await createD1ReadonlyAdapter(args);
+ if(compatible)assert.equal((await adapter.review()).preflight,'PASS');
+ else await assert.rejects(adapter.review(),/INITIALIZATION_REFUSED_SCHEMA/);
+ const expectedQueries=compatible&&schema.length===2?[SCHEMA_QUERY,COUNT_QUERY]:[SCHEMA_QUERY];
+ assert.equal(args.calls.length,2+expectedQueries.length);assert.deepEqual(args.calls.filter(c=>c.options.body).map(c=>JSON.parse(c.options.body).sql),expectedQueries);
  assert.deepEqual(db.prepare('SELECT * FROM sqlite_schema').all(),before);
 });
-console.log(`PASS D1 read-only adapter: ${checks} mock fixtures, provider metadata identity, exact target/SQL/URL allowlists, unknown schema/occupied refusal, permission/query/network failures, reserved-table evidence fails closed separately for staging/recovery without value reads; actual Cloudflare NOT_VERIFIED`);
+await fixture(async db=>{
+ const args=mock(db);args.expectedAccountId='b'.repeat(32);await assert.rejects(createD1ReadonlyAdapter(args),/D1_PREFLIGHT_ACCOUNT/);assert.deepEqual(args.calls,[]);
+});
+console.log(`PASS D1 read-only adapter: ${checks} mock fixtures, approved account/target/SQL/URL allowlists, provider identity, permission/query/network/redirect refusal, verified reserved-schema acceptance and generic rejection; no KV values; actual Cloudflare NOT_VERIFIED`);

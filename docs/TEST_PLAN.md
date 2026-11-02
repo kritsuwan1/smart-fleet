@@ -1,5 +1,11 @@
 # SmartFleet - Test Plan
 
+## Task 3C.2L — Live read-only preparation / account scope
+
+- Found request-scope gap: prior adapter/verifier accepted another syntactically valid account before schema checks. Tightened both to the already-approved Account ID; new tests assert wrong valid-format account produces zero transport/read calls. No Account/DB tuple added.
+- Related suites PASS: adapter 48 Mock fixtures, reserved schema 61, initialization safety 28. Existing redirect/wrong-identity/query/permission failure tests remain passing. Adapter fixtures use the public approved identifier in fake responses; exact reserved-schema acceptance and altered-schema refusal reflect the K policy. No live credentials/network/protected-table data.
+- Actual Windows Node v24.22.1 Build/Typecheck/all 19 suites PASS. Linux evidence follows publication. Operator approval, authenticated transport/broker review and evidence recorder are planned in LIVE_D1_VERIFICATION_PREPARATION.md, not implemented live capabilities. No Cloudflare API call; actual metadata/schema/permission/authentication NOT_VERIFIED.
+
 ## Task 3C.2K — Verified reserved schema compatibility
 
 - Added tests/d1-reserved-schema.test.mjs to npm test (19 suites): 60 Mock cases cover exact approved-account/provider capability and DDL acceptance for both targets, strict generic/raw rejection, copied/forged/expired/wrong-target identity, malformed/altered/null DDL, extra columns/objects, duplicate names, same-name views and occupied preservation. Existing adapter 47 / initialization 28 fixtures remain PASS.

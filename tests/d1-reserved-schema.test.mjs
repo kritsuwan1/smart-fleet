@@ -58,7 +58,7 @@ for(const target of ['staging','recovery']){
   await assert.rejects(prepareD1Initialization(args),/REFUSED_SCHEMA/);assert.deepEqual(args.queries,[SCHEMA_QUERY]);assert.deepEqual(objects,before);
   assert.equal(guardAccepts(allowedPlan.sql,objects),false);checks++;
  }
- for(const unverified of [{...metadata},Object.freeze({...metadata}),await identity(target,'a'.repeat(32))]){
+ for(const unverified of [{...metadata},Object.freeze({...metadata}),{...metadata,account_id:'a'.repeat(32)}]){
   const args=input(target,unverified,[reserved()]);await assert.rejects(prepareD1Initialization(args),/REFUSED_SCHEMA/);assert.deepEqual(args.queries,[SCHEMA_QUERY]);checks++;
  }
  // Verified metadata for one target cannot certify the other.
@@ -85,6 +85,8 @@ for(const target of ['staging','recovery']){
 // Forged source/verification flags do not substitute for provider responses.
 const forged={...(await identity('staging')),apiVerified:true,source:'cloudflare-api'};
 await assert.rejects(prepareD1Initialization(input('staging',forged,[reserved()])),/REFUSED_SCHEMA/);checks++;
+let forbiddenReads=0;
+await assert.rejects(verifyCloudflareD1Identity({target:'staging',expectedAccountId:'b'.repeat(32),read:async()=>{forbiddenReads++;return{};}}),/D1_PREFLIGHT_IDENTITY/);assert.equal(forbiddenReads,0);checks++;
 // Expired evidence cannot enable the exception. No wall-clock wait is needed.
 const metadata=await identity('staging'),clock=Date.now;
 try{const now=Date.now();Date.now=()=>now+61000;await assert.rejects(prepareD1Initialization(input('staging',metadata,[reserved()])),/REFUSED_SCHEMA/);checks++;}finally{Date.now=clock;}

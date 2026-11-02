@@ -1,13 +1,13 @@
 // No default transport, credential discovery, CLI, initialization or deployment.
 import {prepareD1Initialization,validateInitializationTarget,SCHEMA_QUERY,COUNT_QUERY} from './d1-initialization-safety.mjs';
-import {verifyCloudflareD1Identity} from './d1-provider-identity.mjs';
+import {verifyCloudflareD1Identity,DASHBOARD_ACCOUNT_ID} from './d1-provider-identity.mjs';
 const refuse=code=>{throw new Error('D1_PREFLIGHT_'+code);};
 const origin='https://api.cloudflare.com/client/v4';
 
 export async function createD1ReadonlyAdapter({target,config,expectedAccountId,transport}){
  const snapshot=structuredClone(config);
  const expected=validateInitializationTarget(target,snapshot);
- if(typeof expectedAccountId!=='string'||!/^[a-f0-9]{32}$/.test(expectedAccountId))refuse('ACCOUNT');
+ if(expectedAccountId!==DASHBOARD_ACCOUNT_ID)refuse('ACCOUNT');
  if(typeof transport!=='function')refuse('TRANSPORT_REQUIRED');
  const accountPath=`/accounts/${expectedAccountId}`;
  const databasePath=accountPath+`/d1/database/${expected.id}`;
