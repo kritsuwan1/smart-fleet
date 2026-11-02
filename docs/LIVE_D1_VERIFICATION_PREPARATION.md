@@ -1,5 +1,7 @@
 # Task 3C.2L — Live D1 read-only verification preparation
 
+Task 3C.2N: [D1_OFFLINE_APPROVAL_TRANSPORT.md](D1_OFFLINE_APPROVAL_TRANSPORT.md) records implemented Offline signature/replay/Mock transport and the remaining authenticated network design. No live mode/CLI or credential path exists. Actual operator registry enrollment, protected stores and TLS/permission verification still need separate approval; Mock PASS is not live verification.
+
 Task 3C.2M adds a working Mock-only broker, offline CLI and redacted evidence persistence; see [D1_MOCK_BROKER.md](D1_MOCK_BROKER.md). Historical "no broker/recorder" statements below now apply to live integration only. Live mode is unconditionally disabled, including with a manifest; no real authentication/approval mechanism is implemented. Separate per-target approval and reviewed live implementation remain required.
 
 2026-11-02, Asia/Bangkok. Repository kritsuwan1/smart-fleet, branch dev/smartfleet-batch-1. **Preparation/mock tests PASS; live verification NOT_RUN / NOT_VERIFIED.** This is the review package for the next round, not permission to connect. No Cloudflare API request, credential/token creation/read/display, Agent Lee Access, real environment change or resource action occurred. Reading public documentation is not live account/API access.

@@ -1,5 +1,11 @@
 # SmartFleet - Test Plan
 
+## Task 3C.2N — Offline signed approval and transport
+
+- Added tests/d1-offline-security.test.mjs to npm test (21 suites), 64 cases: Ed25519 public test-vector signature checks; unknown/revoked/wrong keys, forged/unsigned/modified scope, expiry/clock rollback/post-claim expiry, budget/copy/cross-target refusal, atomic replay across two Node processes and sealed evidence tamper/field checks. No real operator key/credential is generated/read; no runtime signer exists.
+- Approval-gated transport delegates only to Mock broker, with scope check and durable nonce claim before any mock metadata, then signed budget/expiry before each request. Live/auth/credential/proxy/URL/abort options are refused or covered by unchanged M policy; no network client. Real TLS/operator enrollment/storage/authentication NOT_VERIFIED.
+- Actual Windows Node v24.22.1 Build/Typecheck/all 21 suites PASS; old broker 75/adapter 48/reserved 61/initialization 28 still PASS. Linux evidence follows publication. See D1_OFFLINE_APPROVAL_TRANSPORT.md for real trust bootstrap/credential/TLS/store/source blockers, independent Staging/Recovery approvals and unchanged NOT_READY status.
+
 ## Task 3C.2M — Mock-only Broker
 
 - Added tests/d1-broker.test.mjs to npm test (20 suites), 75 cases: both targets, exact host/account/UUID/method/body/SQL/order, default mock/live denial, no injected network/credential options, permission/network/identity/schema failures, redirect/abort/concurrency/budget/replay/expiry refusal and redacted evidence persistence/no-overwrite/hash.

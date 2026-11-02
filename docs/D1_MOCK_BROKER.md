@@ -1,5 +1,7 @@
 # Task 3C.2M — Safe read-only broker (MOCK ONLY)
 
+Task 3C.2N adds a separate Offline Ed25519 approval verifier, file-backed nonce claims and approval-gated Mock transport/evidence integrity wrapper. See [D1_OFFLINE_APPROVAL_TRANSPORT.md](D1_OFFLINE_APPROVAL_TRANSPORT.md). Real operator enrollment/auth/TLS/storage remain blockers; Task M live denial and Mock defaults are unchanged. The old unsigned manifest below remains rehearsal-only, never a live authorization.
+
 2026-11-02, dev/smartfleet-batch-1. **Implementation/rehearsal PASS; live Cloudflare NOT_VERIFIED; live execution and initialization NOT_READY.** Default mode is mock. All other modes, including live with an approval object, are rejected. No code path, credential loader or network client exists to enable live operation in this implementation.
 
 ## Components
