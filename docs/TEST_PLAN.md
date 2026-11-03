@@ -1,5 +1,26 @@
 # SmartFleet - Test Plan
 
+## Task 3D.1 — feature audit, current results and next regressions
+
+- Owner defers Operator setup/Cloudflare Live/Staging Initialize/Deployment. Existing broker/signature/operator Mock tests stay enabled as software regressions; their PASS is not an operational/live status. No new cloud/operator work is scheduled. Live NOT_READY, actual verification NOT_VERIFIED.
+- Actual Windows x64 Node v24.22.1 build/typecheck/npm test PASS all 22 existing suites, no code or test additions. Covers core trips, imports, accounts/roles, metrics/PDF structure, static mobile/history/profile/receipt markup, Backup/Maintenance, local workerd/SQLite and Mock D1/security scenarios. No lint script. New audit Linux CI NOT_RUN (docs-only paths-ignore); unchanged executable baseline aac550a has successful run 41612678919, Ubuntu 24.04.5/Node v24.22.1/all 22 suites.
+- Two extra unchanged-source synthetic probes REPRODUCED defects: inspectBackup accepts a correctly checksummed trip with departure 10:00/return 09:00 although validateTrip rejects; car API accepts/persists initialOdo=100000000 but Trip at that odometer is invalid. These expected safety checks FAIL and are not covered by the existing green suites. No real/persistent DB or credentials involved. See FEATURE_AUDIT_3D1.md for evidence and limitations.
+
+Planned regression matrix (implementation separately scoped; no cases added in this audit):
+
+| Priority / next task | Cases and acceptance | Existing regressions to retain |
+| --- | --- | --- |
+| P1 / 3D.2 Backup semantic checks | Valid envelopes/legacy/missing optional Maintenance fields accepted; invalid end-before-start, impossible calendar date, malformed open/closed odo, invalid bounds rejected. Inspect is read-only; no silent repair/filtering. Keep full synthetic source/target snapshots unchanged on refusal | backup-alerts, automatic-backup, maintenance, worker, environments; valid SQL/JSON restore and session rotation |
+| P1 / 3D.2 Car input bounds | 0 and 99999999 accepted under existing rules; 100000000/negative/fraction/unsafe/nonfinite rejected client/server; rejected API write leaves version/cars/trips/Maintenance/audit unchanged | worker, import, trip-receipt, maintenance, accounts; no rewrite of historic cars/odo |
+| P1 / 3D.3 submit/confirmation | Two same-task submit events => one request; delayed/out-of-order/lost reply, 409/401/offline outcomes; no blind retry/false receipt; exact persisted trip ID/plate/time/odo on success | Existing server CAS/ownership, trip receipts and Maintenance useRef duplicate guard |
+| P1 decision / 3D.4 permissions | Approve Admin/Staff/User matrix and legacy Employee mapping/signup policy first; then pending/invite/driver-claim/direct API/session/data-scope cases | accounts, roles, profile, maintenance Admin/Employee redaction; no self-promotion |
+| P1/P2 / 3D.5 mobile | Local synthetic 360/390/768/1280, complete checkout-return-receipt/Maintenance/profile/report/backup flows, long Thai strings/focus/keyboard/orientation/network failures; no document-wide overflow | Static UI tests plus optional maintenance-browser harness; identity injection stated; no claim of physical iOS/Safari |
+| P2 / 3D.6 reports | Cross-month/open/closed/empty/multi-car metrics, employee scope, local Thai font/PDF render and download failures; only owner-approved trend/range/cost enhancements | reports, role scope, import, backup; no real fuel/network calls in tests |
+| P2 / 3D.7 multi-car/QR | Independent concurrent occupancy/odo/reminders/history/report filters, archive preservation, duplicate plate and occupied deactivation denial; proposed QR exact car/environment host refusal | receipt two-car tests, import car matching, maintenance car isolation; no actual Production/Demo QR/public route change |
+
+Fresh browser/physical-device/PDF visual testing NOT_RUN in this audit. Historical Maintenance browser evidence is bounded to its loopback/injected-identity harness. Actual Cloudflare/operator/storage/auth/TLS/remote recovery remain DEFERRED / NOT_VERIFIED; no live tests are inferred from the 22 suites.
+
+
 ## Task 3C.2P — Operator-run verifier (OFFLINE ONLY)
 
 - Added tests/d1-operator-offline.test.mjs, 133 cases; npm test now 22 suites. Separate processes exercise Staging/Recovery independently, no reset/cross-target reuse. Scope presentation precedes exact typed synthetic confirmation; missing/copied bootstrap, operator/host/model-storage refusal, unknown options/live/external-client/proxy/auth denial and piped/non-TTY CLI refusal.

@@ -1,5 +1,8 @@
 # Task 3C.2O — Live security architecture review (DESIGN ONLY)
 
+Owner decision 2026-11-03 (Task 3D.1): **Operator setup, Cloudflare live verification, Staging initialization and deployment are DEFERRED**, not operational PASS. Actual Operator/Auth/TLS/API remain NOT_VERIFIED and Live NOT_READY. Application features and offline/local testing are the active priority; see [FEATURE_AUDIT_3D1.md](FEATURE_AUDIT_3D1.md) and [ROADMAP.md](ROADMAP.md). Historical offline PASS evidence below remains valid only for its mock/software scope. This deferral does not remove any security guard or authorize credential/cloud access.
+
+
 Task 3C.2P: owner selected Option A direction subject to final owner/host/credential/storage approval. [OPERATOR_OFFLINE_VERIFIER.md](OPERATOR_OFFLINE_VERIFIER.md) documents the approved offline-only implementation: one-shot synthetic runner, interactive Mock rehearsal, pure path/ACL model, in-memory attempts and failure/evidence tests. This fulfills part of O2/O3 only; actual protected bootstrap, durable storage and authenticated HTTPS are not implemented or verified. No live command/access or operational approval follows. Historical “awaiting A/B direction” below is superseded only by this qualified offline direction; final operational gates remain pending.
 
 

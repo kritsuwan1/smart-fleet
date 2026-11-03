@@ -1,5 +1,8 @@
 # Task 3C.2P — Operator-run one-shot verifier (OFFLINE ONLY)
 
+Owner decision 2026-11-03 (Task 3D.1): **Operator setup, Cloudflare live verification, Staging initialization and deployment are DEFERRED**, not operational PASS. Actual Operator/Auth/TLS/API remain NOT_VERIFIED and Live NOT_READY. Application features and offline/local testing are the active priority; see [FEATURE_AUDIT_3D1.md](FEATURE_AUDIT_3D1.md) and [ROADMAP.md](ROADMAP.md). Historical offline PASS evidence below remains valid only for its mock/software scope. This deferral does not remove any security guard or authorize credential/cloud access.
+
+
 2026-11-03, Asia/Bangkok; kritsuwan1/smart-fleet, dev/smartfleet-batch-1. Option A direction accepted for offline development, subject to final owner/host/credential/storage approval. **Offline implementation PASS; actual Operator/Auth/TLS/Cloudflare NOT_VERIFIED; Live / Initialize / Deploy NOT_READY.**
 
 Read with [LIVE_SECURITY_ARCHITECTURE_REVIEW.md](LIVE_SECURITY_ARCHITECTURE_REVIEW.md). This implementation does not establish a trusted Windows operator or operational read-only connection. No signing keys, tokens, credentials, Windows operator directories/ACLs or Cloudflare resources were created/read. Task N signature system remains offline unchanged.

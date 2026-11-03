@@ -1,5 +1,8 @@
 # Task 3C.2L — Live D1 read-only verification preparation
 
+Owner decision 2026-11-03 (Task 3D.1): **Operator setup, Cloudflare live verification, Staging initialization and deployment are DEFERRED**, not operational PASS. Actual Operator/Auth/TLS/API remain NOT_VERIFIED and Live NOT_READY. Application features and offline/local testing are the active priority; see [FEATURE_AUDIT_3D1.md](FEATURE_AUDIT_3D1.md) and [ROADMAP.md](ROADMAP.md). Historical offline PASS evidence below remains valid only for its mock/software scope. This deferral does not remove any security guard or authorize credential/cloud access.
+
+
 Task 3C.2O: [LIVE_SECURITY_ARCHITECTURE_REVIEW.md](LIVE_SECURITY_ARCHITECTURE_REVIEW.md) now defines the recommended simpler operator-run, agent-isolated one-shot route (A) and deferred signed broker route (B). It supersedes the earlier universal broker/signed-manifest/distributed-ledger proposal and repository .qa live-storage suggestion below. Live artifacts must use approved private non-sync operator storage. This is a design recommendation awaiting owner decision, not a live harness, permission or removal of existing offline guards. Exact endpoint/SQL/identity policy and independent Staging/Recovery approvals remain mandatory; real API NOT_VERIFIED, live/initialization NOT_READY.
 
 

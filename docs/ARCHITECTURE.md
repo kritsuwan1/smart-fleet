@@ -1,5 +1,16 @@
 # SmartFleet - System Architecture
 
+## Task 3D.1 — current feature architecture and owner direction
+
+**Operator setup / Cloudflare Live / Staging Initialize / Deployment: DEFERRED by owner, actual NOT_VERIFIED; Live NOT_READY.** Current application audit is [FEATURE_AUDIT_3D1.md](FEATURE_AUDIT_3D1.md); active offline/local sequence and acceptance are in [ROADMAP.md](ROADMAP.md). The older Phase 0 audit sections below are pinned historical evidence, not current missing-feature assertions.
+
+Current Development source (cbdc2e3; v3.8.5 label) uses React/React DOM 19.2.6, TypeScript 5.9.3, esbuild 0.28.1 and Wrangler 4.116.0, with Node 24 tests. One D1 fleet_store.main JSON retains cars/people/projects/trips/accounts/audit/fuel prices plus optional additive maintenancePlans/maintenanceHistory; main writes use optimistic version checks. No normalized schema migration or new cloud service is needed for the proposed local validation fixes.
+
+Core checkout/return, per-car date/km Maintenance reminders/history/corrections and persisted start/return receipts exist. Admin/Employee API boundaries exist; Staff/User/onboarding approval do not. Manual SQL/JSON exports and isolated SQLite recovery work without R2; scheduled/R2 code has only mock/local verification and activation remains deferred. Dashboard and monthly per-car/employee image-based PDF/XLSX exist; trends/maintenance reports, dynamic per-car QR and broad mobile browser acceptance remain gaps. This supersedes historical “no Maintenance/no scheduled handler/no push CI” statements only for the present Development snapshot: the Linux test workflow now exists; deployed behavior is unverified.
+
+Two audit probes reproduce a backup semantic-validation gap (end before start accepted with valid checksum) and a Car/Trip odometer upper-bound mismatch. See D1/D2 in the audit; no code fix, schema change or data mutation is part of 3D.1. Maintenance rollback/history correction is currently implemented and covered; do not carry the old Task 3B missing-history finding forward as unresolved.
+
+
 ## Task 3C.2P — Option A offline one-shot verifier
 
 [OPERATOR_OFFLINE_VERIFIER.md](OPERATOR_OFFLINE_VERIFIER.md) records the new synthetic-only one-target/process runner and interactive rehearsal CLI. Private synthetic handles model operator/host/path/ACL prerequisites, exact scope precedes typed confirmation, in-memory pending attempt precedes a maximum four fixed Mock requests, and redacted evidence is checked against a separate fixture receipt. No trusted real bootstrap, persistent operator storage, credentials or HTTP client exists; normal operational invocation fails closed. Tests simulate TLS/redirect/timeouts/proxy/environment/identity/schema/storage/tampering; actual Operator/Auth/TLS/Cloudflare remain NOT_VERIFIED. Option A direction is approved for offline work only; final host/credential/storage approval and Live remain NOT_READY. Existing D1 reserved-schema/SQL/app/config policies unchanged.
