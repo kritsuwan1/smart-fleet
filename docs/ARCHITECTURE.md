@@ -1,5 +1,12 @@
 # SmartFleet - System Architecture
 
+## Task 3C.2O — proposed live read-only architecture (design only)
+
+See [LIVE_SECURITY_ARCHITECTURE_REVIEW.md](LIVE_SECURITY_ARCHITECTURE_REVIEW.md). Recommend a short-lived operator-run fixed-target verifier in an agent-isolated Windows session/device (option A), with protected operator identity/bootstrap, private non-sync evidence/attempt state, least-privilege auth and exact HTTPS/SQL controls. A permanent isolated credential broker with Ed25519 approvals (option B) is deferred until delegation or independent signed authorization is required. This recommendation awaits owner decision; no security code, live transport, credential access or live entry point is added.
+
+Task N's signature/registry/replay/Mock implementation remains offline unchanged. It does not prove human identity, host isolation, real TLS or API provenance. Earlier broker/signature/distributed-store prerequisites are conditional on choosing B; essential target/identity/schema/credential boundaries remain mandatory for either route. Actual operator/auth/TLS/API NOT_VERIFIED; Live / Initialize / Deploy NOT_READY. Review, acceptance criteria, residual account-wide read risk and separate Staging/Recovery approval gates are in the linked design.
+
+
 Task 3C.1: separate staging compilation (output/worker-staging.js) uses DEMO_DB/demo marker, STAGING label, synthetic-only fallback seed and disabled QR routes/UI; Production/Demo configs and QR assets remain unchanged. No-R2/private/disabled-cron examples refer to existing user-reported Staging/recovery D1 names with unverified placeholder IDs. Admin history correction uses existing Audit and optimistic main-row write; failed candidate validation preserves prior state, with manual-plan rollback guards. See [STAGING_READINESS.md](STAGING_READINESS.md). No deployed configuration or SQL schema migration is changed.
 
 ## Task 3A current development addition

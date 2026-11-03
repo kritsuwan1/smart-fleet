@@ -1,5 +1,8 @@
 # Task 3C.2N — Operator approval and authenticated transport (OFFLINE ONLY)
 
+Task 3C.2O architecture decision proposal: [LIVE_SECURITY_ARCHITECTURE_REVIEW.md](LIVE_SECURITY_ARCHITECTURE_REVIEW.md) recommends an operator-run one-shot verifier on an agent-isolated trusted endpoint (A) for occasional checks. A permanent signed-approval broker (B), live key enrollment and distributed replay machinery are conditional on delegated approval requirements, not automatic prerequisites for A. This supersedes the universal future-broker requirements below at design level only. N's code/signatures/stores remain strictly offline, not a live authorization; no alternative live implementation is approved or added. Owner architecture/isolation/scope decisions remain pending.
+
+
 2026-11-02, dev/smartfleet-batch-1. **Offline cryptographic approval/replay/transport tests PASS; actual operator enrollment, credential bridge, TLS and Cloudflare API NOT_VERIFIED. Live mode and initialization NOT_READY.** No real signer/Cloudflare credential was created, read or used. No live transport, token loader or live CLI was added. Task M broker's live denial is unchanged; the new facade also rejects every mode except offline before approval processing.
 
 ## Implemented boundary

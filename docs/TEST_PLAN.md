@@ -1,5 +1,13 @@
 # SmartFleet - Test Plan
 
+## Task 3C.2O — Live security architecture review (DESIGN ONLY)
+
+- Documentation-only review; no new security code/tests/CLI/config/allowlist. [LIVE_SECURITY_ARCHITECTURE_REVIEW.md](LIVE_SECURITY_ARCHITECTURE_REVIEW.md) defines A/B decision gates and future acceptance for isolated operator identity, fixed package/bootstrap, credential least privilege, exact HTTPS request policy, complete I/O deadlines/abort, proxy/CA refusal, private non-sync journal/evidence, redaction/tamper/ACL/reparse/storage failures and separate targets.
+- Actual new Windows x64 Node v24.22.1 Build/Typecheck/npm test PASS all 21 suites, including N 64 security, M broker 75, adapter 48, reserved 61 and initialization 28 cases. No lint script. All 94 checked tracked executable/build/test/config/workflow inputs match remote ff80d24 (Task N source unchanged); generated ignored src/client.bundle.txt excluded.
+- Latest Linux baseline run 41378250206 remains completed/success for exact executable f0c0109 (Ubuntu 24.04.5 / Node v24.22.1, 21 suites/64 N cases; prior decoded evidence in PROGRESS.md). New O Linux CI NOT_RUN because changes are docs-only and paths-ignore applies. No fresh Linux execution claimed.
+- Future implementation must pass Windows/Linux regressions and adversarial offline transport tests before separately approved real-network/TLS/auth checks. Mock success does not satisfy actual host/operator/permission/TLS/API gates. Design review PASS; live / initialization / deployment NOT_READY. No Cloudflare calls/credentials or operational changes.
+
+
 ## Task 3C.2N — Offline signed approval and transport
 
 - Added tests/d1-offline-security.test.mjs to npm test (21 suites), 64 cases: Ed25519 public test-vector signature checks; unknown/revoked/wrong keys, forged/unsigned/modified scope, expiry/clock rollback/post-claim expiry, budget/copy/cross-target refusal, atomic replay across two Node processes and sealed evidence tamper/field checks. No real operator key/credential is generated/read; no runtime signer exists.
