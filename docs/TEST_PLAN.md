@@ -1,5 +1,13 @@
 # SmartFleet - Test Plan
 
+## Task 3C.2P — Operator-run verifier (OFFLINE ONLY)
+
+- Added tests/d1-operator-offline.test.mjs, 133 cases; npm test now 22 suites. Separate processes exercise Staging/Recovery independently, no reset/cross-target reuse. Scope presentation precedes exact typed synthetic confirmation; missing/copied bootstrap, operator/host/model-storage refusal, unknown options/live/external-client/proxy/auth denial and piped/non-TTY CLI refusal.
+- Both targets cover exact reserved/empty/empty-fleet success; redirects, permission/network, wrong identity, malformed/schema/occupied/write-metadata failures. Internal TLS certificate/hostname and DNS/connect/TLS/headers/body timeout/abort scenarios prove simulated fail-closed control flow only, not genuine TLS/I/O verification. Four requests maximum, no retry/retarget, no KV contents/counts. fetch tripwire zero; no new signing keys or credential access.
+- Pure Windows storage model tests reject sync/checkout/network/reparse/noncanonical/stream/device paths, ownership/inheritance and broad ACLs; no real operator filesystem/ACL inspection or persistence. Evidence schema/redaction and externally held receipt detect tampering even after embedded digest recomputation. Actual operator/storage/auth/TLS/API remain NOT_VERIFIED, Live NOT_READY.
+- Actual Windows x64 Node v24.22.1 build/typecheck/all 22 suites PASS, including new 133; N 64 / broker 75 / adapter 48 / reserved 61 / initialization 28 regressions unchanged. Interactive human rehearsal NOT_RUN by agent; noninteractive denial and synthetic confirmation model tested. Linux CI exact-commit results follow in PROGRESS.md. See OPERATOR_OFFLINE_VERIFIER.md for offline use and operational blockers. No lint script.
+
+
 ## Task 3C.2O — Live security architecture review (DESIGN ONLY)
 
 - Documentation-only review; no new security code/tests/CLI/config/allowlist. [LIVE_SECURITY_ARCHITECTURE_REVIEW.md](LIVE_SECURITY_ARCHITECTURE_REVIEW.md) defines A/B decision gates and future acceptance for isolated operator identity, fixed package/bootstrap, credential least privilege, exact HTTPS request policy, complete I/O deadlines/abort, proxy/CA refusal, private non-sync journal/evidence, redaction/tamper/ACL/reparse/storage failures and separate targets.

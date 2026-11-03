@@ -1,5 +1,10 @@
 # SmartFleet - System Architecture
 
+## Task 3C.2P — Option A offline one-shot verifier
+
+[OPERATOR_OFFLINE_VERIFIER.md](OPERATOR_OFFLINE_VERIFIER.md) records the new synthetic-only one-target/process runner and interactive rehearsal CLI. Private synthetic handles model operator/host/path/ACL prerequisites, exact scope precedes typed confirmation, in-memory pending attempt precedes a maximum four fixed Mock requests, and redacted evidence is checked against a separate fixture receipt. No trusted real bootstrap, persistent operator storage, credentials or HTTP client exists; normal operational invocation fails closed. Tests simulate TLS/redirect/timeouts/proxy/environment/identity/schema/storage/tampering; actual Operator/Auth/TLS/Cloudflare remain NOT_VERIFIED. Option A direction is approved for offline work only; final host/credential/storage approval and Live remain NOT_READY. Existing D1 reserved-schema/SQL/app/config policies unchanged.
+
+
 ## Task 3C.2O — proposed live read-only architecture (design only)
 
 See [LIVE_SECURITY_ARCHITECTURE_REVIEW.md](LIVE_SECURITY_ARCHITECTURE_REVIEW.md). Recommend a short-lived operator-run fixed-target verifier in an agent-isolated Windows session/device (option A), with protected operator identity/bootstrap, private non-sync evidence/attempt state, least-privilege auth and exact HTTPS/SQL controls. A permanent isolated credential broker with Ed25519 approvals (option B) is deferred until delegation or independent signed authorization is required. This recommendation awaits owner decision; no security code, live transport, credential access or live entry point is added.

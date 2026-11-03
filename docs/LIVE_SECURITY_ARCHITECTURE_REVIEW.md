@@ -1,5 +1,8 @@
 # Task 3C.2O — Live security architecture review (DESIGN ONLY)
 
+Task 3C.2P: owner selected Option A direction subject to final owner/host/credential/storage approval. [OPERATOR_OFFLINE_VERIFIER.md](OPERATOR_OFFLINE_VERIFIER.md) documents the approved offline-only implementation: one-shot synthetic runner, interactive Mock rehearsal, pure path/ACL model, in-memory attempts and failure/evidence tests. This fulfills part of O2/O3 only; actual protected bootstrap, durable storage and authenticated HTTPS are not implemented or verified. No live command/access or operational approval follows. Historical “awaiting A/B direction” below is superseded only by this qualified offline direction; final operational gates remain pending.
+
+
 Date: 2026-11-03, Asia/Bangkok. Repository kritsuwan1/smart-fleet; branch dev/smartfleet-batch-1. Reviewed remote ff80d24994b5d4571584b90dd960fd476fef6853 and Task N executable commit f0c0109494e6ce4bfafa29b9081994f052262580. **Design review complete; recommendation awaiting owner decision. Real operator/auth/TLS/API NOT_VERIFIED; Live / Initialize / Deploy NOT_READY.**
 
 No new security system, live transport, CLI, credential access, account API call or resource change is implemented/authorized here. Public documentation review is separate from authenticated API access. This document supersedes earlier L/N proposals that treat a permanent broker, signed approvals, distributed replay storage or repository .qa storage as universal live prerequisites. Their existing code remains offline-only and unchanged. A simpler route is a proposal requiring separate approval, not an operational bypass.
