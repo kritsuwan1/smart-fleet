@@ -1,3 +1,4 @@
+import {validateTripValues} from './validation';
 export type Car={id:string;plate:string;province:string;model:string;initialOdo:number;active:boolean;currentOdo?:number;fuelType?:string;imagePreset?:string};
 export type Person={id:string;name:string;active:boolean};
 export type Trip={id:string;seq:number;carId:string;driverId:string;project:string;destination:string;start:string;end:string;odoStart:number;odoEnd:number|null;note:string;reason:string;ownerUserId?:string};
@@ -13,12 +14,7 @@ export function validateTrip(s:Fleet,t:Trip){
  if(!s.people.some(p=>p.id===t.driverId))throw Error('ไม่พบพนักงานขับรถ');
  if(!t.project?.trim()||!t.destination?.trim())throw Error('กรุณาระบุงาน/โครงการและสถานที่ไป');
  if(t.project.length>300||t.destination.length>1000||t.note.length>2000||t.reason.length>1000)throw Error('ข้อความยาวเกินกำหนด');
- const validDate=(v:string)=>/^\d{4}-\d\d-\d\dT\d\d:\d\d$/.test(v)&&Number.isFinite(Date.parse(v+'+07:00'))&&new Date(Date.parse(v+'+07:00')+7*3600000).toISOString().slice(0,16)===v;
- if(!validDate(t.start)||t.end&&!validDate(t.end))throw Error('วันเวลาไม่ถูกต้อง');
- if(t.end&&t.end<t.start)throw Error('วันเวลากลับต้องไม่ก่อนเวลาออกเดินทาง');
- if(!Number.isInteger(t.odoStart)||t.odoStart<0||t.odoStart>99999999)throw Error('เลขไมล์ออกต้องเป็นจำนวนเต็มตั้งแต่ 0');
- if(t.end&&(!Number.isInteger(t.odoEnd)||t.odoEnd!<t.odoStart||t.odoEnd!>99999999))throw Error('เลขไมล์กลับต้องไม่น้อยกว่าเลขไมล์ออก');
- if(!t.end&&t.odoEnd!==null)throw Error('กรุณากรอกวันเวลากลับ');
+ validateTripValues(t);
  const others=s.trips.filter(x=>x.carId===t.carId&&x.id!==t.id);
  if(others.some(x=>t.start<(x.end||'9999')&&x.start<(t.end||'9999')))throw Error('ช่วงเวลาใช้รถซ้อนกับรายการอื่นของรถคันนี้');
  const prev=others.filter(x=>x.end&&x.end<=t.start).sort((a,b)=>b.end.localeCompare(a.end))[0];

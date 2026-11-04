@@ -5,6 +5,7 @@ import {importedTrips} from './seed';
 import {manualFuel,validMonth} from './fuel';
 import {planImport} from './import-plan';
 import {changeMaintenance} from './maintenance';
+import {validOdometer} from './validation';
 export function fleetApi(env:any,user:User){
 const json=(v:unknown,status=200)=>Response.json(v,{status,headers:{'Cache-Control':'no-store'}});
 async function GET(){try{const {state,version,payloadBytes}=await readState(env);return json(viewForUser(state,version,user,payloadBytes));}catch(e){return fail(e);}}
@@ -71,7 +72,7 @@ async function POST(req:Request){try{
   const fuelType=String(extra.fuelType??old?.fuelType??'');const imagePreset=String(extra.imagePreset??old?.imagePreset??'');
   if(!['','ดีเซล','เบนซิน','ไฮบริด','ไฟฟ้า','อื่น ๆ'].includes(fuelType)||!['','none','revo'].includes(imagePreset))throw Error('ข้อมูลเชื้อเพลิงหรือภาพรถไม่ถูกต้อง');
   Object.assign(car,{...('fuelType' in extra||old?.fuelType!==undefined?{fuelType}:{}),...(imagePreset?{imagePreset}:{})});
-  if(!car.plate||!car.province||car.plate.length>40||car.province.length>100||!Number.isInteger(car.initialOdo)||car.initialOdo<0)throw Error('กรุณาตรวจสอบทะเบียน จังหวัด และเลขไมล์เริ่มต้น');
+  if(!car.plate||!car.province||car.plate.length>40||car.province.length>100||!validOdometer(car.initialOdo))throw Error('กรุณาตรวจสอบทะเบียน จังหวัด และเลขไมล์เริ่มต้น');
   if(s.cars.some(c=>c.id!==car.id&&c.plate.replace(/\s/g,'')===car.plate.replace(/\s/g,'')&&c.province===car.province))throw Error('มีทะเบียนรถนี้อยู่แล้ว');
   if(!car.active&&s.trips.some(t=>t.carId===car.id&&!t.end))throw Error('ต้องคืนรถก่อนปิดใช้งาน');
   s.cars=old?s.cars.map(c=>c.id===car.id?car:c):[...s.cars,car];after=car;action='จัดการรถยนต์';

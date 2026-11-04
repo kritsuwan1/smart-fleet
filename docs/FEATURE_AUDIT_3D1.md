@@ -1,5 +1,8 @@
 # Task 3D.1 — Feature audit and development roadmap
 
+Follow-up 2026-11-04, Task 3D.2: this audit commit acbc8bf was verified on dev/smartfleet-batch-1 with exactly the eight docs-only paths, so 3D.1 is closed. The D1/D2 defects below describe the audited pre-fix snapshot; they are now resolved by shared value checks and 163 new regression cases (23 suites total). See [DATA_VALIDATION_CONSISTENCY.md](DATA_VALIDATION_CONSISTENCY.md) and current PROGRESS/ROADMAP. Other findings remain applicable; next task is 3D.3 submit/confirmation. Operator/Live/Initialize/Deployment stay DEFERRED, not operational PASS.
+
+
 Date: 2026-11-03 (Asia/Bangkok). Repository kritsuwan1/smart-fleet; branch dev/smartfleet-batch-1. Audited [cbdc2e36515bc559a37024a9f0e1f404c96acee5](https://github.com/kritsuwan1/smart-fleet/tree/cbdc2e36515bc559a37024a9f0e1f404c96acee5). App/package label remains v3.8.5; this Development branch includes later Maintenance/Backup/security additions. This is evidence about that source snapshot, not deployed v3.8.5 or real Fleet data.
 
 **Owner decision: Operator setup, Cloudflare live verification, Staging initialization and deployment are DEFERRED.** They have not passed operational verification. App/local development can proceed independently. Live remains NOT_READY; no security guards are removed. No Cloudflare APIs, credentials/resources, real database writes, Initialize/Deploy/Merge, Production/Demo/R2/Cron/routes changes.

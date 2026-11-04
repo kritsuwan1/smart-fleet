@@ -1,6 +1,7 @@
 import type {Fleet} from './fleet';
 import {portableChecksum} from './checksum';
 import {validateMaintenance} from './maintenance';
+import {validOdometer,validateTripValues} from './validation';
 export async function backupDigest(state:unknown){
  const input=new TextEncoder().encode(JSON.stringify(state));
  if(!globalThis.crypto?.subtle)return portableChecksum(input);
@@ -16,10 +17,13 @@ export async function inspectBackup(text:string){
  if(!s||typeof s!=='object'||!['cars','people','projects','trips','audit'].every(k=>Array.isArray(s[k]))||typeof s.imported!=='boolean')fail();
  const ids=(rows:any[])=>{const set=new Set<string>();for(const row of rows){if(!row||typeof row.id!=='string'||!row.id||set.has(row.id))fail();set.add(row.id);}return set;};
  const cars=ids(s.cars),people=ids(s.people);ids(s.trips);ids(s.audit);
- for(const c of s.cars)if(typeof c.plate!=='string'||typeof c.province!=='string'||typeof c.model!=='string'||!Number.isInteger(c.initialOdo)||c.initialOdo<0||typeof c.active!=='boolean')fail();
+ for(const c of s.cars)if(typeof c.plate!=='string'||typeof c.province!=='string'||typeof c.model!=='string'||!validOdometer(c.initialOdo)||typeof c.active!=='boolean')fail();
  for(const p of s.people)if(typeof p.name!=='string'||typeof p.active!=='boolean')fail();
  if(s.projects.some((p:unknown)=>typeof p!=='string'))fail();
- for(const t of s.trips){if(!cars.has(t.carId)||!people.has(t.driverId)||!Number.isInteger(t.seq)||t.seq<1||!Number.isInteger(t.odoStart)||t.odoStart<0||typeof t.start!=='string'||!Number.isFinite(Date.parse(t.start+'+07:00'))||typeof t.end!=='string'||(t.end&&(!Number.isFinite(Date.parse(t.end+'+07:00'))||!Number.isInteger(t.odoEnd)||t.odoEnd<t.odoStart)))fail();}
+ for(const t of s.trips){
+  if(!cars.has(t.carId)||!people.has(t.driverId)||!Number.isInteger(t.seq)||t.seq<1)fail();
+  try{validateTripValues(t);}catch{fail();}
+ }
  if(s.accounts!==undefined){if(!Array.isArray(s.accounts))fail();ids(s.accounts);for(const a of s.accounts)if(!people.has(a.driverId)||typeof a.username!=='string'||typeof a.passwordHash!=='string'||typeof a.salt!=='string')fail();}
  validateMaintenance(s);
  if(typeof b.exportedAt!=='string'||!Number.isFinite(Date.parse(b.exportedAt)))fail();

@@ -1,5 +1,16 @@
 # SmartFleet - Test Plan
 
+## Task 3D.2 — shared value validation and no-mutation recovery regression
+
+- Prerequisite 3D.1 verified before development: acbc8bf exists as Development HEAD with exactly eight docs-only changes. Both source bugs first reproduced with failing new assertions (backupRejected=false / carStatus=200), now reject (true / 400).
+- Added tests/validation-consistency.test.mjs, 163 cases, npm test total 23 suites. Covers shared Trip chronology/strict calendar/minute timestamps, open/closed odo shape and 0–99999999 bounds, manual current/legacy backups, valid absent optional fields and long legacy notes/unknown data, car creation/edit valid numeric strings and invalid/boundary inputs. No unrelated overlap/text/continuity business validation added to backup inspection.
+- Invalid automatic artifacts have correctly recomputed SHA256, metadata counts and byte sizes; 20 variants each tested against both empty-main and populated synthetic SQLite targets. Assert zero SQL run calls and identical complete schema/rows/payloads/versions, including sentinel records, on refusal. Valid local restores retain all state except existing session rotation. Raw arbitrary SQL is not covered by this JS validator; no actual restore authorized.
+- Car invalid API inputs return 400 with no effective row/version/audit mutation; accepted 0/max and existing numeric strings check the exact created/edited car, expected car count and version. Valid Trip boundary/equal/leap/cross-year/reason cases retained. Environment/auth/security/schema guards unchanged.
+- Actual Windows x64 Node v24.22.1: npm ci/build/typecheck/all 23 suites PASS. New 163 and existing broker 75 / security 64 / adapter 48 / reserved 61 / initialization 28 / operator fixtures 133 plus feature tests PASS. No lint script or fresh browser-device test. Linux exact-commit evidence follows in PROGRESS; no prior-run substitution. Operator/Live/Initialize/Deployment DEFERRED, actual NOT_VERIFIED.
+
+The 3D.1 D1/D2 findings below are historical reproduced defects now addressed by 3D.2; their former planned cases are implemented. 3D.3 submit/confirmation remains next. Details: [DATA_VALIDATION_CONSISTENCY.md](DATA_VALIDATION_CONSISTENCY.md).
+
+
 ## Task 3D.1 — feature audit, current results and next regressions
 
 - Owner defers Operator setup/Cloudflare Live/Staging Initialize/Deployment. Existing broker/signature/operator Mock tests stay enabled as software regressions; their PASS is not an operational/live status. No new cloud/operator work is scheduled. Live NOT_READY, actual verification NOT_VERIFIED.

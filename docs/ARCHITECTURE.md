@@ -1,5 +1,12 @@
 # SmartFleet - System Architecture
 
+## Task 3D.2 — current validation boundaries
+
+[DATA_VALIDATION_CONSISTENCY.md](DATA_VALIDATION_CONSISTENCY.md): new src/validation.ts shares only the existing Trip timestamp/calendar/chronology/open-closed odometer rules and 0–99999999 integer bound. fleet.ts preserves cross-trip/reference/text/reason policy; backup.ts uses value checks for current/legacy JSON; api.ts and App car input use the same odo bound. No Fleet/SQL shape, Worker/routes/config or stored-data mutation policy changed. Existing automatic-artifact inspection refuses invalid values before the local restore library can write; arbitrary trusted SQL is not validated by JS.
+
+Task 3D.1 audit commit acbc8bf was verified docs-only on the correct branch; D1/D2 defects in its historical sections are now fixed and regression-tested. Windows Node 24 ci/build/typecheck/23 suites PASS, including 163 new cases; exact Linux CI evidence is in PROGRESS after publication. Operator setup/Cloudflare Live/Initialize/Deployment remain DEFERRED and actual cloud behavior NOT_VERIFIED. Remaining app roadmap starts with 3D.3 reliable submit/confirmation.
+
+
 ## Task 3D.1 — current feature architecture and owner direction
 
 **Operator setup / Cloudflare Live / Staging Initialize / Deployment: DEFERRED by owner, actual NOT_VERIFIED; Live NOT_READY.** Current application audit is [FEATURE_AUDIT_3D1.md](FEATURE_AUDIT_3D1.md); active offline/local sequence and acceptance are in [ROADMAP.md](ROADMAP.md). The older Phase 0 audit sections below are pinned historical evidence, not current missing-feature assertions.
