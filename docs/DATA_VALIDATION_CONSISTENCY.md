@@ -41,7 +41,7 @@ This is not a new arbitrary-SQL safety guarantee. Manual SQL restore is a truste
 
 - Windows x64 Node v24.22.1: npm ci PASS (42 installed, audited 43; reported 0 vulnerabilities), build PASS (Demo 996817 / Production 995443 / Staging 995590 bytes), typecheck PASS, npm test PASS all 23 suites including new 163 cases. Existing 22 suites and security/environment/Backup/Maintenance/permissions/import/report/receipt regressions pass. No lint script.
 - npm ci reported blocked esbuild/workerd install scripts under the existing allowScripts policy; no policy/approval was changed. Build, native local workerd and tests succeeded. Dependencies/lockfile unchanged.
-- Exact new implementation Linux Node 24 CI is checked after publication and recorded in PROGRESS.md, not inferred from Windows or the earlier Task P run.
+- Exact implementation 77b3607 Linux CI [41755017762](https://github.com/kritsuwan1/smart-fleet/actions/runs/41755017762) PASS: Ubuntu 24.04.5 / Node v24.22.1, npm ci/build/typecheck/all 23 suites including new 163. Decoded logs/runtime commit metadata checked; details in PROGRESS.md. Documentation follow-up does not change the executable snapshot.
 - No real browser/device acceptance is claimed for the added HTML max attribute; Typecheck and API boundary regressions establish the current check scope.
 
 ## Remaining scope
