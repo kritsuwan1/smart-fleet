@@ -1,5 +1,6 @@
 import {IS_DEMO,IS_STAGING,ENVIRONMENT,SITE_URL,ENVIRONMENT_HTML} from './environment';
 import {createBackup} from './backup';
+import {parseOperationalState,operationalAccountsSql} from './account-compatibility';
 import {BACKUP_CRON,runAutomaticBackup,automaticBackupStatus} from './automatic-backup';
 import {APP_VERSION} from './version';
 import {systemStatus} from './system-status';
@@ -33,9 +34,10 @@ const json=(value:any,status=200,extra:any={})=>response(JSON.stringify(value),s
 const redirect=(to:string,cookie?:string)=>response(null,303,{Location:to,...(cookie?{'Set-Cookie':cookie}:{})});
 const q=(s:string)=>"'"+s.replaceAll("'","''")+"'";
 async function backup(env:any){
- const row=await env.DB.prepare("SELECT payload FROM fleet_store WHERE id='main'").first();if(!row)return response('ยังไม่มีข้อมูล',404);const id='restore-'+crypto.randomUUID();const restoreGuard=IS_DEMO?"(SELECT payload FROM fleet_store WHERE id='environment')='demo'":"COALESCE((SELECT payload FROM fleet_store WHERE id='environment'),'production')='production'";
+ const row=await env.DB.prepare("SELECT payload FROM fleet_store WHERE id='main'").first();if(!row)return response('ยังไม่มีข้อมูล',404);parseOperationalState(row.payload);const id='restore-'+crypto.randomUUID();const restoreGuard=IS_DEMO?"(SELECT payload FROM fleet_store WHERE id='environment')='demo'":"COALESCE((SELECT payload FROM fleet_store WHERE id='environment'),'production')='production'";
  const lines=['-- Smart Fleet '+APP_VERSION+' backup '+new Date().toISOString(),'-- environment: '+ENVIRONMENT,'-- PRIVATE: contains salted password hashes and session-signing material. Keep offline and private.','-- Restores all fleet data AND employee accounts. Existing main state is replaced only after valid JSON staging.','CREATE TABLE IF NOT EXISTS fleet_store(id TEXT PRIMARY KEY NOT NULL,payload TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 0);',`INSERT OR REPLACE INTO fleet_store(id,payload,version) VALUES(${q(id)},'',0);`];
  for(let i=0;i<row.payload.length;i+=10000)lines.push(`UPDATE fleet_store SET payload=payload || ${q(row.payload.slice(i,i+10000))} WHERE id=${q(id)};`);
+ lines.splice(5,0,`SELECT CASE WHEN NOT EXISTS(SELECT 1 FROM fleet_store WHERE id='main' AND NOT (${operationalAccountsSql('payload')})) THEN 1 ELSE json('ACCOUNT_FORMAT_UNSUPPORTED') END;`);
  lines.push(`INSERT INTO fleet_store(id,payload,version) SELECT 'main',json_set(payload,'$.sessionKey',lower(hex(randomblob(32)))),0 FROM fleet_store WHERE id=${q(id)} AND json_valid(payload) AND ${restoreGuard} ON CONFLICT(id) DO UPDATE SET payload=excluded.payload,version=fleet_store.version+1;`,`DELETE FROM fleet_store WHERE id=${q(id)};`);
  return response(lines.join('\n'),200,{'Content-Type':'application/sql; charset=utf-8','Content-Disposition':`attachment; filename="smart-fleet-${ENVIRONMENT}-backup-${new Date().toISOString().slice(0,10)}.sql"`});
 }

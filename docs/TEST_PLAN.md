@@ -1,5 +1,16 @@
 # SmartFleet - Test Plan
 
+## Task 3D.4D-1 — actual operational compatibility guard regression
+
+New operational-compatibility.test.mjs164 cases, npm test26 suites. Exercise actual shared guard/storage/auth/session/Worker/API/manual+automatic backup and restore paths, not just3D.4C harness. Cases: strict version/role/status refusal and explicit missing-role legacy adapter, future metadata/status matrix, root shortcut/session issuance denial, no lazy/rate-limit/signup writes on bad state, no Fleet/member/body leakage, valid disabled/legacy behavior, candidate/stored-state refusal and version CAS, sanitized malformed JSON, JS/generated-SQL parity, complete schema/rows/version/ledger snapshots on refusal, valid SQL/automatic restore rotation, same-ID concurrent return/lost-ack/replay with one audit/odo change.
+
+Retain102 compatibility cases,45 transaction and163 value-validation cases plus prior role/security/Backup/Maintenance suites. The historical unsafe-current-auth probe now verifies actual new refusal and explicitly models pre-gate behavior separately. Valid populated SQL-restore fixture uses full legacy Fleet; formerly skeletal {obsolete:true} is now tested as incompatible/no mutation. No security test is removed or made permissive.
+
+Windows x64 Node24.22.1 npm ci/build/typecheck/all26 suites PASS. Exact implementation Linux CI follows publication in PROGRESS. No lint script; no fresh browser/UAT/cloud execution. [ROLE_ONBOARDING_COMPATIBILITY.md](ROLE_ONBOARDING_COMPATIBILITY.md) records scope and rollback limits. Unsupported state is denied as a whole; no future role/lifecycle state is operationally accepted.
+
+No claim that old deployed readers now refuse new state. Their coercion is a historical model; actual new-reader guards and legacy rollback compatibility are tested offline. No migration/account conversion/new routes, Staff/User/PENDING signup/review activation. Mixed-version cutover, future credential/root adapters and full new-policy RC-01–12 remain separate work. Operator/Live/Initialize/Deployment DEFERRED.
+
+
 ## Task 3D.4C — approved Policy v1.0 compatibility regression
 
 Owner-approved Q1–Q10 now supersede the historical 3D.4A unapproved draft. [ROLE_ONBOARDING_COMPATIBILITY.md](ROLE_ONBOARDING_COMPATIBILITY.md) describes test-only model/gates and remaining operational blockers. New role-compatibility.test.mjs + synthetic fixture:102 cases, npm test25 suites. No operational role/signup/auth/schema changes.

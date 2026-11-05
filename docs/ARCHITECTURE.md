@@ -1,5 +1,12 @@
 # SmartFleet - System Architecture
 
+## Task 3D.4D-1 — actual runtime account/version exclusion gates
+
+Current shared src/account-compatibility.ts strictly recognizes legacy Admin/Employee (including absent role) and refuses unknown roles, lifecycle fields and unsupported state/account versions. The separate future-v2 metadata validator grants no operational access. Storage guards before lazy writes and rechecks missing-key CAS; writeState/keyed writes guard current/candidate snapshots. Auth/session/root/Fleet projection, API and backup sources share the gate; generated trusted SQL target guards and the offline checker retain strict restore/environment/rotation rules. See [ROLE_ONBOARDING_COMPATIBILITY.md](ROLE_ONBOARDING_COMPATIBILITY.md).
+
+No schema/Fleet migration or existing record conversion; trips/ownerUserId/driverId/cars/audit/Maintenance/ledger preserved. Legacy signup remains its existing Employee behavior; Staff/User/PENDING/signup review NOT_ENABLED. Current guard implementation supersedes the historical3D.4C “no actual gate” status below, not the old deployed binary. Future credentials/root/authoritative lifecycle/mixed-reader cutover remain unimplemented. New164 cases plus prior25 suites =>26 offline suites; exact CI in PROGRESS. Operator/Live/Initialize/Deployment DEFERRED.
+
+
 ## Task 3D.4C — approved Policy v1.0, isolated compatibility spike
 
 Owner approved Q1–Q10 on2026-11-05; current policy record is [ROLE_ONBOARDING_CONTRACT.md](ROLE_ONBOARDING_CONTRACT.md), superseding the historical 3D.4A draft below. Staff own checkout/return/no amendment, all-history/minimized aggregates and Maintenance management; User own history/personal reports/basic reminders; signup pending/Admin exact-Person approval; legacy Employee unchanged.

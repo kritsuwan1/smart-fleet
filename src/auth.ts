@@ -2,6 +2,7 @@ import {ACCOUNT_LIMIT} from './limits';
 import {systemStatus} from './system-status';
 import {readState,writeState} from './storage';
 import {type Fleet,type Account,latestOdo} from './fleet';
+import {assertOperationalAccounts,legacyAccountRole} from './account-compatibility';
 export type User={id:string;username:string;name:string;role:'admin'|'employee';driverId:string;passwordVersion:number};
 const encode=new TextEncoder();export const COOKIE='__Host-smartfleet';export const MAX_AGE=8*3600;
 export const hex=(v:ArrayBuffer)=>Array.from(new Uint8Array(v),n=>n.toString(16).padStart(2,'0')).join('');
@@ -14,8 +15,9 @@ export function passwordValid(p:string){return typeof p==='string'&&p.length>=6&
 const constantEqual=(a:string,b:string)=>{if(a.length!==b.length)return false;let v=0;for(let i=0;i<a.length;i++)v|=a.charCodeAt(i)^b.charCodeAt(i);return v===0;};
 export async function verifyPassword(p:string,account:Account){return constantEqual(await hashPassword(p,account.salt),account.passwordHash);}
 export const cleanName=(s:string)=>s.trim().replace(/\s+/g,' ');
-const userFromAccount=(a:Account):User=>({id:a.id,username:a.username,name:a.name,role:a.role==='admin'?'admin':'employee',driverId:a.driverId,passwordVersion:a.passwordVersion});
+const userFromAccount=(a:Account):User=>({id:a.id,username:a.username,name:a.name,role:legacyAccountRole(a),driverId:a.driverId,passwordVersion:a.passwordVersion});
 export async function checkLogin(env:any,username:string,password:string,state:Fleet):Promise<User|null>{
+ assertOperationalAccounts(state);
  username=(username||'admin').trim().toLowerCase();
  if(username==='admin')return constantEqual(await digest(password),await digest(env.APP_PASSWORD))?{id:'admin',username:'admin',name:'ผู้ดูแลระบบ',role:'admin',driverId:'',passwordVersion:0}:null;
  const account=state.accounts?.find(a=>a.username===username);
@@ -24,6 +26,7 @@ export async function checkLogin(env:any,username:string,password:string,state:F
  return await verifyPassword(password,account)?userFromAccount(account):null;
 }
 export async function issueSession(env:any,state:Fleet,user:User){
+ user=currentUser(user,state);
  const value={uid:user.id,ver:user.passwordVersion,exp:Math.floor(Date.now()/1000)+MAX_AGE,nonce:crypto.randomUUID()};
  const body=btoa(JSON.stringify(value)).replaceAll('+','-').replaceAll('/','_').replace(/=+$/,'');
  return `${COOKIE}=${body}.${await sign(await signingKey(env,state),body)}; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=${MAX_AGE}`;
@@ -31,6 +34,7 @@ export async function issueSession(env:any,state:Fleet,user:User){
 export const clearSession=()=>`${COOKIE}=; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=0`;
 export async function sessionUser(req:Request,env:any,state:Fleet):Promise<User|null>{
  try{
+  assertOperationalAccounts(state);
   const cookie=(req.headers.get('cookie')||'').split(';').map(v=>v.trim()).find(v=>v.startsWith(COOKIE+'='))?.slice(COOKIE.length+1)||'';
   const [body,sig,...extra]=cookie.split('.');if(extra.length||!body||body.length>500||!/^[A-Za-z0-9_-]+$/.test(body)||!/^[a-f\d]{64}$/.test(sig||''))return null;
   const bytes=Uint8Array.from(sig.match(/../g)!,v=>parseInt(v,16));if(!await crypto.subtle.verify('HMAC',await key(await signingKey(env,state)),bytes,encode.encode(body)))return null;
@@ -41,12 +45,13 @@ export async function sessionUser(req:Request,env:any,state:Fleet):Promise<User|
  }catch{return null;}
 }
 export function currentUser(user:User,state:Fleet){
+ assertOperationalAccounts(state);
  if(user.id==='admin'&&user.role==='admin')return user;
  const account=state.accounts?.find(a=>a.id===user.id&&a.active&&a.passwordVersion===user.passwordVersion);if(!account)throw Error('UNAUTHORIZED');return userFromAccount(account);
 }
 export function viewForUser(state:Fleet,version:number,user:User,payloadBytes?:number){
  user=currentUser(user,state);const view=structuredClone(state);delete view.accounts;delete view.sessionKey;
- const members=user.role==='admin'?(state.accounts||[]).map(({id,username,name,active,createdAt,driverId,role})=>({id,username,name,active,createdAt,driverId,role:role==='admin'?'admin':'employee'})):[];
+ const members=user.role==='admin'?(state.accounts||[]).map(a=>({id:a.id,username:a.username,name:a.name,active:a.active,createdAt:a.createdAt,driverId:a.driverId,role:legacyAccountRole(a)})):[];
  const occupiedCars=state.trips.filter(t=>!t.end&&t.ownerUserId!==user.id).map(t=>t.carId);
  if(user.role!=='admin'){
   delete view.maintenanceHistory;

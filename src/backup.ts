@@ -2,17 +2,19 @@ import type {Fleet} from './fleet';
 import {portableChecksum} from './checksum';
 import {validateMaintenance} from './maintenance';
 import {validOdometer,validateTripValues} from './validation';
+import {assertOperationalAccounts} from './account-compatibility';
 export async function backupDigest(state:unknown){
  const input=new TextEncoder().encode(JSON.stringify(state));
  if(!globalThis.crypto?.subtle)return portableChecksum(input);
  const bytes=await crypto.subtle.digest('SHA-256',input);
  return Array.from(new Uint8Array(bytes),n=>n.toString(16).padStart(2,'0')).join('');
 }
-export async function createBackup(state:Fleet,appVersion:string,environment='production'){return {format:'smart-fleet-backup',schemaVersion:1,environment,exportedAt:new Date().toISOString(),appVersion,sha256:await backupDigest(state),state};}
+export async function createBackup(state:Fleet,appVersion:string,environment='production'){assertOperationalAccounts(state);return {format:'smart-fleet-backup',schemaVersion:1,environment,exportedAt:new Date().toISOString(),appVersion,sha256:await backupDigest(state),state};}
 export async function inspectBackup(text:string){
  if(new TextEncoder().encode(text).length>5_000_000)throw Error('ไฟล์ใหญ่เกิน 5 MB');
  let b:any;try{b=JSON.parse(text);}catch{throw Error('อ่าน JSON ไม่ได้ กรุณาเลือกไฟล์สำรอง JSON ของ Smart Fleet');}
  const s=b?.state;
+ assertOperationalAccounts(s);
  const fail=()=>{throw Error('โครงสร้างไฟล์สำรองไม่ครบหรือมีข้อมูลอ้างอิงไม่ถูกต้อง');};
  if(!s||typeof s!=='object'||!['cars','people','projects','trips','audit'].every(k=>Array.isArray(s[k]))||typeof s.imported!=='boolean')fail();
  const ids=(rows:any[])=>{const set=new Set<string>();for(const row of rows){if(!row||typeof row.id!=='string'||!row.id||set.has(row.id))fail();set.add(row.id);}return set;};

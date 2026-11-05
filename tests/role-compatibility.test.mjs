@@ -3,7 +3,7 @@ import {build} from 'esbuild';
 import {readFile} from 'node:fs/promises';
 import {fixture} from './fixtures/role-compatibility.mjs';
 import * as C from '../scripts/offline-role-compatibility.mjs';
-const built = await build({stdin: {contents: `export {createBackup,inspectBackup} from './src/backup';
+const built = await build({stdin: {contents: `export {createBackup,inspectBackup,backupDigest} from './src/backup';
 export {currentUser,viewForUser} from './src/auth';export {maintenanceStatus} from './src/maintenance';
 export {tripOperationContext,authorizeOperation} from './src/trip-operation';`, resolveDir: process.cwd()},
 bundle: true, write: false, format: 'esm', platform: 'node', define: {__FLEET_ENV__: '"demo"'}});
@@ -131,17 +131,20 @@ try {
     assert.deepEqual(enabled.fleet,d.fleet); assert.deepEqual(enabled.ledger,d.ledger);
   });
   for (const role of ['staff','user','admin']) await test(()=>assert.throws(()=>C.changeAccess(fresh(),'manager',3,'employee',{role,status:'APPROVED',at}),/LEGACY_CONVERSION_REFUSED/));
-  // Legacy operational behavior preserved; explicitly demonstrate why an old binary must never get new state.
+  // Historical coercion is retained as an explicit model; actual runtime now rejects it.
   await test(async()=>{
     const d=fresh(), user={...d.fleet.accounts[1]}, view=app.viewForUser(d.fleet,0,user);
     assert.equal(view.state.trips.length,2); assert.equal(view.user.role,'employee'); assert.equal(view.state.maintenanceHistory,undefined);
     const unsafe=clone(d.fleet); unsafe.accounts[1].role='staff'; unsafe.accounts[1].status='PENDING';
-    assert.equal(app.currentUser(user,unsafe).role,'employee'); // real old coercion, not claimed refusal
+    const preGateRole = a => a.role === 'admin' ? 'admin' : 'employee'; // pinned historical behavior, not a deployed-binary test
+    assert.equal(preGateRole(unsafe.accounts[1]),'employee');
+    assert.throws(()=>app.currentUser(user,unsafe),/ACCOUNT_FORMAT_UNSUPPORTED/);
     assert.throws(()=>C.legacyReader(unsafe)); assert.throws(()=>C.legacyReader(d));
     const legacyBackup=JSON.stringify(await app.createBackup(d.fleet,'synthetic','demo'));
     await C.inspectLegacyApplicationBackup(legacyBackup,app.inspectBackup);
-    const poisoned=JSON.stringify(await app.createBackup(unsafe,'synthetic','demo'));
-    await app.inspectBackup(poisoned); // old inspector does not understand new authorization policy
+    await assert.rejects(()=>app.createBackup(unsafe,'synthetic','demo'),/ACCOUNT_FORMAT_UNSUPPORTED/);
+    const poisoned=JSON.stringify({...JSON.parse(legacyBackup),state:unsafe,sha256:await app.backupDigest(unsafe)});
+    await assert.rejects(()=>app.inspectBackup(poisoned),/ACCOUNT_FORMAT_UNSUPPORTED/);
     await assert.rejects(()=>C.inspectLegacyApplicationBackup(poisoned,app.inspectBackup));
   });
   for (const reader of [1,2]) await test(async()=>{

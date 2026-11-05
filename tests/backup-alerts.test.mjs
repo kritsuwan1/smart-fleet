@@ -33,7 +33,7 @@ const invalid=structuredClone(state);invalid.trips[0].carId='missing';await asse
 const sqlText=await (await request('/api/backup.sql')).text();
 for(const populated of [false,true]){
  const target=new DatabaseSync(':memory:');
- if(populated){target.exec('CREATE TABLE fleet_store(id TEXT PRIMARY KEY NOT NULL,payload TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 0)');target.prepare('INSERT INTO fleet_store VALUES (?,?,?)').run('main',JSON.stringify({obsolete:true}),7);}
+ if(populated){target.exec('CREATE TABLE fleet_store(id TEXT PRIMARY KEY NOT NULL,payload TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 0)');target.prepare('INSERT INTO fleet_store VALUES (?,?,?)').run('main',JSON.stringify({...state,trips:[],audit:[]}),7);}
  target.exec(sqlText);
  const restored=JSON.parse(target.prepare("SELECT payload FROM fleet_store WHERE id='main'").get().payload);
  assert.notEqual(restored.sessionKey,state.sessionKey);assert.deepEqual({...restored,sessionKey:''},{...state,sessionKey:''});

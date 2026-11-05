@@ -8,10 +8,11 @@ import {manualFuel,validMonth} from './fuel';
 import {planImport} from './import-plan';
 import {changeMaintenance} from './maintenance';
 import {validOdometer} from './validation';
+import {AccountCompatibilityError} from './account-compatibility';
 export function fleetApi(env:any,user:User){
 const json=(v:unknown,status=200)=>Response.json(v,{status,headers:{'Cache-Control':'no-store'}});
 async function GET(){try{const {state,version,payloadBytes}=await readState(env);return json(viewForUser(state,version,user,payloadBytes));}catch(e){return fail(e);}}
-function fail(e:unknown){if(e instanceof OperationError)return json({error:e.message,code:e.code},e.status);const m=e instanceof Error?e.message:'เกิดข้อผิดพลาด';return json({error:m},m==='UNAUTHORIZED'?401:m==='FORBIDDEN'?403:400);}
+function fail(e:unknown){if(e instanceof AccountCompatibilityError)return json({error:e.message,code:e.message},503);if(e instanceof OperationError)return json({error:e.message,code:e.code},e.status);const m=e instanceof Error?e.message:'เกิดข้อผิดพลาด';return json({error:m},m==='UNAUTHORIZED'?401:m==='FORBIDDEN'?403:400);}
 async function POST(req:Request){try{
  if(req.headers.get('origin')&&new URL(req.headers.get('origin')!).host!==new URL(req.url).host)return json({error:'คำขอไม่ถูกต้อง'},403);
  const raw=await req.text();if(raw.length>1000000)throw Error('ข้อมูลมีขนาดใหญ่เกินกำหนด');

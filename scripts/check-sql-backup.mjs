@@ -14,18 +14,19 @@ try{
  let statement='';const statements=[];
  for(const part of matches){if(part.startsWith('--'))continue;if(part===';'){if(statement.trim())statements.push(statement.trim());statement='';}else statement+=part;}
  if(statement.trim())throw Error('ไฟล์ SQL ไม่ครบ');
+ const built=await build({stdin:{contents:`export {createBackup,inspectBackup} from './src/backup';export {operationalAccountsSql} from './src/account-compatibility';`,resolveDir:fileURLToPath(new URL('../',import.meta.url))},bundle:true,write:false,format:'esm',platform:'node'});
+ const {createBackup,inspectBackup,operationalAccountsSql}=await import('data:text/javascript;base64,'+Buffer.from(built.outputFiles[0].text).toString('base64'));
+ const guard=`SELECT CASE WHEN NOT EXISTS(SELECT 1 FROM fleet_store WHERE id='main' AND NOT (${operationalAccountsSql('payload')})) THEN 1 ELSE json('ACCOUNT_FORMAT_UNSUPPORTED') END`;
  const allowed=[/^CREATE TABLE IF NOT EXISTS fleet_store\(/i,/^INSERT OR REPLACE INTO fleet_store\(id,payload,version\) VALUES\(/i,/^UPDATE fleet_store SET payload=payload \|\| '/i,/^INSERT INTO fleet_store\(id,payload,version\) SELECT 'main',json_set\(payload,/i,/^DELETE FROM fleet_store WHERE id=/i];
  // Also reject extra SQL tokens hidden after an otherwise-valid prefix.
  for(const line of statements){
   const withoutStrings=line.replace(/'(?:(?:'')|[^'])*'/g,"''");
-  if(!allowed.some(pattern=>pattern.test(line))||/\b(ATTACH|DETACH|PRAGMA|DROP|ALTER|load_extension|readfile|writefile)\b/i.test(withoutStrings))throw Error('รองรับเฉพาะ SQL สำรองที่สร้างจาก Smart Fleet');
+  if(!(line===guard||allowed.some(pattern=>pattern.test(line)))||/\b(ATTACH|DETACH|PRAGMA|DROP|ALTER|load_extension|readfile|writefile)\b/i.test(withoutStrings))throw Error('รองรับเฉพาะ SQL สำรองที่สร้างจาก Smart Fleet');
  }
  const environment=/^-- environment: demo$/m.test(text)?'demo':'production';
  if(environment==='demo'){db.exec("CREATE TABLE fleet_store(id TEXT PRIMARY KEY NOT NULL,payload TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 0); INSERT INTO fleet_store VALUES('environment','demo',0)");}
  db.exec(text);
  const row=db.prepare("SELECT payload FROM fleet_store WHERE id='main'").get();if(!row)throw Error('ไม่มีข้อมูลหลักในไฟล์ SQL');
- const built=await build({entryPoints:[fileURLToPath(new URL('../src/backup.ts',import.meta.url))],bundle:true,write:false,format:'esm',platform:'node'});
- const {createBackup,inspectBackup}=await import('data:text/javascript;base64,'+Buffer.from(built.outputFiles[0].text).toString('base64'));
  const summary=await inspectBackup(JSON.stringify(await createBackup(JSON.parse(row.payload),'SQL restore test',environment)));
  console.log('ทดสอบกู้คืน SQL ในฐานข้อมูลจำลองสำเร็จ ไม่ได้เชื่อมต่อหรือแก้ไข Production');
  console.log(`รถ ${summary.cars} คัน · พนักงาน ${summary.people} คน · การเดินทาง ${summary.trips} รายการ · ยังไม่คืน ${summary.open} · บัญชี ${summary.accounts} · ประวัติแก้ไข ${summary.audit}`);

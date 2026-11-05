@@ -1,5 +1,71 @@
 # Task 3D.4C — Offline role/onboarding compatibility spike
 
+## Task 3D.4D-1 — actual Development runtime gates (current)
+
+2026-11-05, approved Policy v1.0. **Guard implementation verified offline; Staff/User/lifecycle activation NOT_ENABLED. Operator/Live/Initialize/Deployment DEFERRED.** The 3D.4C sections below are historical spike evidence, superseded here only for the implemented reader boundaries.
+
+### Accepted representation and future record boundary
+
+[src/account-compatibility.ts](../src/account-compatibility.ts) is the shared strict reader policy. Valid legacy Fleet has core cars/people/trips/audit/projects arrays, imported boolean, optional accounts, and optional nonempty string sessionKey. Missing sessionKey is the recognized old-state lazy-key migration; null/empty/non-string keys are ambiguous and refused, not repaired. No existing valid record is normalized or converted.
+
+Legacy accounts accept only role admin, employee or an absent role explicitly adapted to employee. They require nonempty id/username/name/salt/passwordHash/driverId, boolean active, nonnegative safe-integer passwordVersion, an existing Person link and unique account IDs/usernames. Stored root-id/username admin is ambiguous (the existing root lives outside accounts), so fail closed for review. No password derivation, minimum length, root secret, signing claims or session expiry policy changed. The guard checks credential field shape, not provenance or password-hash algorithm migration. Invalid/unknown credentials never trigger repair or account conversion.
+
+The absent account-format marker denotes existing legacy version1; explicit top-level accountFormatVersion=1 also requires exactly those legacy security semantics. No marker is added by reads/writes. Unsupported versions, wrappers, authorization/security/policy markers and inline lifecycle fields are refused. Unknown non-security legacy fields remain intact. Legacy active=false is supported and still denies that account; it does not block other valid legacy users.
+
+Future **metadata-only** shape is separately named FutureAccountMetadata:
+~~~text
+{accountFormatVersion:2, role:admin|staff|user|legacy-employee,
+ status:PENDING|APPROVED|REJECTED|DISABLED,
+ personId:string|null, accessRevision:nonnegative safe integer}
+~~~
+APPROVED requires a Person ID; null permits an unlinked PENDING review design. inspectFutureAccountMetadata can validate/clone this exact metadata shape for local tests. It supplies no credential record, persistence, permission, approval proof or session. Operational readers reject every such version2 record, including APPROVED, and the entire incompatible Fleet. They never guess Employee from unknown roles or active=true. This is a safe exclusion gate, not partial activation of the new model.
+
+### Actual runtime integration
+
+| Boundary | Enforcement / preserved behavior |
+| --- | --- |
+| storage.readState | Read/parse/guard existing main before lazy initialization/key writes. Existing keyed state is read-only. Recognized missing-key state is rechecked and updated with expected version; re-read/guard after CAS, fail if a concurrent update prevents obtaining a valid key. Never mutate unsupported stored snapshots. Safe parser exposes only ACCOUNT_FORMAT_UNSUPPORTED, no malformed JSON fragments. |
+| storage.writeState / writeTripOperation | Guard candidate before any write, read/guard stored main and check version before existing CAS. Stored/candidate mismatch refuses; same version-CAS/atomic3-statement operation batch remains authoritative. No data rewrite/migration or sequential fallback. |
+| auth.checkLogin/currentUser/sessionUser/issueSession/viewForUser | Guard even before root shortcut/credential comparison. Explicit legacyAccountRole, no non-admin fallback. Session issuance rechecks current account/passwordVersion; bad snapshots cannot mint/use sessions or serialize Fleet/members. Disabled legacy account remains denied; normal legacy Admin/Employee scope/login unchanged. |
+| Fleet API | Existing auth/ownership/validation/action guards retained; compatibility failures return sanitized503 ACCOUNT_FORMAT_UNSUPPORTED, no Fleet/result. No new HTTP routes or actions. |
+| Worker dispatch | Existing readState guard covers login/registration/assets/API/backup entry paths. Incompatible state fails503 before rate-limit/registration writes. Normal legacy signup still creates Employee exactly as before; no pending/staff/user signup or review UI is activated. |
+| createBackup / inspectBackup | Guard account/version shape before export/inspection acceptance. New/legacy envelope support and SHA256 checks unchanged for valid data; incompatible source or correctly rehashed bad account data refuses. |
+| automatic artifacts / isolated restore | Existing paths reuse createBackup/inspectBackup, so refusal precedes restore mutation. Existing target/environment/empty-only guards/session-key rotation preserved; no automatic-backup/Cron/R2 behavior activated. |
+| SQL backup | Export parses/guards the exact row read. Generated trusted SQL adds the same account policy as a target preflight after CREATE IF NOT EXISTS and before scratch-row creation or main replacement. On an existing incompatible target, schema/rows/versions/ledger stay unchanged. Empty-target table creation and valid legacy target restore remain supported. |
+| offline SQL rehearsal | Accepts the exact generated new SELECT guard, not a permissive SQL prefix; existing restricted SQL statement checks remain. No cloud connection/real DB is introduced. |
+
+JS and generated SQL share reserved-field lists and are tested for positive/negative parity, including optional legacy data, numeric versions and null/unknown/security/root collisions. Refusal of malformed JSON or SQL JSON types is safe denial, not schema repair. SQL uses only fixed internal payload expressions, never user-selected identifiers or request SQL.
+
+### Backup, old-reader and rollback limits
+
+Full backup format remains schemaVersion1 for valid legacy Fleet; no new credential storage format is enabled. The sidecar v2 spike envelope remains quarantined and cannot be installed in operational main. Backup bytes/metadata checksums still detect integrity, not trusted origin or identity proof. Existing main-only backup exclusion of the operation ledger and session-epoch reset on restore remain explicit limitations.
+
+New SQL exports refuse incompatible existing targets before effective mutation. A prior green test used {obsolete:true} as a populated target; it is now an explicit rejection case. The valid populated-restore fixture uses an actual legacy Fleet instead. This intentionally rejects invalid targets while preserving valid legacy restore/rotation. The original environment guards are unchanged.
+
+**Arbitrary/manual SQL and pre-gate SQL files are not made safe by a JavaScript gate.** Only the new trusted generated export and existing isolated test/rehearsal contracts are verified. Do not execute untrusted/tampered SQL or an old restore script against new-format data. No operational SQL execution/restore is authorized here. A generic untrusted-SQL importer is not added.
+
+Current Development readers now fail closed; **old deployed binaries are unchanged**. Tests preserve the pre-gate role-coercion behavior as an explicitly labeled small historical model, demonstrate that old behavior is unsafe for future data, and verify refusal in the actual new modules/Worker. They do not certify an old deployed binary. Older-reader exclusion in a mixed-version rollout still requires a separately approved storage/access/runtime cutover. Since this task writes no future states, no such migration is needed now.
+
+Rollback compatibility is tested for unchanged recognized legacy data, preserved original IDs/accounts/history/ledger and operation replay. A previous binary may still read that unchanged legacy layout, but loses these new security gates. Never downgrade over future status/version data; the 3D.4C exact-candidate/no-loss rollback rules remain in force. No schema/data migration, root credential change, account conversion, ledger pruning or actual rollback occurs.
+
+### Tests and current evidence
+
+New tests/operational-compatibility.test.mjs:164 synthetic cases in npm test (26 suites). Covers JS/SQL compatibility parity; future metadata/status cross-product; zero-write refusal before missing-key initialization, login/rate-limit/register/API; direct session/root/Fleet/member/export denial; valid absent-role/disabled legacy compatibility; candidate and stored-state write refusal/CAS races; malformed-payload redaction; correctly rehashed bad account backups; complete schema/row/version/ledger snapshots on SQL/automatic-restore refusal; valid restore/session rotation; actual concurrent same-ID return/lost acknowledgement/replay/conflict/recovery with one audit/odometer commit. External-fetch tripwire zero.
+
+Existing102 compatibility cases retain their invariants; only the old “current auth accepts unsupported data” probe now expects actual refusal and labels the earlier coercion as historical. Existing backup-alerts valid populated target is corrected as above; its invalid-target case is explicitly covered by the new suite. Prior45 transaction/163 value-validation/account/role/Maintenance/security suites retained, not weakened.
+
+Windows x64 Node24.22.1 npm ci PASS (42 installed/audited43, reported0 vulnerabilities; existing install-script restrictions unchanged), build PASS (Demo1014923/Production1013549/Staging1013696 bytes), typecheck PASS, all26 suites PASS. No lint script. Exact implementation Linux CI follows publication; no prior-run substitution. No new browser/physical-device/cloud/credential/real DB claim.
+
+### Proposed Task 3D.4D-2 (separate scoped authorization)
+
+Review/define the authoritative persisted account/credential/lifecycle model and root adapter, versioned backup/restore admission and denial-preserving mixed-reader cutover with synthetic fixtures first. Then integrate current-status/capability/DTO projection under approved v1.0 in reviewed increments; preserve Employee behavior and immutable historical ownership. Do not enable signup/role assignment/review UI until that representation and session/transaction reconciliation are validated.
+
+Remaining limits: future metadata is not a complete credential record; no new state reader, approval workflow, identity-proof mechanism, status UI, generic migration or mixed-version deployment mechanism. Ambiguous credential/root/format records fail closed for review rather than guessed conversion. New features remain NOT_ENABLED, full new-policy route/UI acceptance NOT_RUN; Operator/Live/Initialize/Deployment remain DEFERRED.
+
+---
+
+## Historical Task 3D.4C spike record
+
 2026-11-05, Asia/Bangkok. Development branch dev/smartfleet-batch-1. Owner-approved SmartFleet Role & Onboarding Policy v1.0 is recorded in [ROLE_ONBOARDING_CONTRACT.md](ROLE_ONBOARDING_CONTRACT.md).
 
 **OFFLINE SPIKE PASS; new operational roles/signup NOT_ENABLED. Operator/Live/Initialize/Deployment DEFERRED.** No Cloudflare/real DB/credential access, resources, routes, R2/Cron, Production/Demo changes, initialize/deploy/merge or actual account migration. Mock approval flags are not real identity proof.

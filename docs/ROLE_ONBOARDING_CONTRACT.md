@@ -4,6 +4,8 @@ Date: 2026-11-05 (Asia/Bangkok). Repository: kritsuwan1/smart-fleet. Branch: dev
 
 **POLICY v1.0 APPROVED FOR OFFLINE DEVELOPMENT — OPERATIONAL ACTIVATION NOT APPROVED / NOT ENABLED.** No existing Employee conversion or actual account/auth change. Operator/Live/Initialize/Deployment remain DEFERRED; actual operational verification remains NOT_VERIFIED.
 
+**3D.4D-1 current implementation:** Development now has strict operational legacy/version/role/status exclusion guards, tested offline. This supersedes historical unknown-role coercion claims for the new source only. Legacy signup/permissions remain unchanged; Staff/User/lifecycle activation NOT_ENABLED. Future metadata has no credential/root adapter or approval workflow. Details: [ROLE_ONBOARDING_COMPATIBILITY.md](ROLE_ONBOARDING_COMPATIBILITY.md). No old deployed binary, real account or cloud behavior is changed.
+
 ## Policy v1.0 — owner approval recorded 2026-11-05
 
 The owner approved Q1–Q10 in the Task 3D.4C instruction. This supersedes the original draft choices below; it does not approve operational activation, account conversion, cloud access or deployment.
