@@ -6,8 +6,8 @@ import {vehicleProfile} from './vehicle-profile';
 import VehicleActionButton from './VehicleActionButton';
 
 const num=(n:number)=>n.toLocaleString('en-US');
-type Props={state:Fleet;trip:any;mode:'start'|'return';busy:boolean;error:string;employee:boolean;occupiedCars:Set<string>;onSubmit:(v:any)=>void;onClose:()=>void};
-export default function JourneyForm({state:s,trip,mode,busy,error,employee,occupiedCars,onSubmit,onClose}:Props){
+type Props={state:Fleet;trip:any;mode:'start'|'return';busy:boolean;uncertain?:boolean;error:string;employee:boolean;occupiedCars:Set<string>;onSubmit:(v:any)=>void;onClose:()=>void};
+export default function JourneyForm({state:s,trip,mode,busy,uncertain=false,error,employee,occupiedCars,onSubmit,onClose}:Props){
  const [v,setV]=useState({...trip});
  const errorRef=useRef<HTMLDivElement>(null);
  useEffect(()=>{if(error)errorRef.current?.focus();},[error]);
@@ -17,7 +17,7 @@ export default function JourneyForm({state:s,trip,mode,busy,error,employee,occup
  const distance=v.odoEnd!==''&&v.odoEnd!==null&&v.odoEnd!==undefined?Number(v.odoEnd)-Number(v.odoStart):null;
  const discontinuous=!returning&&v.odoStart!==''&&Number(v.odoStart)!==expected;
  return <form className="journey-form" onSubmit={e=>{e.preventDefault();if(!busy)onSubmit(v);}} aria-busy={busy}>
-  <fieldset disabled={busy} className="journey-fields"><div className="modal-body">
+  <fieldset disabled={busy||uncertain} className="journey-fields"><div className="modal-body">
    <div className="journey-vehicle">{profile?.image==='revo'?<img src="/vehicle-revo-canopy.webp" alt="Toyota Hilux Revo พร้อมหลังคาครอบกระบะ" width="132" height="88"/>:<CarFront size={64}/>}<div><strong>{car?.plate||'เลือกรถยนต์'}</strong><p>{profile?.model||'รถยนต์บริษัท'}</p><small>{profile?.fuel}</small></div></div>
    {!returning&&s.cars.filter(c=>c.active).length>1&&<label className="field journey-car-select"><span>รถยนต์ <b>*</b></span><select value={v.carId} onChange={e=>{const id=e.target.value;setV((p:any)=>({...p,carId:id,odoStart:latestOdo(s,id)}));}} required>{s.cars.filter(c=>c.active).map(c=><option key={c.id} value={c.id} disabled={occupiedCars.has(c.id)}>{c.plate}{occupiedCars.has(c.id)?' · กำลังใช้งาน':''}</option>)}</select></label>}
    {returning?<section className="journey-summary"><h3><Clock3 size={21}/>กำลังใช้งาน</h3><dl><div><dt>งาน / โครงการ</dt><dd>{v.project}</dd></div><div><dt>สถานที่ไป</dt><dd>{v.destination}</dd></div><div><dt>ผู้ขับรถ</dt><dd>{s.people.find(p=>p.id===v.driverId)?.name||'—'}</dd></div><div><dt>เวลาออกเดินทาง</dt><dd>{new Date(v.start+'+07:00').toLocaleString('th-TH',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'Asia/Bangkok'})} น.</dd></div><div><dt>เลขไมล์ตอนรับรถ</dt><dd>{num(Number(v.odoStart))} กม.</dd></div></dl></section>:employee?<div className="journey-driver"><Users size={23}/><span>ผู้ขับรถ</span><strong>{s.people.find(p=>p.id===v.driverId)?.name||'—'}</strong><LockKeyhole size={17} aria-label="ใช้บัญชีที่เข้าสู่ระบบ"/></div>:<label className="field journey-driver-select"><span>พนักงานขับรถ <b>*</b></span><select value={v.driverId} onChange={e=>set('driverId',e.target.value)} required><option value="">เลือกพนักงาน</option>{s.people.filter(p=>p.active||p.id===v.driverId).map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></label>}
@@ -33,6 +33,6 @@ export default function JourneyForm({state:s,trip,mode,busy,error,employee,occup
    {(discontinuous||v.reason||error.includes('เลขไมล์ไม่ต่อเนื่อง'))&&<label className="field journey-reason"><span>เหตุผลกรณีเลขไมล์ไม่ต่อเนื่อง{discontinuous&&<b> *</b>}</span><input value={v.reason||''} onChange={e=>set('reason',e.target.value)} placeholder="เช่น มีการใช้รถก่อนรายการนี้" required={discontinuous} maxLength={1000}/></label>}
   </div></fieldset>
   {error&&<div className="alert error journey-error" role="alert" ref={errorRef} tabIndex={-1}><AlertCircle size={18}/>{error}</div>}
-  <div className="modal-footer journey-footer"><VehicleActionButton type="submit" variant={returning?'return':'start'} disabled={busy} aria-busy={busy}>{busy?'กำลังบันทึก…':returning?'ยืนยันคืนรถ':'ยืนยันบันทึกใช้รถ'}</VehicleActionButton><button type="button" className="journey-cancel" disabled={busy} onClick={onClose}>ยกเลิก</button></div>
+  <div className="modal-footer journey-footer"><VehicleActionButton type="submit" variant={returning?'return':'start'} disabled={busy} aria-busy={busy}>{busy?'กำลังบันทึก…':returning?'ยืนยันคืนรถ':'ยืนยันบันทึกใช้รถ'}</VehicleActionButton><button type="button" className="journey-cancel" disabled={busy||uncertain} onClick={onClose}>ยกเลิก</button></div>
  </form>;
 }

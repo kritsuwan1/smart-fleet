@@ -1,5 +1,12 @@
 # SmartFleet - System Architecture
 
+## Task 3D.3 — idempotent checkout/return transactions
+
+[TRANSACTION_RELIABILITY.md](TRANSACTION_RELIABILITY.md): updated checkout/return UI sends stable UUID/kind metadata. API fingerprints payload and scopes operation rows to authenticated actor/Fleet session-key epoch; original result/receipt is replayed only after current authorization and matching-payload checks, with fresh scoped Fleet data. Ledger rows use existing fleet_store IDs trip-operation:v1:<digest>; no Fleet shape/SQL schema change. Operation insert, main optimistic CAS and consistency assertion execute atomically through D1.batch; unavailable batch never falls back to separate writes. Keyed requests use first-primary sessions when available; replays read Fleet after result lookup. Same-ID concurrency/lost acknowledgements do not repeat effective writes.
+
+App synchronous save/pending guards, acknowledged-result validation and JourneyForm uncertainty lock complement server guarantees. Legacy unkeyed requests keep CAS-only semantics. Operational ledger is excluded from main-only Fleet backups, has no pruning, and pending client IDs are memory-only; guarantees do not span restore/key rotation/closed tabs. Rollback requires resolving keyed attempts before an explicitly approved client/server downgrade. SQLite/Miniflare45 scenarios, prior23 suites and a local360px Browser flow PASS; exact Linux evidence is in PROGRESS after publication. Worker/routes/config/schema unchanged; Operator/Live/Initialize/Deploy DEFERRED.
+
+
 ## Task 3D.2 — current validation boundaries
 
 [DATA_VALIDATION_CONSISTENCY.md](DATA_VALIDATION_CONSISTENCY.md): new src/validation.ts shares only the existing Trip timestamp/calendar/chronology/open-closed odometer rules and 0–99999999 integer bound. fleet.ts preserves cross-trip/reference/text/reason policy; backup.ts uses value checks for current/legacy JSON; api.ts and App car input use the same odo bound. No Fleet/SQL shape, Worker/routes/config or stored-data mutation policy changed. Existing automatic-artifact inspection refuses invalid values before the local restore library can write; arbitrary trusted SQL is not validated by JS.

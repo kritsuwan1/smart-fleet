@@ -1,5 +1,7 @@
 import {validateTrip,type Fleet,type Trip} from './fleet';
-import {readState,writeState} from './storage';
+import {readState,writeState,writeTripOperation} from './storage';
+import {tripOperationContext,readTripOperation,authorizeOperation,OperationError,type OperationRecord} from './trip-operation';
+import {tripReceiptFromResponse} from './trip-receipt';
 import {currentUser,viewForUser,passwordValid,hashPassword,type User,hex,cleanName,clearSession} from './auth';
 import {importedTrips} from './seed';
 import {manualFuel,validMonth} from './fuel';
@@ -9,19 +11,33 @@ import {validOdometer} from './validation';
 export function fleetApi(env:any,user:User){
 const json=(v:unknown,status=200)=>Response.json(v,{status,headers:{'Cache-Control':'no-store'}});
 async function GET(){try{const {state,version,payloadBytes}=await readState(env);return json(viewForUser(state,version,user,payloadBytes));}catch(e){return fail(e);}}
-function fail(e:unknown){const m=e instanceof Error?e.message:'เกิดข้อผิดพลาด';return json({error:m},m==='UNAUTHORIZED'?401:m==='FORBIDDEN'?403:400);}
+function fail(e:unknown){if(e instanceof OperationError)return json({error:e.message,code:e.code},e.status);const m=e instanceof Error?e.message:'เกิดข้อผิดพลาด';return json({error:m},m==='UNAUTHORIZED'?401:m==='FORBIDDEN'?403:400);}
 async function POST(req:Request){try{
  if(req.headers.get('origin')&&new URL(req.headers.get('origin')!).host!==new URL(req.url).host)return json({error:'คำขอไม่ถูกต้อง'},403);
  const raw=await req.text();if(raw.length>1000000)throw Error('ข้อมูลมีขนาดใหญ่เกินกำหนด');
- const b=JSON.parse(raw);const {state:s,version}=await readState(env);
+ const b=JSON.parse(raw);
+ const scopedEnv=b.action==='trip'&&b.tripOperation!==undefined&&typeof env.DB?.withSession==='function'?{...env,DB:env.DB.withSession('first-primary')}:env;
+ const {state:s,version}=await readState(scopedEnv);
  const actorUser=currentUser(user,s),actor=actorUser.name;
  if(actorUser.role!=='admin'&&b.action!=='trip')return json({error:'FORBIDDEN'},403);
+ const operation=b.action==='trip'&&b.tripOperation!==undefined?await tripOperationContext(b.tripOperation,b.data,actorUser,s):null;
+ function result(record:OperationRecord,state:Fleet,currentVersion:number,replayed:boolean){
+  const current=currentUser(user,state);authorizeOperation(record,operation!,state,current);
+  return json({...viewForUser(state,currentVersion,current),tripResult:record.tripResult,tripReceipt:record.receipt,tripOperation:{id:record.id,kind:record.kind,version:record.version,replayed}});
+ }
+ async function replay(record:OperationRecord){
+  const latest=await readState(scopedEnv);
+  if(latest.state.sessionKey!==s.sessionKey)throw new OperationError('ข้อมูลถูกกู้คืนหรือเปลี่ยนรุ่น กรุณารีเฟรช',409,'OPERATION_STATE_CHANGED');
+  return result(record,latest.state,latest.version,true);
+ }
+ if(operation){const record=await readTripOperation(scopedEnv,operation.key);if(record)return await replay(record);}
  if(b.version!==version)return json({error:'ข้อมูลเปลี่ยนแปลงจากหน้าต่างอื่นแล้ว กรุณารีเฟรชและลองใหม่'},409);
  let before:unknown=null,after:unknown=null,action='';
  let importResult:unknown=undefined;
  let tripResult:{id:string;operation:'start'|'return'|'edit'|'historical'}|undefined;
  if(b.action==='trip'){
   const old=s.trips.find(t=>t.id===b.data.id);before=old||null;
+  if(operation?.operation.kind==='return'&&(!old||old.end))throw new OperationError('รายการนี้ไม่อยู่ในสถานะรอคืนรถ',409,'OPERATION_STATE_CHANGED');
   const d=b.data;
   if(actorUser.role!=='admin'){
    if(old&&(old.ownerUserId!==actorUser.id||old.end))return json({error:'ไม่มีสิทธิ์แก้ไขรายการนี้'},403);
@@ -110,6 +126,21 @@ async function POST(req:Request){try{
   s.imported=true;after={count:importedTrips.length,source:'บันทึกการใช้รถ.xlsx'};action='นำเข้า Excel ต้นฉบับ';
  }else throw Error('ไม่รองรับคำสั่งนี้');
  s.audit.unshift({id:crypto.randomUUID(),time:new Date().toISOString(),actor,action,before,after});
+ if(operation){
+  const receipt=tripReceiptFromResponse({state:s,tripResult});
+  if(!receipt||receipt.kind!==operation.operation.kind)throw new OperationError('ผลรายการไม่ตรงกับคำขอ',400,'OPERATION_INVALID');
+  const record:OperationRecord={format:1,commitToken:crypto.randomUUID(),...operation.operation,actorId:actorUser.id,actorRole:actorUser.role,actorDriverId:actorUser.driverId,carId:receipt.trip.carId,fingerprint:operation.fingerprint,version:version+1,tripResult:{id:receipt.trip.id,operation:receipt.kind},receipt};
+  try{if(await writeTripOperation(scopedEnv,s,version,operation.key,record))return result(record,s,version+1,false);}
+  catch(error){
+   if(error instanceof OperationError)throw error;
+   // An acknowledgement can be lost after commit. Read only; never issue a second write here.
+   try{const committed=await readTripOperation(scopedEnv,operation.key);if(committed)return await replay(committed);}catch(e){if(e instanceof OperationError||e instanceof Error&&['UNAUTHORIZED','FORBIDDEN'].includes(e.message))throw e;}
+   throw new OperationError('ยังยืนยันผลการบันทึกไม่ได้ กรุณาลองรายการเดิมอีกครั้ง',503,'OPERATION_UNAVAILABLE');
+  }
+  const committed=await readTripOperation(scopedEnv,operation.key);
+  if(committed)return await replay(committed);
+  return json({error:'มีการบันทึกพร้อมกัน กรุณารีเฟรชแล้วลองใหม่'},409);
+ }
  if(!await writeState(env,s,version))return json({error:'มีการบันทึกพร้อมกัน กรุณารีเฟรชแล้วลองใหม่'},409);
  if(b.action==='account'&&b.data.id===actorUser.id)return new Response(JSON.stringify({reauthenticate:true}),{headers:{'Content-Type':'application/json','Cache-Control':'no-store','Set-Cookie':clearSession()}});
  return json({...viewForUser(s,version+1,actorUser),importResult,tripResult});

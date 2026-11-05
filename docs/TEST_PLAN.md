@@ -1,5 +1,15 @@
 # SmartFleet - Test Plan
 
+## Task 3D.3 — atomic transaction result replay / client uncertainty
+
+- Prerequisite verified: exact3D.2 implementation77b3607 expected files, a57bf7d docs-only follow-up and Linux41755017762 PASS all23 suites. Baseline old API reproduced checkout duplicate200/409/lost-reply retry409 and fresh-version Admin return retry changing version2→3.
+- New transaction-reliability.test.mjs: 45 scenarios in npm test (24 suites). Same-ID duplicate/concurrent checkout/return => original result, one main/audit/odo change; changed payload/car/kind =>409/no write; stale/fresh-version replay, JSON key order, user namespaces, disabled/demoted/foreign-user denial, invalid ID/intent/odo, competing vehicles/global CAS and retry of actual loser. No test assumes which concurrent request wins.
+- Atomic SQLite batch faults at each of3 statements =>rollback/no orphan; lost batch ack =>readback; missing batch =>503/no sequential fallback. Primary-first session, concurrent revocation, capacity refusal, malformed ledger and actual offline Miniflare D1 batch concurrency tested. Replay reads Fleet after locating stored result to avoid stale authorization snapshots; previous23 suites retain auth/env/schema/validation coverage.
+- Client tests: same-task latch, stable ID/payload on lost/timeout/late replies, no automatic retry, changed intent blocked while unknown, original return receipt, 400/401/403/409/503 outcomes, malformed acknowledgement/state withheld from success. Replayed receipt remains original while fresh scoped state may show later return. IDs in memory only; reload/restore/legacy-client limits explicit in TRANSACTION_RELIABILITY.md.
+- Optional transaction-browser.mjs actual Edge156.0.4314.58, 360px, isolated loopback/synthetic SQLite/injected identity: same-task double start submits one POST; intercept response after committed return then abort to create deterministic lost reply; unknown form/close/cancel disabled; explicit double retry sends one same-ID request; unchanged version2/data, one trip/two audit/two ledger rows. This is not actual cloud auth/physical mobile acceptance; uses existing ignored Playwright, no app dependency added.
+- Windows Nodev24.22.1 npm ci/build/typecheck/all24 suites PASS, new45 and prior validation163/security/Maintenance/Backup/permissions suites PASS. No lint. Exact-commit Linux evidence follows in PROGRESS. Public D1 batch contract reviewed; real provider/Operator/Live/Initialize/Deploy remain DEFERRED/NOT_VERIFIED. Migration/rollback compatibility and remaining retention/reload risks documented; no live SQL or rollback run.
+
+
 ## Task 3D.2 — shared value validation and no-mutation recovery regression
 
 - Prerequisite 3D.1 verified before development: acbc8bf exists as Development HEAD with exactly eight docs-only changes. Both source bugs first reproduced with failing new assertions (backupRejected=false / carStatus=200), now reject (true / 400).

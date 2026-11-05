@@ -1,6 +1,6 @@
 # SmartFleet Development Roadmap
 
-Updated 2026-11-04 (Asia/Bangkok), Task 3D.2; audit 3D.1 verified closed. Repository kritsuwan1/smart-fleet; active branch dev/smartfleet-batch-1. App label/baseline v3.8.5; targets remain v3.8.6 through v4.2.0, without assigning a deployment/release date.
+Updated 2026-11-05 (Asia/Bangkok), Task 3D.3; prerequisites 3D.1/3D.2 verified. Repository kritsuwan1/smart-fleet; active branch dev/smartfleet-batch-1. App label/baseline v3.8.5; targets remain v3.8.6 through v4.2.0, without assigning a deployment/release date.
 
 ## Owner direction and boundaries
 
@@ -14,18 +14,18 @@ Source-backed feature status, confirmed D1/D2 defects and risks: [FEATURE_AUDIT_
 
 | Area | Current state | Next gap |
 | --- | --- | --- |
-| Checkout / return | IMPLEMENTED core | Same-task submit/lost response/concurrency UI assurance (car bounds fixed in 3D.2) |
+| Checkout / return | IMPLEMENTED core | Keyed transaction replay implemented in 3D.3; legacy/cross-reload coverage remains |
 | Maintenance / expiry | IMPLEMENTED current date/km/either dashboard scope | Browser completion, owner-defined calendar/expiry enhancements if needed |
 | No-R2 backup/recovery | PARTIAL | D1 chronology/calendar/odo defect fixed in 3D.2; broader recovery UX/provenance; durable cloud automation deferred |
 | Dashboard / monthly PDF | PARTIAL | Trends/ranges/maintenance costs, browser-rendered PDF acceptance |
 | Mobile | PARTIAL | Whole critical-flow browser matrix and failure UX |
 | Admin / Staff / User | PARTIAL | Only Admin/Employee exist; Staff/User/onboarding policy missing |
 | Multiple vehicles | PARTIAL | Car bounds fixed in 3D.2; dynamic per-car QR, wider isolation/concurrency acceptance |
-| Success confirmation | PARTIAL | Detailed start/return receipt exists; uncertain transaction handling and other-action requirements |
+| Success confirmation | PARTIAL | Original receipt replay/uncertainty handling implemented; cross-reload and other-action requirements |
 
 ## Prioritized application batches
 
-Task 3D.1 documentation commit acbc8bf is verified closed. Task 3D.2 is implemented and tested offline; see [DATA_VALIDATION_CONSISTENCY.md](DATA_VALIDATION_CONSISTENCY.md), with exact-commit Linux evidence in PROGRESS after publication. Later batches remain planned; 3D.3 is recommended next. Each task retains the Development/security/no-cloud boundaries.
+Task 3D.1 documentation commit acbc8bf is verified closed. Task 3D.2 is implemented and tested offline; see [DATA_VALIDATION_CONSISTENCY.md](DATA_VALIDATION_CONSISTENCY.md), with exact-commit Linux evidence in PROGRESS after publication. Task 3D.3 is implemented offline with45 new scenarios and a local360px browser test; see [TRANSACTION_RELIABILITY.md](TRANSACTION_RELIABILITY.md). Later batches remain planned; 3D.4 role/onboarding policy is the next owner decision. Each task retains the Development/security/no-cloud boundaries.
 
 ### 3D.2 — Data-validation consistency (IMPLEMENTED offline; CI evidence in PROGRESS)
 
@@ -36,16 +36,16 @@ Goal: fix the two locally reproduced input/backup defects without changing valid
 
 Acceptance: D1 sample (10:00 departure / 09:00 return) rejected; impossible calendar dates and malformed open/closed odometers rejected; valid date/odo boundaries accepted; 100,000,000 initialOdo rejected without a write; existing valid car/trip/maintenance/account/audit data identical before/after failed requests/inspection. Existing backup/SQL restore/import/roles/Maintenance regressions and Windows/Linux build/typecheck/tests pass. Scope checks must not silently tighten unrelated valid business behavior; stop for owner decision if compatibility changes are needed.
 
-### 3D.3 — Reliable submit and truthful confirmation (P1, recommended next)
+### 3D.3 — Reliable submit and truthful confirmation (IMPLEMENTED offline; exact CI in PROGRESS)
 
 Goal: harden the existing flows rather than invent another transaction/security framework.
 - Reuse the synchronous submit guard approach already in Maintenance/Profile where appropriate.
 - Handle slow requests, two submit events in one task, out-of-order replies, 401/409 and commit-then-lost-response.
 - Show success only for the specific successful server result; uncertain outcome must offer refresh/reconciliation, not fabricate a receipt or auto-post a duplicate.
 
-Acceptance: one client request for same-task double submit; server CAS/ownership still enforced; no stale error overwrites a later confirmed success; failed/unknown save never claims success. Known successful start/return receipt retains exact car/trip ID/time/odometer. Separate tabs remain safe under existing version guards. Adding durable request IDs/Fleet fields is not assumed: design/backward-compatibility approval first if required.
+Acceptance: one client request for same-task double submit; server CAS/ownership still enforced; no stale error overwrites a later confirmed success; failed/unknown save never claims success. Known successful start/return receipt retains exact car/trip ID/time/odometer. Separate tabs remain safe under existing version guards. Owner's 3D.3 instruction now authorizes stable server operation IDs: implemented as separate rows in existing fleet_store, atomically with main CAS, without SQL/Fleet migration. Compatibility/rollback plan is in TRANSACTION_RELIABILITY.md. Legacy unkeyed clients retain CAS-only behavior; same-ID guarantees require retained records/current epoch and in-page pending intent. No transparent rollback with unresolved keyed requests.
 
-### 3D.4 — Role and onboarding contract, then scoped implementation (P1 decision)
+### 3D.4 — Role and onboarding contract, then scoped implementation (P1, next owner decision)
 
 Owner must define Admin/Staff/User capabilities, legacy Employee mapping and whether signup requires Admin approval/invite/verified driver linkage. Existing immediate active self-registration/name matching is a high attribution risk if public signup is unintended; make this decision before wider onboarding.
 
@@ -95,6 +95,6 @@ These are planning themes, not new release tags or proof of deployed versions. E
 
 ## Common acceptance and regression policy
 
-Read AGENTS/source/docs, work only on Development, use synthetic memory/SQLite/local Worker tests and preserve complete snapshots on refusal. For executable changes run build/typecheck/all available suites on Windows and Linux Node 24; for docs-only changes use appropriate local checks and accurately reference the unchanged Linux baseline. No lint script exists. Current baseline: 23 suites PASS on Windows including 163 new consistency cases; exact new Linux results are recorded in PROGRESS. The previously reproduced D1/D2 defects now reject invalid data before relevant writes. Other audit risks remain; an offline suite PASS does not close operational gates.
+Read AGENTS/source/docs, work only on Development, use synthetic memory/SQLite/local Worker tests and preserve complete snapshots on refusal. For executable changes run build/typecheck/all available suites on Windows and Linux Node 24; for docs-only changes use appropriate local checks and accurately reference the unchanged Linux baseline. No lint script exists. Current baseline: 24 suites PASS on Windows including45 transaction scenarios and163 consistency cases; exact new Linux results are recorded in PROGRESS. The previously reproduced D1/D2 defects now reject invalid data before relevant writes. Other audit risks remain; an offline suite PASS does not close operational gates.
 
 Keep tests for trip continuity/overlap/ownership, backups/checksums/session rotation, maintenance rollback/manual overrides, role filters, imports and multi-car isolation. Do not delete or weaken security tests/allowlists because their live operation is deferred. Record results/limits in PROGRESS; owner approvals remain necessary for business/shape/schema changes or operational actions outside a task's scope.
