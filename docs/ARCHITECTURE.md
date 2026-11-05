@@ -1,5 +1,14 @@
 # SmartFleet - System Architecture
 
+## Task 3D.4A — proposed role/onboarding contract (DESIGN ONLY)
+
+[ROLE_ONBOARDING_CONTRACT.md](ROLE_ONBOARDING_CONTRACT.md) audits the exact 6edfcb7/f51efec executable baseline and separates existing Admin/Employee behavior from the owner's unapproved Admin/Staff/User proposal. It defines action/data scopes, PENDING/APPROVED/REJECTED/DISABLED lifecycle, Admin-reviewed exact Person linkage, historical ownerUserId/driverId preservation, planned route/UI tests and phased compatible migration/rollback.
+
+No runtime behavior or data format changed. Current signup still creates an active Employee and may match Person by name; it does not enforce pending approval. Existing non-admin role coercion and missing status gates make old runtimes incompatible with unreviewed new lifecycle data. Pending nullable driver links also need future backup validation/versioning. Never populate new states or auto-map Employee based on this document. All-history Staff reads must be separate from own-trip write capabilities; current boolean isAdmin UI cannot simply expose all trips safely.
+
+Owner decisions Q1–Q10 include Staff Maintenance/write/PII/export scope, User operational-home/report exceptions, review/identity proof, legacy mapping and versioned rollback. Contract NOT_APPROVED; future migration/code requires separate scope approval. Current 24-suite Windows baseline and exact Linux41953314810 remain PASS; proposed role/state cases NOT_IMPLEMENTED/NOT_RUN. Operator/Live/Initialize/Deployment DEFERRED.
+
+
 ## Task 3D.3 — idempotent checkout/return transactions
 
 [TRANSACTION_RELIABILITY.md](TRANSACTION_RELIABILITY.md): updated checkout/return UI sends stable UUID/kind metadata. API fingerprints payload and scopes operation rows to authenticated actor/Fleet session-key epoch; original result/receipt is replayed only after current authorization and matching-payload checks, with fresh scoped Fleet data. Ledger rows use existing fleet_store IDs trip-operation:v1:<digest>; no Fleet shape/SQL schema change. Operation insert, main optimistic CAS and consistency assertion execute atomically through D1.batch; unavailable batch never falls back to separate writes. Keyed requests use first-primary sessions when available; replays read Fleet after result lookup. Same-ID concurrency/lost acknowledgements do not repeat effective writes.

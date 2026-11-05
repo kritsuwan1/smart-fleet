@@ -1,5 +1,14 @@
 # SmartFleet - Test Plan
 
+## Task 3D.4A — proposed role/state acceptance contract (DESIGN ONLY)
+
+[ROLE_ONBOARDING_CONTRACT.md](ROLE_ONBOARDING_CONTRACT.md), sections3–9, defines the action/data matrix and planned RC-01–12 cases. They are NOT_IMPLEMENTED / NOT_RUN in this task; policy remains NOT_APPROVED. Current Admin/Employee tests passing does not establish Staff/User/PENDING support.
+
+Future coverage after owner approval: Admin/Staff/User/explicit legacy Employee × PENDING/APPROVED/REJECTED/DISABLED, anonymous/stale/unknown/root cases; every route/action/data scope must have authorized and unauthorized fixtures. Validate complete synthetic state/version/ledger and response redaction, not only hidden buttons. Test no-name-only Person claiming, concurrent approval/claim conflicts, immutable historical ownerUserId/driverId, legacy mapping, backup/status format rejection before mutation, session revocation, other-trip write denial for Staff, and3D.3 replay when role/status/link changes. UI includes no operational prefetch while pending, read-only all-history details, truthful review/transaction results and mobile360px+.
+
+Actual this-task Windows x64 Node24.22.1 build/typecheck/existing24 suites PASS; transaction45/validation163 and prior auth/roles/backup/Maintenance/security remain green. No tests/source/dependencies changed; no new browser test or npm ci/audit run. Exact baseline Linux [41953314810](https://github.com/kritsuwan1/smart-fleet/actions/runs/41953314810), f51efec80a20fbcc6c2a6d97cb9436b9d5e09554, reverified from metadata/decoded logs: Ubuntu24.04.5/Node24.22.1/ci-build-typecheck24 PASS. New docs-only CI NOT_RUN under paths-ignore. Operator/Live/Initialize/Deployment DEFERRED; operational NOT_VERIFIED.
+
+
 ## Task 3D.3 — atomic transaction result replay / client uncertainty
 
 - Prerequisite verified: exact3D.2 implementation77b3607 expected files, a57bf7d docs-only follow-up and Linux41755017762 PASS all23 suites. Baseline old API reproduced checkout duplicate200/409/lost-reply retry409 and fresh-version Admin return retry changing version2→3.

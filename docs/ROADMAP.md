@@ -1,6 +1,6 @@
 # SmartFleet Development Roadmap
 
-Updated 2026-11-05 (Asia/Bangkok), Task 3D.3; prerequisites 3D.1/3D.2 verified. Repository kritsuwan1/smart-fleet; active branch dev/smartfleet-batch-1. App label/baseline v3.8.5; targets remain v3.8.6 through v4.2.0, without assigning a deployment/release date.
+Updated 2026-11-05 (Asia/Bangkok), Task 3D.4A design review; 3D.3 commits and exact Linux CI verified. Repository kritsuwan1/smart-fleet; active branch dev/smartfleet-batch-1. App label/baseline v3.8.5; targets remain v3.8.6 through v4.2.0, without assigning a deployment/release date.
 
 ## Owner direction and boundaries
 
@@ -45,7 +45,11 @@ Goal: harden the existing flows rather than invent another transaction/security 
 
 Acceptance: one client request for same-task double submit; server CAS/ownership still enforced; no stale error overwrites a later confirmed success; failed/unknown save never claims success. Known successful start/return receipt retains exact car/trip ID/time/odometer. Separate tabs remain safe under existing version guards. Owner's 3D.3 instruction now authorizes stable server operation IDs: implemented as separate rows in existing fleet_store, atomically with main CAS, without SQL/Fleet migration. Compatibility/rollback plan is in TRANSACTION_RELIABILITY.md. Legacy unkeyed clients retain CAS-only behavior; same-ID guarantees require retained records/current epoch and in-page pending intent. No transparent rollback with unresolved keyed requests.
 
-### 3D.4 — Role and onboarding contract, then scoped implementation (P1, next owner decision)
+### 3D.4 — Role and onboarding contract, then scoped implementation (P1, policy NOT_APPROVED)
+
+Task **3D.4A design deliverable is complete** in [ROLE_ONBOARDING_CONTRACT.md](ROLE_ONBOARDING_CONTRACT.md): actual/proposed action/data matrix, lifecycle, identity linkage, historical compatibility, planned RC-01–12 tests and migration/rollback gates. No role/status/code/schema/test/account change. The proposed policy is NOT_APPROVED; legacy Employee stays unchanged. Existing Windows24 suites and exact Linux41953314810/f51efec PASS; no new policy acceptance PASS is claimed.
+
+Next **3D.4B owner decision/contract approval** must resolve Q1–Q10 (Staff Maintenance/on-behalf/PII/exports, User home/reports, review/identity, legacy mapping, compatible format/rollback). Only after explicit approval, separately scope **3D.4C offline compatibility/migration test spike**, followed by scoped implementation. Old runtime status ignorance/non-admin coercion and pending links in backups are compatibility blockers; never write new lifecycle states to an old runtime or auto-convert Employee.
 
 Owner must define Admin/Staff/User capabilities, legacy Employee mapping and whether signup requires Admin approval/invite/verified driver linkage. Existing immediate active self-registration/name matching is a high attribution risk if public signup is unintended; make this decision before wider onboarding.
 
