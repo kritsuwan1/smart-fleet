@@ -77,7 +77,7 @@ npm run typecheck
 npm test
 ~~~
 
-Windows x64 Node v24.22.1: npm ci PASS (42 installed/audited 43, reported 0 vulnerabilities; existing esbuild/workerd install-script restrictions retained), Build PASS (Demo 1008994 / Production 1007620 / Staging 1007767 bytes), Typecheck PASS, all 24 suites PASS including 45 new scenarios and all prior 23/security/validation/Backup/Maintenance/role/import regressions. No lint script. Exact-commit Linux result follows publication in PROGRESS; no earlier run is substituted.
+Windows x64 Node v24.22.1: npm ci PASS (42 installed/audited 43, reported 0 vulnerabilities; existing esbuild/workerd install-script restrictions retained), Build PASS (Demo 1008994 / Production 1007620 / Staging 1007767 bytes), Typecheck PASS, all 24 suites PASS including 45 new scenarios and all prior 23/security/validation/Backup/Maintenance/role/import regressions. No lint script. Exact implementation f51efec80a20fbcc6c2a6d97cb9436b9d5e09554 Linux CI [41953314810](https://github.com/kritsuwan1/smart-fleet/actions/runs/41953314810), job127002142499, completed/success on 2026-11-05 09:09 Asia/Bangkok: Ubuntu 24.04.5 / Node v24.22.1; npm ci, build, typecheck and all24 suites PASS, including45 transaction cases and163 validation cases. Decoded job logs and exact head_sha checked; no prior-run substitution. Linux build sizes Demo1007946 / Production1006572 / Staging1006719 bytes. Documentation-only follow-up does not change tested executable inputs.
 
 ## Remaining risks and next task
 
