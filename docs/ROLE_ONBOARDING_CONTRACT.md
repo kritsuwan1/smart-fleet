@@ -1,10 +1,44 @@
-# Task 3D.4A — Role & onboarding contract (DESIGN ONLY)
+# Role & onboarding contract — Policy v1.0 / offline compatibility
 
 Date: 2026-11-05 (Asia/Bangkok). Repository: kritsuwan1/smart-fleet. Branch: dev/smartfleet-batch-1.
 
-**DRAFT FOR OWNER REVIEW — POLICY NOT APPROVED / NOT IMPLEMENTED.** This document does not change authentication, accounts, roles, schemas, routes or security controls. No Employee conversion is authorized. Operator/Live/Initialize/Deployment remain DEFERRED; actual operational verification remains NOT_VERIFIED.
+**POLICY v1.0 APPROVED FOR OFFLINE DEVELOPMENT — OPERATIONAL ACTIVATION NOT APPROVED / NOT ENABLED.** No existing Employee conversion or actual account/auth change. Operator/Live/Initialize/Deployment remain DEFERRED; actual operational verification remains NOT_VERIFIED.
 
-## 1. Evidence and prerequisite gate
+## Policy v1.0 — owner approval recorded 2026-11-05
+
+The owner approved Q1–Q10 in the Task 3D.4C instruction. This supersedes the original draft choices below; it does not approve operational activation, account conversion, cloud access or deployment.
+
+| Decision | Approved v1.0 |
+| --- | --- |
+| Q1 | Staff checkout/return own trips only; all-history visibility does not grant another user's return. |
+| Q2 | Staff/User may return own open trips; cannot amend existing trip details. Legacy Employee retains its current narrow open-trip editing behavior. |
+| Q3 | Staff may read all trip history and aggregate reports with minimized personal data. The precise offline DTO is in ROLE_ONBOARDING_COMPATIBILITY.md; no name/destination/note/account directory is needed for it. |
+| Q4 | User may read own history and personal reports; retain minimal operational car/availability/odometer data needed for checkout/return. |
+| Q5 | Staff manages Maintenance (existing plan/complete/history-correction scope); User reads basic reminders only, without history/details/costs. |
+| Q6 | Self-registration creates PENDING; explicit Admin approval mandatory before operational access. |
+| Q7 | Admin verifies identity and links exact Person ID; never automatic name-only claim. |
+| Q8 | Existing Employee permissions/IDs/history preserved; no automatic conversion. |
+| Q9 | New account/status format versioned; unsupported old readers must be denied. |
+| Q10 | Offline/Mock development only. Deployment requires separate explicit owner approval. |
+
+Approved role/action summary (all operational access requires APPROVED; no automatic root/account migration):
+
+| Capability | Admin | Staff | User | Legacy Employee |
+| --- | --- | --- | --- | --- |
+| Checkout / own open return | Full validated Admin scope | Own only | Own only | Existing own-only scope |
+| Amend existing trip / closed history | Existing Admin scope | Denied | Denied | Existing narrow own-open edits, closed denied |
+| History / reports | All | Minimized all-history + aggregates + own reports | Own history + personal reports | Existing own history/reports unchanged |
+| Maintenance | Manage | Manage | Basic reminders | Existing active-plan reminders unchanged |
+| Account approval / identity linking / roles | Admin only | Denied | Denied | Denied |
+| Full backup / import / car & directory management | Existing Admin-only scope | Denied | Denied | Denied |
+| Restore / cloud / deployment | Separate existing operational approvals; no new HTTP restore | Denied | Denied | Denied |
+
+**Implementation details still open, not reversals of approved policy:** production-ready version gate/storage layout and old-binary exclusion; registration identity/credential records; review evidence process/retention and UI; pending status/password recovery; root bootstrap adapter; status/relink handling with active/uncertain trips; restore quarantine and capacity/ledger retention. The spike models these only where safe with synthetic fixtures. Rejected-account reopening and driver relinking have no new implementation or implied authorization. See [ROLE_ONBOARDING_COMPATIBILITY.md](ROLE_ONBOARDING_COMPATIBILITY.md).
+
+The remainder is the pinned 3D.4A audit/design history. Its original Q choices / NOT_APPROVED statements describe that earlier draft, **not the current v1.0 owner decision**. Current application auth/signup is still unchanged; new roles and pending signup are NOT_ENABLED. Contract approval does not mean full implementation or new policy acceptance/UAT PASS.
+
+
+## 1. Historical 3D.4A evidence and prerequisite gate
 
 - Verified implementation [f51efec80a20fbcc6c2a6d97cb9436b9d5e09554](https://github.com/kritsuwan1/smart-fleet/commit/f51efec80a20fbcc6c2a6d97cb9436b9d5e09554): expected 15 paths, parent a57bf7d; atomic keyed trips, client reliability, tests/package script and docs.
 - Verified [6edfcb7fb93f865ea5d0bdc3bd109dcbe4eabf9e](https://github.com/kritsuwan1/smart-fleet/commit/6edfcb7fb93f865ea5d0bdc3bd109dcbe4eabf9e): parent f51efec, exactly three documentation paths (PROGRESS, TEST_PLAN, TRANSACTION_RELIABILITY); Development HEAD before this task.
@@ -171,7 +205,7 @@ Each applicable matrix cell must have a positive authorized fixture and a negati
 
 **Rollback design:** docs-only rollback is reverting this design commit; no runtime rollback is needed now. Future feature rollback must not deploy an old binary over new PENDING/Staff/User states: old coercion ignores status and can admit unapproved accounts. First deny operational ingress/enrollment using the future reviewed gate, stop new submissions, resolve/drain uncertain operations under the new runtime, retain main/ledger and post-cutover records, and produce an offline compatibility report. Prefer a forward fix or a previously tested status-aware compatible runtime. Any reverse data conversion must preserve all trips/history/IDs and rejected/pending denial, explicitly map affected accounts with owner approval, invalidate old cookies and pass synthetic snapshots first. Never restore an old full snapshot as a shortcut that erases new trips or restores revoked privileges. If a safe denial-preserving downgrade is not demonstrated, stay fail-closed and report blocked; no live rollback/migration command is authorized.
 
-## 11. Decisions required from owner — NONE APPROVED BY THIS TASK
+## 11. Historical 3D.4A decision queue — superseded by approved v1.0 above
 
 | Decision | Proposed review position / why |
 | --- | --- |

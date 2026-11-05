@@ -1,5 +1,14 @@
 # SmartFleet - System Architecture
 
+## Task 3D.4C — approved Policy v1.0, isolated compatibility spike
+
+Owner approved Q1–Q10 on2026-11-05; current policy record is [ROLE_ONBOARDING_CONTRACT.md](ROLE_ONBOARDING_CONTRACT.md), superseding the historical 3D.4A draft below. Staff own checkout/return/no amendment, all-history/minimized aggregates and Maintenance management; User own history/personal reports/basic reminders; signup pending/Admin exact-Person approval; legacy Employee unchanged.
+
+[ROLE_ONBOARDING_COMPATIBILITY.md](ROLE_ONBOARDING_COMPATIBILITY.md) defines a separate v2/synthetic-only envelope retaining original Fleet/ledger and explicit legacy projection, nullable pending links, status/revision guards, minimized DTOs and transactional memory-SQLite migration/rollback. Node-only scripts/offline-role-compatibility.mjs has no operational imports/CLI/network/real binding/path. Tests use actual backup semantic/maintenance/replay functions without changing them. New suite102 cases, total25 offline suites; app bundle inputs/auth/signup unchanged.
+
+The existing runtime still ignores unsupported lifecycle/coerces non-admin to Employee; only the isolated reader gate refuses v2. No new state is placed in fleet_store.main. Actual reader exclusion, authoritative credential/status adapters, root integration, registration/review UI and activation remain NOT_IMPLEMENTED. Policy approved does not imply runtime readiness; Operator/Live/Initialize/Deployment DEFERRED.
+
+
 ## Task 3D.4A — proposed role/onboarding contract (DESIGN ONLY)
 
 [ROLE_ONBOARDING_CONTRACT.md](ROLE_ONBOARDING_CONTRACT.md) audits the exact 6edfcb7/f51efec executable baseline and separates existing Admin/Employee behavior from the owner's unapproved Admin/Staff/User proposal. It defines action/data scopes, PENDING/APPROVED/REJECTED/DISABLED lifecycle, Admin-reviewed exact Person linkage, historical ownerUserId/driverId preservation, planned route/UI tests and phased compatible migration/rollback.

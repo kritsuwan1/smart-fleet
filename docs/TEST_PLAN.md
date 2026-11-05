@@ -1,5 +1,16 @@
 # SmartFleet - Test Plan
 
+## Task 3D.4C — approved Policy v1.0 compatibility regression
+
+Owner-approved Q1–Q10 now supersede the historical 3D.4A unapproved draft. [ROLE_ONBOARDING_COMPATIBILITY.md](ROLE_ONBOARDING_COMPATIBILITY.md) describes test-only model/gates and remaining operational blockers. New role-compatibility.test.mjs + synthetic fixture:102 cases, npm test25 suites. No operational role/signup/auth/schema changes.
+
+Cases cover strict role/status/version/reader denial; complete legacy Fleet/IDs/ownerUserId/driverId/history/ledger preservation; pending null links/no name matching; Admin-only exact Person approval and separate assignment; unauthorized/duplicate/inactive claims; Staff/User own-return/no-amend, User reports/basic reminders and Staff Maintenance/minimized all-history totals; role×status cross-product; actual old coercion/backup acceptance probes; correct-checksum invalid security/chronology/odo refusal before any synthetic write; atomic SQLite migration/restore/rollback fault snapshots; stale concurrent review CAS and no lossy rollback after changes. Actual unchanged authorizeOperation/maintenanceStatus/backup semantics are reused. External fetch tripwire remains zero.
+
+Fresh Windows Node24.22.1 npm ci/build/typecheck/all25 suites PASS (new102 / transaction45 / validation163 and prior security/account/Maintenance/Backup). Helper node --check PASS; .mjs runtime tests are separate from src-only TypeScript check. Exact implementation Linux CI follows publication in PROGRESS; never substitute old CI. App bundle sizes unchanged. No new browser acceptance run or real identity proof claim.
+
+The old binary has NOT gained a version gate; rejection is in the isolated harness and new state is never given to it. Actual readers/credentials/registration/review/route/UI RC-01–12 acceptance remain NOT_IMPLEMENTED/NOT_RUN. Unknown-role coercion in current auth must not be used for v2. Operator/Live/Initialize/Deployment remain DEFERRED.
+
+
 ## Task 3D.4A — proposed role/state acceptance contract (DESIGN ONLY)
 
 [ROLE_ONBOARDING_CONTRACT.md](ROLE_ONBOARDING_CONTRACT.md), sections3–9, defines the action/data matrix and planned RC-01–12 cases. They are NOT_IMPLEMENTED / NOT_RUN in this task; policy remains NOT_APPROVED. Current Admin/Employee tests passing does not establish Staff/User/PENDING support.
