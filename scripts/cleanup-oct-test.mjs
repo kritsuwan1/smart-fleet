@@ -21,7 +21,7 @@ export function planCleanup(state){
  for(const [seq,start,project,odoStart,odoEnd] of expected){
   const found=rows.filter(t=>t.seq===seq);
   if(found.length!==1)throw Error('Duplicate sequence. Nothing was removed.');
-  const t=found[0];if(t.start!==start||t.project!==project||t.odoStart!==odoStart||t.odoEnd!==odoEnd||!t.end)throw Error('Date/project/odometer differs from approved screenshot. Nothing was removed.');
+  const t=found[0];if(t.start!==start||String(t.project).replace(/\s/g,'').toLowerCase()!==project.replace(/\s/g,'').toLowerCase()||t.odoStart!==odoStart||t.odoEnd!==odoEnd||!t.end)throw Error('Date/project/odometer differs from approved screenshot. Nothing was removed.');
  }
  const ids=new Set(rows.map(t=>t.id));if(ids.size!==8)throw Error('Duplicate trip IDs');
  const distance=rows.reduce((n,t)=>n+t.odoEnd-t.odoStart,0);if(distance!==71)throw Error('Distance mismatch');

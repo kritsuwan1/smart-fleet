@@ -1,4 +1,4 @@
-name: Review exact October test cleanup
+name: Remove approved October test records
 on:
   push:
     branches: ['maintenance/remove-oct-test-20261106']
@@ -19,10 +19,9 @@ jobs:
         with:
           node-version: '24'
       - run: node --experimental-sqlite scripts/test-cleanup.mjs
-      - name: Verify eight requested test trips
+      - name: Archive and remove eight approved test trips
         run: node scripts/cleanup-oct-test.mjs
         env:
-          CLEANUP_REVIEW: 'yes'
-          CLEANUP_APPLY: 'no'
+          CLEANUP_APPLY: 'yes'
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
