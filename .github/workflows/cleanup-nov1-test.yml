@@ -1,0 +1,27 @@
+name: Remove approved November test record
+on:
+  push:
+    branches: ['maintenance/remove-nov1-test-145-20261106']
+permissions:
+  contents: read
+concurrency:
+  group: smart-fleet-exact-nov1-cleanup
+  cancel-in-progress: false
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node scripts/test-nov1-cleanup.mjs
+      - name: Verify archive and remove approved test record 145
+        run: node scripts/cleanup-nov1-test.mjs
+        env:
+          CLEANUP_APPLY: 'yes'
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

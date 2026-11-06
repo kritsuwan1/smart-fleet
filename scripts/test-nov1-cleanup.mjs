@@ -1,0 +1,8 @@
+import assert from 'node:assert/strict';import {planCleanup,cleanupId} from './cleanup-nov1-test.mjs';
+const real={id:'real',seq:146,carId:'car-1',start:'2026-11-01T08:00',project:'Real job',odoStart:117630,odoEnd:117650,end:'2026-11-01T12:00'};
+const target={id:'test145',seq:145,carId:'car-1',start:'2026-11-01T00:31',project:'Project t',destination:'T',odoStart:117620,odoEnd:117630,end:'2026-11-01T00:40'};
+const state={cars:[{id:'car-1',plate:'8กน3362',province:'กรุงเทพมหานคร'}],trips:[real,target],audit:[{id:'earlier-cleanup'}],accounts:[{id:'preserve'}],sessionKey:'synthetic',projects:['Project t','Real job'],careReminders:[{id:'care'}]};
+const original=JSON.stringify(state),p=planCleanup(state);assert.equal(JSON.stringify(state),original);assert.deepEqual(p.result.trips,[real]);assert.equal(p.distance,10);assert.deepEqual(p.result.accounts,state.accounts);assert.deepEqual(p.result.projects,state.projects);assert.deepEqual(p.result.careReminders,state.careReminders);assert.equal(p.result.sessionKey,state.sessionKey);assert.deepEqual(p.result.audit[0].before.trips,[target]);assert.equal(p.result.audit[0].id,cleanupId);assert.equal(planCleanup(p.result).alreadyDone,true);
+for(const field of ['start','project','odoStart','odoEnd']){const s=structuredClone(state);s.trips[1][field]=field.startsWith('odo')?0:'wrong';assert.throws(()=>planCleanup(s));}
+const dup=structuredClone(state);dup.trips.push({...target,id:'other'});assert.throws(()=>planCleanup(dup));
+console.log('PASS exact #145 scope, wrong date/project/odometer and duplicate rejected, idempotency, original and other records preserved, audit recovery copy.');
