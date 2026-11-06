@@ -22,6 +22,7 @@ jobs:
       - name: Verify eight requested test trips
         run: node scripts/cleanup-oct-test.mjs
         env:
+          CLEANUP_REVIEW: 'yes'
           CLEANUP_APPLY: 'no'
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

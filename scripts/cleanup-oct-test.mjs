@@ -40,6 +40,15 @@ async function run(){
  const binding=settings.result?.bindings?.find(b=>b.name==='DB'&&b.type==='d1');if(binding?.id!==db)throw Error('Production binding mismatch');
  const marker=(await query("SELECT payload FROM fleet_store WHERE id='environment'")).results[0];if(marker&&marker.payload!=='production')throw Error('Production marker mismatch');
  const row=(await query("SELECT payload,version FROM fleet_store WHERE id='main'")).results[0];if(!row)throw Error('Primary state missing');
+ if(process.env.CLEANUP_REVIEW==='yes'){
+  const state=JSON.parse(row.payload),car=state.cars.find(c=>c.plate.replace(/\s/g,'')==='8กน3362');
+  for(const [seq,start,project,odoStart,odoEnd] of expected){
+   const matches=state.trips.filter(t=>t.carId===car?.id&&t.seq===seq),t=matches[0];
+   const flags={sequence:seq,unique:matches.length===1,startMatches:t?.start===start,projectMatches:t?.project===project,projectMatchesIgnoringSpacesAndCase:String(t?.project||'').replace(/\s/g,'').toLowerCase()===project.replace(/\s/g,'').toLowerCase(),odoStartMatches:t?.odoStart===odoStart,odoEndMatches:t?.odoEnd===odoEnd,closed:!!t?.end};
+   console.log('SCOPE_CHECK='+JSON.stringify(flags));
+  }
+  console.log('Read-only comparison completed: no record values exported and no data changed.');return;
+ }
  const plan=planCleanup(JSON.parse(row.payload));if(plan.alreadyDone){console.log('Verified: the requested eight test records were already removed by this cleanup.');return;}
  console.log('Verified exact screenshot match: 8 closed test trips, October 30–31, 2026, total 71 km. Other trip records are excluded.');
  if(process.env.CLEANUP_APPLY!=='yes'){console.log('PREVIEW ONLY: no database data changed.');return;}
