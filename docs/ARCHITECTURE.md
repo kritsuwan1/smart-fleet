@@ -1,5 +1,11 @@
 # SmartFleet - System Architecture
 
+## Safe Windows Local Preview — isolated adapter, unchanged app runtime
+
+npm run preview:local builds the existing artifacts and serves only output/worker-staging.js through scripts/preview-local.mjs at127.0.0.1:8787. scripts/preview-fixture.mjs creates a new synthetic in-memory SQLite with the same D1-shaped prepare/bind/first/run/atomic batch pattern as browser tests; no disk database, production configuration/IDs, .env, Wrangler or cloud transport. Only the synthetic DEMO_DB binding and fixed fictional root password are passed to the Staging Worker. Session epoch/salts are fresh each process.
+
+The local bridge enforces Host/Origin/body bounds, loopback-only bind, self-only CSP/browser resources and denied process fetch/WebSocket. QR/backup/import are unavailable in preview; application auth/secure cookies/roles/Person gates/transaction CAS/ledger and maintenance are reused unchanged. No scheduler/reset/unlock/Admin-ledger capability. [LOCAL_PREVIEW_WINDOWS.md](LOCAL_PREVIEW_WINDOWS.md) documents credentials and ephemeral storage; it is not an OS firewall/public server or real recovery environment.3D.4D-6 SKIPPED;3D.5 separate; Operator/Live/Initialize/Deployment DEFERRED.
+
 ## Task 3D.4D-5 — manual support design boundary
 
 Runtime is unchanged from3D.4D-4. Existing operation lookup uses the requesting actor/current epoch, so Admin cannot use it as a User-ledger search. Fleet trip/audit inspection can identify candidates but cannot prove original operation identity or terminal noncommit. There is no durable rejection/cancellation fence, missing-ID discovery, support-decision store or manual unlock route.

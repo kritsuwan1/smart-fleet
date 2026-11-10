@@ -55,7 +55,7 @@ Completed **3D.4D-4** offline: existing session/role/link/Person authorization a
 
 Completed **3D.4D-5 (DESIGN ONLY)**: [MANUAL_UNKNOWN_OPERATION_RECOVERY.md](MANUAL_UNKNOWN_OPERATION_RECOVERY.md) defines five evidence/outcome states, privacy-minimized User/Admin support, no absent-row/timeout unlock, eight OPEN owner decisions, future apply/audit/fencing gates and25 synthetic acceptance specifications (NOT_RUN). No new read-only search/reset/endpoint/storage behavior is implemented. Policy v1.1/legacy compatibility and blocked outcomes remain unchanged.
 
-Next proposed **3D.4D-6**: owner-reviewed bounded read-only support lookup contract/offline proof after decision D1 and related privacy/audit approval. Exact-account discovery must return candidates separately from proven original outcomes; no raw-ledger/User scope expansion or automatic unlock. Noncommit fencing, authority, one-use apply/audit and cross-epoch recovery decisions remain separately OPEN. Do not add an abandon/reset button or data-changing endpoint. Operator/Live/Initialize/Deployment stay DEFERRED.
+**3D.4D-6 — SKIPPED by owner (2026-11-10).** No Admin ledger lookup/support discovery/reset/unlock implementation. Manual recovery design decisions remain unresolved; existing blocked-outcome policy stays. Safe Local Preview is an independent enablement task: localhost-only actual Worker + synthetic in-memory SQLite; see [LOCAL_PREVIEW_WINDOWS.md](LOCAL_PREVIEW_WINDOWS.md). Task3D.5 remains separate and is not completed by preview smoke tests. Operator/Live/Initialize/Deployment stay DEFERRED.
 
 ### 3D.5 — Mobile and local browser acceptance (P1/P2)
 

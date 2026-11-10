@@ -1,5 +1,11 @@
 # SmartFleet - Test Plan
 
+## Safe Windows Local Preview enablement
+
+New preview-local.test.mjs28 cases, total30 npm test suites: exact IPv4 loopback/port contract, Host/Origin/cross-site/absolute-target refusal, self-only CSP/no external font links, actual synthetic auth/secure cookie, scoped User and unlinked User, blocked QR/backup/import/recovery/reset paths, UTF-8 request reconstruction, denied fetch/WebSocket, per-process memory/session isolation and occupied-port refusal. No app security flags weakened; no new dependencies/config/resources.
+
+Optional preview-local-browser.mjs uses the real Staging Worker bridge and Edge157.0.4341.42 with separate Admin/User contexts; desktop/360/390 signup/login/explicit Person link/checkout/return/own history/PDF/Maintenance PASS, no page errors or external browser requests. Windows Node24.22.1 build/typecheck/all30 suites PASS. Actual npm preview startup8787 verified; process continues until Ctrl+C, no DB files persist. Linux evidence for the new commit recorded in PROGRESS after publication. This verifies preview enablement only;3D.5 remains separate and3D.4D-6 SKIPPED. No live cloud/native-device/deployment claim. [LOCAL_PREVIEW_WINDOWS.md](LOCAL_PREVIEW_WINDOWS.md).
+
 ## Task 3D.4D-5 — manual support design acceptance (NOT_RUN)
 
 [MANUAL_UNKNOWN_OPERATION_RECOVERY.md](MANUAL_UNKNOWN_OPERATION_RECOVERY.md) defines25 future synthetic specifications M01–M25, not implemented tests and not additional PASS counts. Cover exact original receipt vs attempt-only rejection, unknown/late commit, lost pointer/tab/storage/logout/device, auth/Person changes, same-name/unowned history, Admin actor-namespace restriction, future bounded discovery, corrupt/cross-epoch/stale evidence, forged/replayed decisions, audit/CAS races, future terminal fencing, minimized support data and desktop/360/390 accessibility. Every review/deny must preserve full Fleet/accounts/people/trips/Maintenance/audit/ledger/schema snapshots; only separately approved support-audit deltas may be permitted.
