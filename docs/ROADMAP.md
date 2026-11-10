@@ -1,6 +1,6 @@
 # SmartFleet Development Roadmap
 
-Updated 2026-11-10 (Asia/Bangkok), Task3D.4D-4 session/Person lifecycle and recovery; Policy v1.1 supersedes Q6 only. Repository kritsuwan1/smart-fleet; active branch dev/smartfleet-batch-1. App label/baseline v3.8.5; targets remain v3.8.6 through v4.2.0, without assigning a deployment/release date.
+Updated 2026-11-10 (Asia/Bangkok), Task3D.4D-5 manual unknown-operation support design; Policy v1.1 supersedes Q6 only. Repository kritsuwan1/smart-fleet; active branch dev/smartfleet-batch-1. App label/baseline v3.8.5; targets remain v3.8.6 through v4.2.0, without assigning a deployment/release date.
 
 ## Owner direction and boundaries
 
@@ -14,14 +14,14 @@ Source-backed feature status, confirmed D1/D2 defects and risks: [FEATURE_AUDIT_
 
 | Area | Current state | Next gap |
 | --- | --- | --- |
-| Checkout / return | IMPLEMENTED core | Keyed transaction replay implemented in 3D.3; legacy/cross-reload coverage remains |
+| Checkout / return | IMPLEMENTED core | 3D.3 keyed replay and3D.4D-4 local reload recovery implemented; lost-pointer support remains design only |
 | Maintenance / expiry | IMPLEMENTED current date/km/either dashboard scope | Browser completion, owner-defined calendar/expiry enhancements if needed |
 | No-R2 backup/recovery | PARTIAL | D1 chronology/calendar/odo defect fixed in 3D.2; broader recovery UX/provenance; durable cloud automation deferred |
 | Dashboard / monthly PDF | PARTIAL | Trends/ranges/maintenance costs, browser-rendered PDF acceptance |
 | Mobile | PARTIAL | Whole critical-flow browser matrix and failure UX |
 | Admin / Staff / User | PARTIAL | Legacy Admin/Employee preserved; v1.1 immediate signup + verified own User operations implemented offline; Staff/new-User promotion disabled |
 | Multiple vehicles | PARTIAL | Car bounds fixed in 3D.2; dynamic per-car QR, wider isolation/concurrency acceptance |
-| Success confirmation | PARTIAL | Original receipt replay/uncertainty handling implemented; cross-reload and other-action requirements |
+| Success confirmation | PARTIAL | Original receipt and local reload recovery implemented; missing-pointer manual review/unlock not implemented |
 
 ## Prioritized application batches
 
@@ -53,7 +53,9 @@ Implemented through **3D.4D-3**: immediate unlinked signup/login/profile; first-
 
 Completed **3D.4D-4** offline: existing session/role/link/Person authorization and own-return policy verified; session-bound metadata-only pointer and read-only ledger reconciliation preserve intent after reload without storing payload or resubmitting. Unknown/expiry/logout fail closed; existing CAS handles separate-tab checkout/return.63 new cases/29 suites; desktop1280/mobile360/390 browser acceptance and exact CI evidence in PROGRESS. No relink, Staff, signup approval or destructive migration. [SESSION_PERSON_RECOVERY.md](SESSION_PERSON_RECOVERY.md).
 
-Next proposed **3D.4D-5 (DESIGN ONLY, owner review)**: manual unknown-operation reconciliation and accessible support procedure, including privacy-preserving lookup evidence, stale session/tab-close limitations, no accidental duplicate, and explicit acceptance/authority before any unlock/reset action. Do not add an abandon/reset button, new data-changing endpoint or new identity policy automatically. Cross-device/native-mobile verification remains a separate gap. Operator/Live/Initialize/Deployment stay DEFERRED.
+Completed **3D.4D-5 (DESIGN ONLY)**: [MANUAL_UNKNOWN_OPERATION_RECOVERY.md](MANUAL_UNKNOWN_OPERATION_RECOVERY.md) defines five evidence/outcome states, privacy-minimized User/Admin support, no absent-row/timeout unlock, eight OPEN owner decisions, future apply/audit/fencing gates and25 synthetic acceptance specifications (NOT_RUN). No new read-only search/reset/endpoint/storage behavior is implemented. Policy v1.1/legacy compatibility and blocked outcomes remain unchanged.
+
+Next proposed **3D.4D-6**: owner-reviewed bounded read-only support lookup contract/offline proof after decision D1 and related privacy/audit approval. Exact-account discovery must return candidates separately from proven original outcomes; no raw-ledger/User scope expansion or automatic unlock. Noncommit fencing, authority, one-use apply/audit and cross-epoch recovery decisions remain separately OPEN. Do not add an abandon/reset button or data-changing endpoint. Operator/Live/Initialize/Deployment stay DEFERRED.
 
 ### 3D.5 — Mobile and local browser acceptance (P1/P2)
 

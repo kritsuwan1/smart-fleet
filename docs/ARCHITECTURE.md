@@ -1,5 +1,11 @@
 # SmartFleet - System Architecture
 
+## Task 3D.4D-5 — manual support design boundary
+
+Runtime is unchanged from3D.4D-4. Existing operation lookup uses the requesting actor/current epoch, so Admin cannot use it as a User-ledger search. Fleet trip/audit inspection can identify candidates but cannot prove original operation identity or terminal noncommit. There is no durable rejection/cancellation fence, missing-ID discovery, support-decision store or manual unlock route.
+
+[MANUAL_UNKNOWN_OPERATION_RECOVERY.md](MANUAL_UNKNOWN_OPERATION_RECOVERY.md) specifies User/Admin read-only procedures, evidence/authorization/audit gates, privacy and owner decisions. Recommends bounded separately approved read-only discovery first; unknown remains blocked, no new ID/resubmit/reset or raw-ledger exposure. No source/schema/routes/storage/auth/legacy behavior changes; future decisions and25 acceptance specifications are NOT_IMPLEMENTED/NOT_RUN. Operator/Live/Initialize/Deployment DEFERRED.
+
 ## Task 3D.4D-4 — session-bound recovery pointer (current)
 
 Existing auth expiry/revocation/link, immutable User return, CAS and ledger remain authoritative. New trip-recovery.ts stores one bounded8h tab-local operation pointer with opaque session scope, UUID/kind/timestamps only, before sending; no credential/Fleet/payload persistence. Same-page retry retains exact intent; reload uses only explicit GET lookup on existing Fleet API and never reconstructs/resends a payload or issues a fresh ID while unresolved. GET rechecks current authorization/epoch after ledger read and returns original validated receipt or unknown, without writes. Receipt consistency guards reject corrupt ledger rows.

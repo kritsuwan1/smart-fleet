@@ -1,5 +1,9 @@
 # Task 3D.4D-4 — Session, Person lifecycle and uncertain-result recovery
 
+## Task 3D.4D-5 follow-up — manual recovery design only
+
+[MANUAL_UNKNOWN_OPERATION_RECOVERY.md](MANUAL_UNKNOWN_OPERATION_RECOVERY.md) now defines self-help and Admin support when the original pointer is unavailable. Admin's existing lookup remains actor-scoped; history/audit candidates and absent rows are not terminal evidence. Five states, eight OPEN owner decisions and25 future synthetic acceptance specifications distinguish confirmed outcomes from unknown/authorization changed/unavailable evidence. No reset/unlock/search endpoint, marker clearing, new operation ID or blind retry is implemented or authorized.3D.4D-4 runtime, v1.1/legacy compatibility and DEFERRED operational boundaries are unchanged.
+
 2026-11-10 Asia/Bangkok. DEV/OFFLINE, kritsuwan1/smart-fleet, dev/smartfleet-batch-1. Policy v1.1 unchanged. Signup/login remains immediate; exact Person verification is Admin-only and first-link-only. No Staff activation, promotion, relink, identity retention, ownership backfill or data migration.
 
 ## Verified baseline and findings

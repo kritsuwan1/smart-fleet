@@ -1,5 +1,11 @@
 # SmartFleet - Test Plan
 
+## Task 3D.4D-5 — manual support design acceptance (NOT_RUN)
+
+[MANUAL_UNKNOWN_OPERATION_RECOVERY.md](MANUAL_UNKNOWN_OPERATION_RECOVERY.md) defines25 future synthetic specifications M01–M25, not implemented tests and not additional PASS counts. Cover exact original receipt vs attempt-only rejection, unknown/late commit, lost pointer/tab/storage/logout/device, auth/Person changes, same-name/unowned history, Admin actor-namespace restriction, future bounded discovery, corrupt/cross-epoch/stale evidence, forged/replayed decisions, audit/CAS races, future terminal fencing, minimized support data and desktop/360/390 accessibility. Every review/deny must preserve full Fleet/accounts/people/trips/Maintenance/audit/ledger/schema snapshots; only separately approved support-audit deltas may be permitted.
+
+Current task reverified exact Linux42793628897 on b920532 (29 suites/63 recovery cases) and reran existing synthetic session-recovery63 + transaction-reliability45 on Windows Node24.22.1 PASS. No new test/fixture/source file; no fresh build/typecheck/full29/browser claim. Future unlock/reset and read-only Admin discovery require separate owner approval; their acceptance remains NOT_RUN/NOT_IMPLEMENTED. Existing v1.1 authorization, CAS/replay, v4/schema3 backups and legacy Admin/Employee regressions remain required. Operator/Live/Initialize/Deployment DEFERRED.
+
 ## Task 3D.4D-4 — lifecycle/reload recovery (current)
 
 New session-recovery.test.mjs63 synthetic cases; total29 suites. Require expiry boundary/passwordVersion/disable/reject/link/epoch/role denial for writes and receipt lookup, concurrent disable during ledger read, inactive Person cannot checkout but own open return works, separate/same-ID checkout/return CAS, corrupt ledger refusal/no mutation, owner-only lookup/unknown privacy, unchanged legacy/account/backup/ledger data. Scope binds only the authenticated session, ignoring unrelated cookies.
