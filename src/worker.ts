@@ -81,7 +81,7 @@ export default {async scheduled(event:{cron:string;scheduledTime:number},env:any
   if(!user){
    if(path.startsWith('/api/'))return json({error:'UNAUTHORIZED'},401);
    if(path==='/register')return html(registerPage('',returnTo));
-   return html(login('',returnTo,url.searchParams.get('changed')==='1'?'เปลี่ยนรหัสผ่านแล้ว กรุณาเข้าสู่ระบบอีกครั้ง':''));
+   return html(login('',returnTo,url.searchParams.get('expired')==='1'?'เซสชันหมดอายุหรือสิทธิ์เปลี่ยน กรุณาเข้าสู่ระบบอีกครั้ง หากมีรายการไม่แน่นอนให้ตรวจสอบผลก่อนเริ่มรายการใหม่':url.searchParams.get('changed')==='1'?'เปลี่ยนรหัสผ่านแล้ว กรุณาเข้าสู่ระบบอีกครั้ง':''));
   }
   if(path==='/login'||path==='/register')return redirect(returnTo);
   if(path==='/logout'){
@@ -99,7 +99,7 @@ export default {async scheduled(event:{cron:string;scheduledTime:number},env:any
   }
   if(path==='/report-font-regular.ttf'||path==='/report-font-bold.ttf'){return response(Uint8Array.from(atob(path.includes('bold')?reportBold:reportRegular),c=>c.charCodeAt(0)),200,{'Content-Type':'font/ttf','Cache-Control':'private, max-age=86400'});}
   if(path==='/api/fleet'){
-   const api=fleetApi(env,user);const r=await (req.method==='POST'?api.POST(req):api.GET());const headers=new Headers(r.headers);for(const [k,v] of Object.entries(security))headers.set(k,v);return new Response(r.body,{status:r.status,headers});
+   const api=fleetApi(env,user);const r=await (req.method==='POST'?api.POST(req):api.GET(req));const headers=new Headers(r.headers);for(const [k,v] of Object.entries(security))headers.set(k,v);return new Response(r.body,{status:r.status,headers});
   }
   if(path==='/api/profile/password'&&req.method==='POST'){
    if(user.id==='admin')return json({error:'บัญชีหลักเปลี่ยนรหัสผ่านได้ที่ Cloudflare Secret APP_PASSWORD'},400);

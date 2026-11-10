@@ -1,5 +1,11 @@
 # SmartFleet - System Architecture
 
+## Task 3D.4D-4 — session-bound recovery pointer (current)
+
+Existing auth expiry/revocation/link, immutable User return, CAS and ledger remain authoritative. New trip-recovery.ts stores one bounded8h tab-local operation pointer with opaque session scope, UUID/kind/timestamps only, before sending; no credential/Fleet/payload persistence. Same-page retry retains exact intent; reload uses only explicit GET lookup on existing Fleet API and never reconstructs/resends a payload or issues a fresh ID while unresolved. GET rechecks current authorization/epoch after ledger read and returns original validated receipt or unknown, without writes. Receipt consistency guards reject corrupt ledger rows.
+
+Unknown/storage failure/expiry/logout/new session fail closed; identifier-free tombstone is not auto-cleared into a new write. Logout signals other open tabs without identifiers. Own history/details/reports stay scoped; new transaction controls disabled while unresolved; inactive Person cannot checkout but own open return remains safe. No new route/schema/backup version or real migration. Cross-tab races remain server-CAS protected; no cross-device/global browser recovery is claimed. [SESSION_PERSON_RECOVERY.md](SESSION_PERSON_RECOVERY.md) defines privacy, tests, rollback and manual-review gaps. Policy v1.1/legacy compatibility unchanged; Operator/Live/Initialize/Deployment DEFERRED.
+
 ## Task 3D.4D-3 — verified Person scope (current)
 
 Admin first-links an ACTIVE unlinked User to an explicitly selected unique active/unclaimed Person through existing Account action, review confirmation, audit and main CAS. Open-trip/target-or-unknown-ledger conflicts refuse. No name claim, signup queue, relink or historical rewrite. New linked self-user/state v4 keeps legacy active=false; exact personVerification IDs/server timestamp, passwordVersion++ and signed User link scope protect sessions. Legacy/v3 remain recognized; old binaries refuse v4.

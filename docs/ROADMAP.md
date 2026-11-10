@@ -1,6 +1,6 @@
 # SmartFleet Development Roadmap
 
-Updated 2026-11-10 (Asia/Bangkok), Task3D.4D-3 verified Person/User access; Policy v1.1 supersedes Q6 only. Repository kritsuwan1/smart-fleet; active branch dev/smartfleet-batch-1. App label/baseline v3.8.5; targets remain v3.8.6 through v4.2.0, without assigning a deployment/release date.
+Updated 2026-11-10 (Asia/Bangkok), Task3D.4D-4 session/Person lifecycle and recovery; Policy v1.1 supersedes Q6 only. Repository kritsuwan1/smart-fleet; active branch dev/smartfleet-batch-1. App label/baseline v3.8.5; targets remain v3.8.6 through v4.2.0, without assigning a deployment/release date.
 
 ## Owner direction and boundaries
 
@@ -51,7 +51,9 @@ Owner changed only Q6: User self-registration is immediately active without Admi
 
 Implemented through **3D.4D-3**: immediate unlinked signup/login/profile; first-link-only Admin exact Person ID + review confirmation/audit/CAS; no name claim/relink; open-trip/ledger conflict refusal; v4 User/session/link/backup guards; ownerUserId-only history/personal reports/basic reminders and keyed checkout/own return with immutable details. Legacy Admin/Employee and existing IDs/ledger unchanged. No Staff promotion or new signup approval. Windows28 suites incl81 linking/60 signup/171 guards and actual Edge1280/360/390px PASS; exact Linux evidence in PROGRESS. [VERIFIED_PERSON_LINKING.md](VERIFIED_PERSON_LINKING.md).
 
-Next proposed **3D.4D-4**: synthetic account/link lifecycle and conflict/expired-session/reload UX regression. Acceptance: multiple tabs/reload cannot lose or duplicate an uncertain operation; disabled Person cannot start but own open return remains possible; sessions and replays refuse changed authorization; exact synthetic snapshots preserve historical data. Relink/evidence retention/Staff require separate owner scope. No real migration/deploy is authorized. Operator/Live/Initialize/Deployment remain DEFERRED.
+Completed **3D.4D-4** offline: existing session/role/link/Person authorization and own-return policy verified; session-bound metadata-only pointer and read-only ledger reconciliation preserve intent after reload without storing payload or resubmitting. Unknown/expiry/logout fail closed; existing CAS handles separate-tab checkout/return.63 new cases/29 suites; desktop1280/mobile360/390 browser acceptance and exact CI evidence in PROGRESS. No relink, Staff, signup approval or destructive migration. [SESSION_PERSON_RECOVERY.md](SESSION_PERSON_RECOVERY.md).
+
+Next proposed **3D.4D-5 (DESIGN ONLY, owner review)**: manual unknown-operation reconciliation and accessible support procedure, including privacy-preserving lookup evidence, stale session/tab-close limitations, no accidental duplicate, and explicit acceptance/authority before any unlock/reset action. Do not add an abandon/reset button, new data-changing endpoint or new identity policy automatically. Cross-device/native-mobile verification remains a separate gap. Operator/Live/Initialize/Deployment stay DEFERRED.
 
 ### 3D.5 — Mobile and local browser acceptance (P1/P2)
 

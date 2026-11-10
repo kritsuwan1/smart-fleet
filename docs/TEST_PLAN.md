@@ -1,5 +1,13 @@
 # SmartFleet - Test Plan
 
+## Task 3D.4D-4 — lifecycle/reload recovery (current)
+
+New session-recovery.test.mjs63 synthetic cases; total29 suites. Require expiry boundary/passwordVersion/disable/reject/link/epoch/role denial for writes and receipt lookup, concurrent disable during ledger read, inactive Person cannot checkout but own open return works, separate/same-ID checkout/return CAS, corrupt ledger refusal/no mutation, owner-only lookup/unknown privacy, unchanged legacy/account/backup/ledger data. Scope binds only the authenticated session, ignoring unrelated cookies.
+
+Check one bounded sessionStorage pointer before POST: no payload/credentials/Fleet/identity fields,8h expiry, malformed/extra/array-ID/wrong-scope/clock/storage failure refusal and identifier scrub; logout/account isolation; no new ID or POST after reload/unknown, original receipt only after validated confirmation. Same-page retry keeps original ID, including a later401/403/409 after unknown. Test delayed original commit after unknown, real timeout, dropped responses and tampered acknowledgements. No automatic discard/reset after expiry/logout; fail-closed tombstone.
+
+Optional actual Worker Edge browser: node tests/session-recovery-browser.mjs .qa/browser/node_modules/playwright "PATH_TO_EDGE". Desktop1280/mobile360/390, refresh, two-tab checkout/return,15s timeout/lost response, read-only network failure/recheck, inactive Person, disabled controls, logout scrub/new login and expired-session Thai UX; synthetic only/external requests blocked. Prior linking/signup browsers remain regression checks. Final Windows/exact Linux evidence in PROGRESS; operational/cloud/native-device verification remains deferred. Contract/limits: [SESSION_PERSON_RECOVERY.md](SESSION_PERSON_RECOVERY.md).
+
 ## Task 3D.4D-3 — verified Person/User access (current)
 
 [VERIFIED_PERSON_LINKING.md](VERIFIED_PERSON_LINKING.md) supersedes the previous task's unlinked-only operational limit; signup remains immediate. Required regression: Admin current authorization + explicit IDs/confirmed selection; missing/inactive/duplicate/claimed IDs; disabled/rejected target; target/unknown ledger and open-trip refusal; no name claim/relink; two-account same-Person CAS; audit/identity/legacy/ledger preservation. New person-link.test.mjs81 synthetic cases, total28 suites.

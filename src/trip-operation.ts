@@ -1,6 +1,7 @@
 import type {Fleet} from './fleet';
 import type {User} from './auth';
 import type {TripReceipt} from './trip-receipt';
+import {validateTripValues} from './validation';
 export type TripOperation={id:string;kind:'start'|'return'};
 export type OperationRecord={format:1;commitToken:string;id:string;kind:'start'|'return';actorId:string;actorRole:string;actorDriverId:string;carId:string;fingerprint:string;version:number;tripResult:{id:string;operation:'start'|'return'};receipt:TripReceipt};
 export class OperationError extends Error {constructor(message:string,public status=409,public code='OPERATION_CONFLICT'){super(message);}}
@@ -13,14 +14,20 @@ export async function tripOperationContext(operation:any,data:any,user:User,stat
  const fingerprint=await sha(canonicalTripPayload({actorId:user.id,kind:operation.kind,carId:data.carId,data}));
  return {key,fingerprint,operation:{...operation} as TripOperation};
 }
+// A read-only lookup never reconstructs or resubmits the original transaction payload.
+export async function tripOperationLookup(operation:TripOperation,user:User,state:Fleet){
+ if(!operation||Object.keys(operation).sort().join(',')!=='id,kind'||!['start','return'].includes(operation.kind)||typeof operation.id!=='string'||!/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(operation.id))throw new OperationError('รหัสตรวจสอบรายการไม่ถูกต้อง',400,'OPERATION_INVALID');
+ return {operation,key:'trip-operation:v1:'+await sha(JSON.stringify([state.sessionKey,user.id,operation.id]))};
+}
 export async function readTripOperation(env:any,key:string):Promise<OperationRecord|null>{
  const row=await env.DB.prepare('SELECT payload FROM fleet_store WHERE id=?').bind(key).first();
  if(!row)return null;
- try{const r=JSON.parse(row.payload);if(r.format!==1||!r.receipt?.trip||typeof r.fingerprint!=='string'||!r.tripResult?.id)throw Error();return r;}catch{throw new OperationError('ไม่สามารถตรวจผลรายการเดิมได้ กรุณาลองใหม่',503,'OPERATION_UNAVAILABLE');}
+ try{const r=JSON.parse(row.payload),t=r.receipt?.trip;if(r.format!==1||!t||!['start','return'].includes(r.kind)||r.receipt.kind!==r.kind||r.tripResult?.operation!==r.kind||t.id!==r.tripResult.id||t.carId!==r.carId||typeof r.actorId!=='string'||!['admin','employee','user'].includes(r.actorRole)||typeof r.actorDriverId!=='string'||typeof r.fingerprint!=='string'||!/^[a-f0-9]{64}$/.test(r.fingerprint)||!Number.isSafeInteger(r.version)||r.version<1||r.actorRole!=='admin'&&(t.ownerUserId!==r.actorId||t.driverId!==r.actorDriverId)||r.kind==='start'&&t.end||r.kind==='return'&&!t.end||typeof r.receipt.driverName!=='string'||typeof r.receipt.plate!=='string'||typeof r.receipt.province!=='string')throw Error();validateTripValues(t);return r;}catch{throw new OperationError('ไม่สามารถตรวจผลรายการเดิมได้ กรุณาลองใหม่',503,'OPERATION_UNAVAILABLE');}
 }
 export function authorizeOperation(r:OperationRecord,context:Awaited<ReturnType<typeof tripOperationContext>>,state:Fleet,user:User){
  if(r.actorId!==user.id||r.actorRole!==user.role||r.actorDriverId!==user.driverId)throw new OperationError('FORBIDDEN',403,'OPERATION_FORBIDDEN');
  if(r.id!==context.operation.id||r.kind!==context.operation.kind||r.fingerprint!==context.fingerprint)throw new OperationError('รหัสรายการนี้ถูกใช้กับข้อมูลอื่นแล้ว',409);
  const trip=state.trips.find(t=>t.id===r.tripResult.id);
  if(!trip||trip.carId!==r.carId||user.role!=='admin'&&trip.ownerUserId!==user.id)throw new OperationError('ไม่สามารถยืนยันผลรายการเดิมได้ กรุณารีเฟรช',409,'OPERATION_STATE_CHANGED');
+ if(user.role==='user'&&trip.driverId!==user.driverId)throw new OperationError('FORBIDDEN',403,'OPERATION_FORBIDDEN');
 }

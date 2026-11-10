@@ -1,8 +1,8 @@
 import {validateTrip,type Fleet,type Trip} from './fleet';
 import {readState,writeState,writeTripOperation} from './storage';
-import {tripOperationContext,readTripOperation,authorizeOperation,OperationError,type OperationRecord} from './trip-operation';
+import {tripOperationContext,tripOperationLookup,readTripOperation,authorizeOperation,OperationError,type OperationRecord} from './trip-operation';
 import {tripReceiptFromResponse} from './trip-receipt';
-import {currentUser,viewForUser,passwordValid,hashPassword,type User,hex,cleanName,clearSession} from './auth';
+import {currentUser,viewForUser,passwordValid,hashPassword,type User,hex,cleanName,clearSession,digest,COOKIE} from './auth';
 import {importedTrips} from './seed';
 import {manualFuel,validMonth} from './fuel';
 import {planImport} from './import-plan';
@@ -12,7 +12,22 @@ import {preparePersonLink} from './person-link';
 import {AccountCompatibilityError,isSelfAccount,accountEnabled} from './account-compatibility';
 export function fleetApi(env:any,user:User){
 const json=(v:unknown,status=200)=>Response.json(v,{status,headers:{'Cache-Control':'no-store'}});
-async function GET(){try{const {state,version,payloadBytes}=await readState(env);return json(viewForUser(state,version,user,payloadBytes));}catch(e){return fail(e);}}
+async function scope(req:Request|undefined,state:Fleet,actor:User){const cookie=(req?.headers.get('cookie')||'').split(';').map(v=>v.trim()).find(v=>v.startsWith(COOKIE+'='))||'';return actor.role==='user'&&!actor.driverId?{}:{recoveryScope:await digest(JSON.stringify([state.sessionKey,actor.id,actor.role,actor.driverId,actor.passwordVersion,cookie]))};}
+async function GET(req?:Request){try{
+ const params=req?new URL(req.url).searchParams:new URLSearchParams(),lookup=params.has('operationId')||params.has('operationKind');
+ const readEnv=lookup&&typeof env.DB?.withSession==='function'?{...env,DB:env.DB.withSession('first-primary')}:env;
+ const {state,version,payloadBytes}=await readState(readEnv),actor=currentUser(user,state);let view={...viewForUser(state,version,actor,payloadBytes),...await scope(req,state,actor)};
+ if(!lookup)return json(view);
+ if(actor.role==='user'&&!actor.driverId)throw Error('FORBIDDEN');
+ if([...params.keys()].sort().join(',')!=='operationId,operationKind')throw new OperationError('คำขอตรวจสอบไม่ถูกต้อง',400,'OPERATION_INVALID');
+ const operation={id:params.get('operationId')!,kind:params.get('operationKind')! as 'start'|'return'},context=await tripOperationLookup(operation,actor,state),record=await readTripOperation(readEnv,context.key);
+ const latest=await readState(readEnv),current=currentUser(user,latest.state);
+ if(latest.state.sessionKey!==state.sessionKey)throw new OperationError('ข้อมูลถูกกู้คืนหรือเปลี่ยนรุ่น กรุณาตรวจสอบกับผู้ดูแล',409,'OPERATION_STATE_CHANGED');
+ view={...viewForUser(latest.state,latest.version,current,latest.payloadBytes),...await scope(req,latest.state,current)};
+ if(!record)return json({...view,reconciliation:{state:'unknown',...operation}});
+ authorizeOperation(record,{...context,fingerprint:record.fingerprint},latest.state,current);
+ return json({...view,reconciliation:{state:'confirmed',...operation},tripResult:record.tripResult,tripReceipt:record.receipt,tripOperation:{id:record.id,kind:record.kind,version:record.version,replayed:true}});
+}catch(e){return fail(e);}}
 function fail(e:unknown){if(e instanceof AccountCompatibilityError)return json({error:e.message,code:e.message},503);if(e instanceof OperationError)return json({error:e.message,code:e.code},e.status);const m=e instanceof Error?e.message:'เกิดข้อผิดพลาด';return json({error:m},m==='UNAUTHORIZED'?401:m==='FORBIDDEN'?403:400);}
 async function POST(req:Request){try{
  if(req.headers.get('origin')&&new URL(req.headers.get('origin')!).host!==new URL(req.url).host)return json({error:'คำขอไม่ถูกต้อง'},403);
@@ -25,9 +40,9 @@ async function POST(req:Request){try{
  if(actorUser.role!=='admin'&&b.action!=='trip')return json({error:'FORBIDDEN'},403);
  if(actorUser.role==='user'&&(!b.tripOperation||b.data?.id&&!s.trips.some(t=>t.id===b.data.id&&t.ownerUserId===actorUser.id)))return json({error:'FORBIDDEN'},403);
  const operation=b.action==='trip'&&b.tripOperation!==undefined?await tripOperationContext(b.tripOperation,b.data,actorUser,s):null;
- function result(record:OperationRecord,state:Fleet,currentVersion:number,replayed:boolean){
+ async function result(record:OperationRecord,state:Fleet,currentVersion:number,replayed:boolean){
   const current=currentUser(user,state);authorizeOperation(record,operation!,state,current);
-  return json({...viewForUser(state,currentVersion,current),tripResult:record.tripResult,tripReceipt:record.receipt,tripOperation:{id:record.id,kind:record.kind,version:record.version,replayed}});
+  return json({...viewForUser(state,currentVersion,current),...await scope(req,state,current),tripResult:record.tripResult,tripReceipt:record.receipt,tripOperation:{id:record.id,kind:record.kind,version:record.version,replayed}});
  }
  async function replay(record:OperationRecord){
   const latest=await readState(scopedEnv);
@@ -55,6 +70,7 @@ async function POST(req:Request){try{
   }
   const t:Trip={id:old?.id||crypto.randomUUID(),seq:old?.seq||Math.max(0,...s.trips.map(t=>t.seq))+1,carId:String(d.carId),driverId:String(d.driverId),project:String(d.project||'').trim(),destination:String(d.destination||'').trim(),start:String(d.start||''),end:String(d.end||''),odoStart:Number(d.odoStart),odoEnd:d.end?Number(d.odoEnd):null,note:String(d.note||''),reason:String(d.reason||''),ownerUserId:old?.ownerUserId||(actorUser.id!=='admin'?actorUser.id:undefined)};
   if(d.odoStart===''||t.end&&(d.odoEnd===''||d.odoEnd==null))throw Error('กรุณากรอกเลขไมล์');
+  if(actorUser.role==='user'&&!old&&!s.people.find(p=>p.id===actorUser.driverId)?.active)throw new OperationError('Person ของคุณถูกปิดใช้งาน จึงเริ่มใช้รถไม่ได้ แต่ยังคืนรถที่เปิดไว้ของตนเองได้ กรุณาติดต่อผู้ดูแล',403,'PERSON_INACTIVE');
   validateTrip(s,t);
   if(!old&&(!s.cars.find(c=>c.id===t.carId)?.active||!s.people.find(p=>p.id===t.driverId)?.active))throw Error('รถหรือพนักงานถูกปิดใช้งานแล้ว');
   s.trips=old?s.trips.map(x=>x.id===t.id?t:x):[...s.trips,t];after=t;action=old?'แก้ไขรายการ / คืนรถ':'เพิ่มรายการใช้รถ';
@@ -156,7 +172,7 @@ async function POST(req:Request){try{
  }
  if(!await writeState(env,s,version))return json({error:'มีการบันทึกพร้อมกัน กรุณารีเฟรชแล้วลองใหม่'},409);
  if(b.action==='account'&&b.data.id===actorUser.id)return new Response(JSON.stringify({reauthenticate:true}),{headers:{'Content-Type':'application/json','Cache-Control':'no-store','Set-Cookie':clearSession()}});
- return json({...viewForUser(s,version+1,actorUser),importResult,tripResult});
+ return json({...viewForUser(s,version+1,actorUser),...await scope(req,s,actorUser),importResult,tripResult});
  }catch(e){return fail(e);}}
 
 return {GET,POST};

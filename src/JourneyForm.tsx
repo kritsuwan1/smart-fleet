@@ -6,8 +6,8 @@ import {vehicleProfile} from './vehicle-profile';
 import VehicleActionButton from './VehicleActionButton';
 
 const num=(n:number)=>n.toLocaleString('en-US');
-type Props={state:Fleet;trip:any;mode:'start'|'return';busy:boolean;uncertain?:boolean;error:string;employee:boolean;returnOnly?:boolean;occupiedCars:Set<string>;onSubmit:(v:any)=>void;onClose:()=>void};
-export default function JourneyForm({state:s,trip,mode,busy,uncertain=false,error,employee,returnOnly=false,occupiedCars,onSubmit,onClose}:Props){
+type Props={state:Fleet;trip:any;mode:'start'|'return';busy:boolean;uncertain?:boolean;error:string;employee:boolean;returnOnly?:boolean;occupiedCars:Set<string>;onReconcile?:()=>void;onSubmit:(v:any)=>void;onClose:()=>void};
+export default function JourneyForm({state:s,trip,mode,busy,uncertain=false,error,employee,returnOnly=false,occupiedCars,onReconcile,onSubmit,onClose}:Props){
  const [v,setV]=useState({...trip});
  const errorRef=useRef<HTMLDivElement>(null);
  useEffect(()=>{if(error)errorRef.current?.focus();},[error]);
@@ -33,6 +33,6 @@ export default function JourneyForm({state:s,trip,mode,busy,uncertain=false,erro
    {(discontinuous||v.reason||error.includes('เลขไมล์ไม่ต่อเนื่อง'))&&<label className="field journey-reason"><span>เหตุผลกรณีเลขไมล์ไม่ต่อเนื่อง{discontinuous&&<b> *</b>}</span><input disabled={returning&&returnOnly} value={v.reason||''} onChange={e=>set('reason',e.target.value)} placeholder="เช่น มีการใช้รถก่อนรายการนี้" required={discontinuous} maxLength={1000}/></label>}
   </div></fieldset>
   {error&&<div className="alert error journey-error" role="alert" ref={errorRef} tabIndex={-1}><AlertCircle size={18}/>{error}</div>}
-  <div className="modal-footer journey-footer"><VehicleActionButton type="submit" variant={returning?'return':'start'} disabled={busy} aria-busy={busy}>{busy?'กำลังบันทึก…':returning?'ยืนยันคืนรถ':'ยืนยันบันทึกใช้รถ'}</VehicleActionButton><button type="button" className="journey-cancel" disabled={busy||uncertain} onClick={onClose}>ยกเลิก</button></div>
+  <div className="modal-footer journey-footer">{uncertain&&onReconcile&&<button type="button" className="secondary" disabled={busy} onClick={onReconcile}>ตรวจสอบผลรายการเดิม</button>}<VehicleActionButton type="submit" variant={returning?'return':'start'} disabled={busy} aria-busy={busy}>{busy?'กำลังบันทึก…':returning?'ยืนยันคืนรถ':'ยืนยันบันทึกใช้รถ'}</VehicleActionButton><button type="button" className="journey-cancel" disabled={busy||uncertain} onClick={onClose}>ยกเลิก</button></div>
  </form>;
 }
