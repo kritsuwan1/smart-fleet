@@ -1,5 +1,12 @@
 # SmartFleet - Test Plan
 
+## 2026-11-10 — Task 3D.4D-1 revalidation
+
+Repeated request rechecked against existing implementation cdd610e and docs e78e0a4; all99 executable/script/test/package/build inputs identical to remote. Fresh Windows x64 Nodev24.22.1 npm ci/build/typecheck/all26 offline suites PASS, including164 operational compatibility/102 spike compatibility/45 transaction/163 value-validation cases. No source/test changes or new role/signup activation.
+
+Exact [Linux CI41966113822](https://github.com/kritsuwan1/smart-fleet/actions/runs/41966113822)/job127043386817 re-fetched: Ubuntu24.04.5/Node24.22.1, head_sha=cdd610e1683747e18718c4ba2dc5bb4ea2cac856, all26 suites PASS. Its execution date remains2026-11-05; no new Linux run claimed for2026-11-10. This follow-up is docs-only (workflow paths-ignore); fresh Linux NOT_RUN. No new browser/UAT/real-cloud verification; existing compatibility/rollback limits and DEFERRED operational statuses remain.
+
+
 ## Task 3D.4D-1 — actual operational compatibility guard regression
 
 New operational-compatibility.test.mjs164 cases, npm test26 suites. Exercise actual shared guard/storage/auth/session/Worker/API/manual+automatic backup and restore paths, not just3D.4C harness. Cases: strict version/role/status refusal and explicit missing-role legacy adapter, future metadata/status matrix, root shortcut/session issuance denial, no lazy/rate-limit/signup writes on bad state, no Fleet/member/body leakage, valid disabled/legacy behavior, candidate/stored-state refusal and version CAS, sanitized malformed JSON, JS/generated-SQL parity, complete schema/rows/version/ledger snapshots on refusal, valid SQL/automatic restore rotation, same-ID concurrent return/lost-ack/replay with one audit/odo change.

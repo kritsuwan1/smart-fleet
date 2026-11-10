@@ -1,5 +1,15 @@
 # SmartFleet - Development Progress
 
+## 2026-11-10 — Task 3D.4D-1 repeat-request verification (no implementation changes)
+
+- Reverified requested prerequisites fef56f8865ba2a8b3e280271a2d06f02f57f9301, docs83fd846065b29eb1a113c83b9cb1e7083058c4b2 and exact CI41963063663/job127033697190 PASS25 suites/102 compatibility cases. Existing completed3D.4D-1 implementation cdd610e1683747e18718c4ba2dc5bb4ea2cac856 and docs follow-up e78e0a41d92e3af1865d7e6bcb5dd41ffadf14f4 remain on the correct Development branch. No unexpected commits/source edits.
+- Read AGENTS/all required policy/compatibility/architecture/progress/roadmap/test documents and reinspected actual shared account guards, storage, auth/session, API and backup paths. All99 source/script/test/package/build inputs match the exact remote tree. Existing valid legacy behavior and safe exclusion scope satisfy this repeated task; no redundant implementation or new role/signup/approval activation.
+- Fresh2026-11-10 Windows x64 Nodev24.22.1: npm ci PASS42 installed/audited43/reported0 vulnerabilities (existing esbuild/workerd install-script restrictions unchanged), Build PASS (Demo1014923/Production1013549/Staging1013696 bytes), Typecheck PASS, npm test PASS all26 suites including164 operational guard/102 compatibility/45 transaction/163 validation cases. No lint script.
+- Re-fetched exact implementation [Linux CI41966113822](https://github.com/kritsuwan1/smart-fleet/actions/runs/41966113822), decoded job127043386817: completed/success for cdd610e... on Ubuntu24.04.5/Node24.22.1, ci/build/typecheck/all26 suites incl164 guard cases. This is verified evidence from2026-11-05 for unchanged executable source, not a new Linux execution on2026-11-10. Fresh Linux CI NOT_RUN for this docs-only verification; existing paths-ignore applies.
+- Publication this round changes only PROGRESS.md and TEST_PLAN.md; no source/test/package/lock/config/schema change. Existing limits remain: unsupported lifecycle rejected as a whole, old deployed binaries/old or arbitrary SQL restores are not fixed; future authoritative credential/lifecycle/root/mixed-reader integration is proposed3D.4D-2, not started. Staff/User/PENDING signup/review NOT_ENABLED.
+- No Cloudflare API/real credentials/real DB/resources/Production/Demo/R2/Cron/public-route operations, account conversion/migration, Initialize/Deploy/Merge. Operator/Live/Initialize/Deployment DEFERRED; actual operational NOT_VERIFIED.
+
+
 ## 2026-11-05 — Task 3D.4D-1: operational account compatibility gates (DEV/OFFLINE)
 
 - Prerequisite PASS: fef56f8865ba2a8b3e280271a2d06f02f57f9301 expected10 paths;83fd846065b29eb1a113c83b9cb1e7083058c4b2 parent fef56f8 and3 docs-only paths, correct Development HEAD. Re-fetched exact Linux CI41963063663/job127033697190 completed/success and decoded Ubuntu24.04.5/Node24.22.1/25 suites/102 cases. Read AGENTS/all7 required docs;97 executable/script/test/package/build inputs matched baseline before work.
