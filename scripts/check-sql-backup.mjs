@@ -19,12 +19,13 @@ try{
  const {createBackup,inspectBackup,operationalAccountsSql}=await import('data:text/javascript;base64,'+Buffer.from(built.outputFiles[0].text).toString('base64'));
  const guard=`SELECT CASE WHEN NOT EXISTS(SELECT 1 FROM fleet_store WHERE id='main' AND NOT (${operationalAccountsSql('payload')})) THEN 1 ELSE json('ACCOUNT_FORMAT_UNSUPPORTED') END`;
  // Exact generated v1 statement from cdd610e; permits legacy backup rehearsal without broad SELECT acceptance.
+ const selfUserGuardSha='1f2825a98600bbb3f1aa6a3c75f652d3419e16d7bff282e2042b104f870baffd';
  const legacyGuardSha='8ec22b69bbe7891d2642d79c4336102b887e7f1712cce4e43800082b10ad0229';
  const allowed=[/^CREATE TABLE IF NOT EXISTS fleet_store\(/i,/^INSERT OR REPLACE INTO fleet_store\(id,payload,version\) VALUES\(/i,/^UPDATE fleet_store SET payload=payload \|\| '/i,/^INSERT INTO fleet_store\(id,payload,version\) SELECT 'main',json_set\(payload,/i,/^DELETE FROM fleet_store WHERE id=/i];
  // Also reject extra SQL tokens hidden after an otherwise-valid prefix.
  for(const line of statements){
   const withoutStrings=line.replace(/'(?:(?:'')|[^'])*'/g,"''");
-  if(!(line===guard||createHash('sha256').update(line).digest('hex')===legacyGuardSha||allowed.some(pattern=>pattern.test(line)))||/\b(ATTACH|DETACH|PRAGMA|DROP|ALTER|load_extension|readfile|writefile)\b/i.test(withoutStrings))throw Error('รองรับเฉพาะ SQL สำรองที่สร้างจาก Smart Fleet');
+  if(!(line===guard||createHash('sha256').update(line).digest('hex')===legacyGuardSha||createHash('sha256').update(line).digest('hex')===selfUserGuardSha||allowed.some(pattern=>pattern.test(line)))||/\b(ATTACH|DETACH|PRAGMA|DROP|ALTER|load_extension|readfile|writefile)\b/i.test(withoutStrings))throw Error('รองรับเฉพาะ SQL สำรองที่สร้างจาก Smart Fleet');
  }
  const environment=/^-- environment: demo$/m.test(text)?'demo':'production';
  if(environment==='demo'){db.exec("CREATE TABLE fleet_store(id TEXT PRIMARY KEY NOT NULL,payload TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 0); INSERT INTO fleet_store VALUES('environment','demo',0)");}

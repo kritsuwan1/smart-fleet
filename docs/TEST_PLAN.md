@@ -1,5 +1,15 @@
 # SmartFleet - Test Plan
 
+## Task 3D.4D-3 — verified Person/User access (current)
+
+[VERIFIED_PERSON_LINKING.md](VERIFIED_PERSON_LINKING.md) supersedes the previous task's unlinked-only operational limit; signup remains immediate. Required regression: Admin current authorization + explicit IDs/confirmed selection; missing/inactive/duplicate/claimed IDs; disabled/rejected target; target/unknown ledger and open-trip refusal; no name claim/relink; two-account same-Person CAS; audit/identity/legacy/ledger preservation. New person-link.test.mjs81 synthetic cases, total28 suites.
+
+Check signed-cookie/actor revocation after linking, changed Person and disabled/rejected status; own-only projected DTO/history/PDF/Excel by ownerUserId, never driverId/name; no full Fleet/account/credential/cost/history/private fields. Deny all forbidden routes/actions with complete SQLite schema/row snapshots. User must use keyed checkout/own return, immutable details, exact-payload replay/double-submit/different-ID conflicts; no partial writes/duplicates. v4 JS-SQL parity, old-v3 refusal, schema3 integrity, valid isolated SQL/automatic restore/session rotation and rehashed invalid automatic backup rejection before target mutation.
+
+Optional browser: node tests/person-link-browser.mjs .qa/browser/node_modules/playwright "PATH_TO_EDGE". Actual Worker/secure synthetic signed cookies and separate contexts, desktop1280/mobile360/390, signup/unlinked denial, Admin review, session401/login, User checkout/double submit/lost response retry/return, reminders/personal PDF, no overflow/page errors. External requests blocked. Windows Node24 final ci/build/typecheck/all suites and exact implementation Linux run recorded in PROGRESS. Browser PASS does not verify physical mobile, actual operator, identity proof or Cloudflare.
+
+Operator/Live/Initialize/Deployment DEFERRED; no real DB/API/credentials/resources. Historical task evidence below remains historical.
+
 ## Task 3D.4D-2 — Policy v1.1 immediate User account regression
 
 New self-registration.test.mjs60 cases, npm test27 suites: immediate account activation without queue/approval, six-to128-character passwords/hashes/session cookies/rate limits, caller privilege/Person spoof denial, duplicate/concurrent identities, zero Person creation/matching/history takeover, exact self-only DTO, forbidden routes/writes before ledger lookup, own-password/session revocation/disabled/rejected handling, Admin restrictions, v3 JS/SQL parity/schema2 backup/restore, legacy data and same-ID replay.
@@ -11,11 +21,13 @@ Optional self-registration-browser.mjs actual Edge157.0.4341.42 at360px PASS: re
 Windows Node24.22.1 ci/build/typecheck/all27 suites PASS. Exact implementation 824a4214fbb019fa1ff30e12d7a406945be08fdc verified by Linux CI [42761789176](https://github.com/kritsuwan1/smart-fleet/actions/runs/42761789176), job129648950771, completed/success on2026-11-10 12:23 Asia/Bangkok: Ubuntu24.04.5/Nodev24.22.2, npm ci/build/typecheck/all27 suites PASS including60 self-registration/170 guard/102 historical compatibility/45 transaction/163 validation cases. Exact head_sha and decoded logs checked; Linux bundle sizes Demo1018655/Production1017281/Staging1017428 bytes, install reported0 vulnerabilities. This docs-only evidence follow-up leaves the tested executable inputs unchanged. New User remains unlinked, all Person vehicle/history/report scope denied; verified-link and new User promotion workflow NOT_IMPLEMENTED. Operator/Live/Initialize/Deployment DEFERRED.
 
 
+
 ## 2026-11-10 — Task 3D.4D-1 revalidation
 
 Repeated request rechecked against existing implementation cdd610e and docs e78e0a4; all99 executable/script/test/package/build inputs identical to remote. Fresh Windows x64 Nodev24.22.1 npm ci/build/typecheck/all26 offline suites PASS, including164 operational compatibility/102 spike compatibility/45 transaction/163 value-validation cases. No source/test changes or new role/signup activation.
 
 Exact [Linux CI41966113822](https://github.com/kritsuwan1/smart-fleet/actions/runs/41966113822)/job127043386817 re-fetched: Ubuntu24.04.5/Node24.22.1, head_sha=cdd610e1683747e18718c4ba2dc5bb4ea2cac856, all26 suites PASS. Its execution date remains2026-11-05; no new Linux run claimed for2026-11-10. This follow-up is docs-only (workflow paths-ignore); fresh Linux NOT_RUN. No new browser/UAT/real-cloud verification; existing compatibility/rollback limits and DEFERRED operational statuses remain.
+
 
 
 ## Task 3D.4D-1 — actual operational compatibility guard regression
@@ -29,6 +41,7 @@ Windows x64 Node24.22.1 npm ci/build/typecheck/all26 suites PASS. Exact implemen
 No claim that old deployed readers now refuse new state. Their coercion is a historical model; actual new-reader guards and legacy rollback compatibility are tested offline. No migration/account conversion/new routes, Staff/User/PENDING signup/review activation. Mixed-version cutover, future credential/root adapters and full new-policy RC-01–12 remain separate work. Operator/Live/Initialize/Deployment DEFERRED.
 
 
+
 ## Task 3D.4C — approved Policy v1.0 compatibility regression
 
 Owner-approved Q1–Q10 now supersede the historical 3D.4A unapproved draft. [ROLE_ONBOARDING_COMPATIBILITY.md](ROLE_ONBOARDING_COMPATIBILITY.md) describes test-only model/gates and remaining operational blockers. New role-compatibility.test.mjs + synthetic fixture:102 cases, npm test25 suites. No operational role/signup/auth/schema changes.
@@ -40,6 +53,7 @@ Fresh Windows Node24.22.1 npm ci/build/typecheck/all25 suites PASS (new102 / tra
 The old binary has NOT gained a version gate; rejection is in the isolated harness and new state is never given to it. Actual readers/credentials/registration/review/route/UI RC-01–12 acceptance remain NOT_IMPLEMENTED/NOT_RUN. Unknown-role coercion in current auth must not be used for v2. Operator/Live/Initialize/Deployment remain DEFERRED.
 
 
+
 ## Task 3D.4A — proposed role/state acceptance contract (DESIGN ONLY)
 
 [ROLE_ONBOARDING_CONTRACT.md](ROLE_ONBOARDING_CONTRACT.md), sections3–9, defines the action/data matrix and planned RC-01–12 cases. They are NOT_IMPLEMENTED / NOT_RUN in this task; policy remains NOT_APPROVED. Current Admin/Employee tests passing does not establish Staff/User/PENDING support.
@@ -47,6 +61,8 @@ The old binary has NOT gained a version gate; rejection is in the isolated harne
 Future coverage after owner approval: Admin/Staff/User/explicit legacy Employee × PENDING/APPROVED/REJECTED/DISABLED, anonymous/stale/unknown/root cases; every route/action/data scope must have authorized and unauthorized fixtures. Validate complete synthetic state/version/ledger and response redaction, not only hidden buttons. Test no-name-only Person claiming, concurrent approval/claim conflicts, immutable historical ownerUserId/driverId, legacy mapping, backup/status format rejection before mutation, session revocation, other-trip write denial for Staff, and3D.3 replay when role/status/link changes. UI includes no operational prefetch while pending, read-only all-history details, truthful review/transaction results and mobile360px+.
 
 Actual this-task Windows x64 Node24.22.1 build/typecheck/existing24 suites PASS; transaction45/validation163 and prior auth/roles/backup/Maintenance/security remain green. No tests/source/dependencies changed; no new browser test or npm ci/audit run. Exact baseline Linux [41953314810](https://github.com/kritsuwan1/smart-fleet/actions/runs/41953314810), f51efec80a20fbcc6c2a6d97cb9436b9d5e09554, reverified from metadata/decoded logs: Ubuntu24.04.5/Node24.22.1/ci-build-typecheck24 PASS. New docs-only CI NOT_RUN under paths-ignore. Operator/Live/Initialize/Deployment DEFERRED; operational NOT_VERIFIED.
+
+
 
 
 ## Task 3D.3 — atomic transaction result replay / client uncertainty
@@ -59,6 +75,7 @@ Actual this-task Windows x64 Node24.22.1 build/typecheck/existing24 suites PASS;
 - Windows Nodev24.22.1 npm ci/build/typecheck/all24 suites PASS, new45 and prior validation163/security/Maintenance/Backup/permissions suites PASS. No lint. Exact implementation f51efec80a20fbcc6c2a6d97cb9436b9d5e09554 Linux CI [41953314810](https://github.com/kritsuwan1/smart-fleet/actions/runs/41953314810), job127002142499, completed/success on 2026-11-05 09:09 Asia/Bangkok: Ubuntu 24.04.5 / Node v24.22.1; npm ci, build, typecheck and all24 suites PASS, including45 transaction cases and163 validation cases. Decoded job logs and exact head_sha checked; no prior-run substitution. Linux build sizes Demo1007946 / Production1006572 / Staging1006719 bytes. Documentation-only follow-up does not change tested executable inputs. Public D1 batch contract reviewed; real provider/Operator/Live/Initialize/Deploy remain DEFERRED/NOT_VERIFIED. Migration/rollback compatibility and remaining retention/reload risks documented; no live SQL or rollback run.
 
 
+
 ## Task 3D.2 — shared value validation and no-mutation recovery regression
 
 - Prerequisite 3D.1 verified before development: acbc8bf exists as Development HEAD with exactly eight docs-only changes. Both source bugs first reproduced with failing new assertions (backupRejected=false / carStatus=200), now reject (true / 400).
@@ -68,6 +85,7 @@ Actual this-task Windows x64 Node24.22.1 build/typecheck/existing24 suites PASS;
 - Actual Windows x64 Node v24.22.1: npm ci/build/typecheck/all 23 suites PASS. New 163 and existing broker 75 / security 64 / adapter 48 / reserved 61 / initialization 28 / operator fixtures 133 plus feature tests PASS. No lint script or fresh browser-device test. Exact implementation 77b3607 Linux CI [41755017762](https://github.com/kritsuwan1/smart-fleet/actions/runs/41755017762) PASS: Ubuntu 24.04.5 / Node v24.22.1, npm ci/build/typecheck/all 23 suites incl. new 163. Decoded logs checked; no prior-run substitution. Operator/Live/Initialize/Deployment DEFERRED, actual NOT_VERIFIED.
 
 The 3D.1 D1/D2 findings below are historical reproduced defects now addressed by 3D.2; their former planned cases are implemented. 3D.3 submit/confirmation remains next. Details: [DATA_VALIDATION_CONSISTENCY.md](DATA_VALIDATION_CONSISTENCY.md).
+
 
 
 ## Task 3D.1 — feature audit, current results and next regressions
@@ -91,12 +109,14 @@ Planned regression matrix (implementation separately scoped; no cases added in t
 Fresh browser/physical-device/PDF visual testing NOT_RUN in this audit. Historical Maintenance browser evidence is bounded to its loopback/injected-identity harness. Actual Cloudflare/operator/storage/auth/TLS/remote recovery remain DEFERRED / NOT_VERIFIED; no live tests are inferred from the 22 suites.
 
 
+
 ## Task 3C.2P — Operator-run verifier (OFFLINE ONLY)
 
 - Added tests/d1-operator-offline.test.mjs, 133 cases; npm test now 22 suites. Separate processes exercise Staging/Recovery independently, no reset/cross-target reuse. Scope presentation precedes exact typed synthetic confirmation; missing/copied bootstrap, operator/host/model-storage refusal, unknown options/live/external-client/proxy/auth denial and piped/non-TTY CLI refusal.
 - Both targets cover exact reserved/empty/empty-fleet success; redirects, permission/network, wrong identity, malformed/schema/occupied/write-metadata failures. Internal TLS certificate/hostname and DNS/connect/TLS/headers/body timeout/abort scenarios prove simulated fail-closed control flow only, not genuine TLS/I/O verification. Four requests maximum, no retry/retarget, no KV contents/counts. fetch tripwire zero; no new signing keys or credential access.
 - Pure Windows storage model tests reject sync/checkout/network/reparse/noncanonical/stream/device paths, ownership/inheritance and broad ACLs; no real operator filesystem/ACL inspection or persistence. Evidence schema/redaction and externally held receipt detect tampering even after embedded digest recomputation. Actual operator/storage/auth/TLS/API remain NOT_VERIFIED, Live NOT_READY.
 - Actual Windows x64 Node v24.22.1 build/typecheck/all 22 suites PASS, including new 133; N 64 / broker 75 / adapter 48 / reserved 61 / initialization 28 regressions unchanged. Interactive human rehearsal NOT_RUN by agent; noninteractive denial and synthetic confirmation model tested. Linux CI exact-commit results follow in PROGRESS.md. See OPERATOR_OFFLINE_VERIFIER.md for offline use and operational blockers. No lint script.
+
 
 
 ## Task 3C.2O — Live security architecture review (DESIGN ONLY)

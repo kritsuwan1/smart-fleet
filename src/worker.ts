@@ -88,7 +88,7 @@ export default {async scheduled(event:{cron:string;scheduledTime:number},env:any
    if(req.method==='POST')return redirect('/login',clearSession());
    return html(screen('<p>ต้องการออกจากระบบหรือไม่?</p><form action="/logout" method="post"><button>ออกจากระบบ</button></form><p><a href="/">กลับหน้าหลัก</a></p>'));
   }
-  if(user.role==='user'&&!['/','/api/fleet','/api/profile/password','/app.js','/app.css'].includes(path))return json({error:'FORBIDDEN'},403);
+  if(user.role==='user'&&!['/','/api/fleet','/api/profile/password','/app.js','/app.css',...(user.driverId?['/report-font-regular.ttf','/report-font-bold.ttf','/vehicle-revo-canopy.webp']:[])].includes(path))return json({error:'FORBIDDEN'},403);
   if(path==='/api/system-status'&&req.method==='GET'){const latest=await readState(env),access=await sessionUser(req,env,latest.state);if(!access)return json({error:'UNAUTHORIZED'},401);if(access.role!=='admin')return json({error:'FORBIDDEN'},403);return json(systemStatus(latest.state,latest.payloadBytes));}
   if(path==='/api/backup-status'&&req.method==='GET'){
    if(user.role!=='admin')return json({error:'FORBIDDEN'},403);

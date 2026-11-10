@@ -1,10 +1,14 @@
 # Role & onboarding contract — Policy v1.1
 
+## Task 3D.4D-3 — v1.1 operational Development contract (current)
+
+Owner-authorized first-link-only Admin verification is implemented offline: exact account/Person ID selection + confirmation/audit/CAS, no name matching or identity-document retention. Signup/login remains immediate. Only after verification/fresh login does User receive own vehicle operations (no amendments), ownerUserId-only history/personal reports and basic Maintenance reminders. Staff/new-User privileged assignment remains disabled; valid legacy Admin/Employee unchanged. Existing open-trip/ledger conflict, relink, inactive/ambiguous/claimed Person refuses without mutation. Details/versions/session and rollback limits: [VERIFIED_PERSON_LINKING.md](VERIFIED_PERSON_LINKING.md). This supersedes only the previous implementation's unlinked-only limit, not owner Policy v1.1. Operator/Live/Initialize/Deployment DEFERRED.
+
 ## Policy v1.1 — owner change recorded 2026-11-10 (current)
 
 **v1.1 supersedes v1.0 Q6 only:** new self-registration creates an immediately active **User personal account**, without Admin approval or a PENDING queue. Q1–Q5 and Q7–Q10 remain unchanged. Immediate account access does not prove Person/employee identity; checkout/return/Person-linked history remain unavailable without Admin-verified exact Person linkage.
 
-Current implementation is [SELF_REGISTRATION_V1_1.md](SELF_REGISTRATION_V1_1.md): credentials/session protections preserved, no Person matching/creation on signup, exact self-only DTO, no vehicle/Fleet/report/backup/admin access. New User remains unlinked in this build; linking and privileged role assignment are not activated. Existing Employee/Admin accounts and historical data remain unchanged. Staff/Admin cannot be selected by public signup; existing authorized legacy role management remains Admin-only.
+Historical 3D.4D-2 baseline is [SELF_REGISTRATION_V1_1.md](SELF_REGISTRATION_V1_1.md): credentials/session protections preserved, no Person matching/creation on signup, exact self-only DTO, no vehicle/Fleet/report/backup/admin access. At that baseline new User remained unlinked. Current first-link/own vehicle scope is defined above and in VERIFIED_PERSON_LINKING; privileged role assignment remains disabled. Existing Employee/Admin accounts and historical data remain unchanged. Staff/Admin cannot be selected by public signup; existing authorized legacy role management remains Admin-only.
 
 Recognized self-user v3 status ACTIVE governs personal-account login; legacy active=false is retained as an old-auth deny fuse, not a current disabled account. DISABLED/REJECTED deny login/session; unknown role/status/version still fails closed. New User is not automatically Employee. New snapshots use versioned guards/schema2 JSON backups; no lossy downgrade or mixed old writer is supported.
 
@@ -12,6 +16,7 @@ The v1.0 records and pending-only spike below are **historical**, not current si
 
 
 ## Historical v1.0 / 3D.4D-1 contract record
+
 
 Date: 2026-11-05 (Asia/Bangkok). Repository: kritsuwan1/smart-fleet. Branch: dev/smartfleet-batch-1.
 

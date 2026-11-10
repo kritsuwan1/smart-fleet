@@ -1,10 +1,17 @@
 # SmartFleet - System Architecture
 
-## Task 3D.4D-2 — Policy v1.1 immediate self-account (current)
+## Task 3D.4D-3 — verified Person scope (current)
+
+Admin first-links an ACTIVE unlinked User to an explicitly selected unique active/unclaimed Person through existing Account action, review confirmation, audit and main CAS. Open-trip/target-or-unknown-ledger conflicts refuse. No name claim, signup queue, relink or historical rewrite. New linked self-user/state v4 keeps legacy active=false; exact personVerification IDs/server timestamp, passwordVersion++ and signed User link scope protect sessions. Legacy/v3 remain recognized; old binaries refuse v4.
+
+Linked User projection contains only own ownerUserId trips/projects, own Person, public vehicle fields/current odometer/occupancy IDs and basic reminder DTO. User checkout/own return require stable operation IDs; immutable departure fields, refreshed auth, atomic ledger/CAS and replay guarantees remain. Personal reports use only this projection and skip external fuel requests. Shared readers/source-target SQL guards reject incompatible backup before mutation; schema3 JSON supports v4, earlier schema1/2 retained, isolated restore rotates key. No Staff/new-role management, new public route, SQL schema or real migration. Full contract/rollback/test limits: [VERIFIED_PERSON_LINKING.md](VERIFIED_PERSON_LINKING.md). Operator/Live/Initialize/Deployment DEFERRED. The previous sections describe their historical task baselines.
+
+## Task 3D.4D-2 — Policy v1.1 immediate self-account (historical baseline)
 
 Q6 now permits immediate User account access without Admin approval; Q7 verified Person linkage remains mandatory for vehicle/history scope. [SELF_REGISTRATION_V1_1.md](SELF_REGISTRATION_V1_1.md) documents additive self-user v3 records, legacy active=false deny fuse/current ACTIVE status, strict mixed-state readers, schema2 JSON backups and unchanged legacy credentials/permissions/history.
 
 Actual registration no longer matches or creates Person; it creates only User and audit under CAS, issues the existing secure session and redirects to /. GET Fleet for User is a minimal self-account DTO with no Fleet/version/history; all Person writes and other protected data denied. React reuses profile/password UI at360px. No new routes, identity proof/link/approval queue, Staff/new-User promotion activation or automatic Employee conversion. Shared backup/SQL guards preserve exact new state/restore rotation; old writers must not share it.27 suites/60 new cases and local Edge360px PASS; exact CI in PROGRESS. Operator/Live/Initialize/Deployment DEFERRED.
+
 
 
 ## Task 3D.4D-1 — actual runtime account/version exclusion gates
@@ -12,6 +19,7 @@ Actual registration no longer matches or creates Person; it creates only User an
 Current shared src/account-compatibility.ts strictly recognizes legacy Admin/Employee (including absent role) and refuses unknown roles, lifecycle fields and unsupported state/account versions. The separate future-v2 metadata validator grants no operational access. Storage guards before lazy writes and rechecks missing-key CAS; writeState/keyed writes guard current/candidate snapshots. Auth/session/root/Fleet projection, API and backup sources share the gate; generated trusted SQL target guards and the offline checker retain strict restore/environment/rotation rules. See [ROLE_ONBOARDING_COMPATIBILITY.md](ROLE_ONBOARDING_COMPATIBILITY.md).
 
 No schema/Fleet migration or existing record conversion; trips/ownerUserId/driverId/cars/audit/Maintenance/ledger preserved. Legacy signup remains its existing Employee behavior; Staff/User/PENDING/signup review NOT_ENABLED. Current guard implementation supersedes the historical3D.4C “no actual gate” status below, not the old deployed binary. Future credentials/root/authoritative lifecycle/mixed-reader cutover remain unimplemented. New164 cases plus prior25 suites =>26 offline suites; exact CI in PROGRESS. Operator/Live/Initialize/Deployment DEFERRED.
+
 
 
 ## Task 3D.4C — approved Policy v1.0, isolated compatibility spike
@@ -23,6 +31,7 @@ Owner approved Q1–Q10 on2026-11-05; current policy record is [ROLE_ONBOARDING_
 The existing runtime still ignores unsupported lifecycle/coerces non-admin to Employee; only the isolated reader gate refuses v2. No new state is placed in fleet_store.main. Actual reader exclusion, authoritative credential/status adapters, root integration, registration/review UI and activation remain NOT_IMPLEMENTED. Policy approved does not imply runtime readiness; Operator/Live/Initialize/Deployment DEFERRED.
 
 
+
 ## Task 3D.4A — proposed role/onboarding contract (DESIGN ONLY)
 
 [ROLE_ONBOARDING_CONTRACT.md](ROLE_ONBOARDING_CONTRACT.md) audits the exact 6edfcb7/f51efec executable baseline and separates existing Admin/Employee behavior from the owner's unapproved Admin/Staff/User proposal. It defines action/data scopes, PENDING/APPROVED/REJECTED/DISABLED lifecycle, Admin-reviewed exact Person linkage, historical ownerUserId/driverId preservation, planned route/UI tests and phased compatible migration/rollback.
@@ -32,6 +41,8 @@ No runtime behavior or data format changed. Current signup still creates an acti
 Owner decisions Q1–Q10 include Staff Maintenance/write/PII/export scope, User operational-home/report exceptions, review/identity proof, legacy mapping and versioned rollback. Contract NOT_APPROVED; future migration/code requires separate scope approval. Current 24-suite Windows baseline and exact Linux41953314810 remain PASS; proposed role/state cases NOT_IMPLEMENTED/NOT_RUN. Operator/Live/Initialize/Deployment DEFERRED.
 
 
+
+
 ## Task 3D.3 — idempotent checkout/return transactions
 
 [TRANSACTION_RELIABILITY.md](TRANSACTION_RELIABILITY.md): updated checkout/return UI sends stable UUID/kind metadata. API fingerprints payload and scopes operation rows to authenticated actor/Fleet session-key epoch; original result/receipt is replayed only after current authorization and matching-payload checks, with fresh scoped Fleet data. Ledger rows use existing fleet_store IDs trip-operation:v1:<digest>; no Fleet shape/SQL schema change. Operation insert, main optimistic CAS and consistency assertion execute atomically through D1.batch; unavailable batch never falls back to separate writes. Keyed requests use first-primary sessions when available; replays read Fleet after result lookup. Same-ID concurrency/lost acknowledgements do not repeat effective writes.
@@ -39,11 +50,13 @@ Owner decisions Q1–Q10 include Staff Maintenance/write/PII/export scope, User 
 App synchronous save/pending guards, acknowledged-result validation and JourneyForm uncertainty lock complement server guarantees. Legacy unkeyed requests keep CAS-only semantics. Operational ledger is excluded from main-only Fleet backups, has no pruning, and pending client IDs are memory-only; guarantees do not span restore/key rotation/closed tabs. Rollback requires resolving keyed attempts before an explicitly approved client/server downgrade. SQLite/Miniflare45 scenarios, prior23 suites and a local360px Browser flow PASS; exact Linux evidence is in PROGRESS after publication. Worker/routes/config/schema unchanged; Operator/Live/Initialize/Deploy DEFERRED.
 
 
+
 ## Task 3D.2 — current validation boundaries
 
 [DATA_VALIDATION_CONSISTENCY.md](DATA_VALIDATION_CONSISTENCY.md): new src/validation.ts shares only the existing Trip timestamp/calendar/chronology/open-closed odometer rules and 0–99999999 integer bound. fleet.ts preserves cross-trip/reference/text/reason policy; backup.ts uses value checks for current/legacy JSON; api.ts and App car input use the same odo bound. No Fleet/SQL shape, Worker/routes/config or stored-data mutation policy changed. Existing automatic-artifact inspection refuses invalid values before the local restore library can write; arbitrary trusted SQL is not validated by JS.
 
 Task 3D.1 audit commit acbc8bf was verified docs-only on the correct branch; D1/D2 defects in its historical sections are now fixed and regression-tested. Windows Node 24 ci/build/typecheck/23 suites PASS, including 163 new cases; exact Linux CI evidence is in PROGRESS after publication. Operator setup/Cloudflare Live/Initialize/Deployment remain DEFERRED and actual cloud behavior NOT_VERIFIED. Remaining app roadmap starts with 3D.3 reliable submit/confirmation.
+
 
 
 ## Task 3D.1 — current feature architecture and owner direction
@@ -57,9 +70,11 @@ Core checkout/return, per-car date/km Maintenance reminders/history/corrections 
 Two audit probes reproduce a backup semantic-validation gap (end before start accepted with valid checksum) and a Car/Trip odometer upper-bound mismatch. See D1/D2 in the audit; no code fix, schema change or data mutation is part of 3D.1. Maintenance rollback/history correction is currently implemented and covered; do not carry the old Task 3B missing-history finding forward as unresolved.
 
 
+
 ## Task 3C.2P — Option A offline one-shot verifier
 
 [OPERATOR_OFFLINE_VERIFIER.md](OPERATOR_OFFLINE_VERIFIER.md) records the new synthetic-only one-target/process runner and interactive rehearsal CLI. Private synthetic handles model operator/host/path/ACL prerequisites, exact scope precedes typed confirmation, in-memory pending attempt precedes a maximum four fixed Mock requests, and redacted evidence is checked against a separate fixture receipt. No trusted real bootstrap, persistent operator storage, credentials or HTTP client exists; normal operational invocation fails closed. Tests simulate TLS/redirect/timeouts/proxy/environment/identity/schema/storage/tampering; actual Operator/Auth/TLS/Cloudflare remain NOT_VERIFIED. Option A direction is approved for offline work only; final host/credential/storage approval and Live remain NOT_READY. Existing D1 reserved-schema/SQL/app/config policies unchanged.
+
 
 
 ## Task 3C.2O — proposed live read-only architecture (design only)

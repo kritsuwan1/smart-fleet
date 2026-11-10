@@ -6,8 +6,8 @@ import {vehicleProfile} from './vehicle-profile';
 import VehicleActionButton from './VehicleActionButton';
 
 const num=(n:number)=>n.toLocaleString('en-US');
-type Props={state:Fleet;trip:any;mode:'start'|'return';busy:boolean;uncertain?:boolean;error:string;employee:boolean;occupiedCars:Set<string>;onSubmit:(v:any)=>void;onClose:()=>void};
-export default function JourneyForm({state:s,trip,mode,busy,uncertain=false,error,employee,occupiedCars,onSubmit,onClose}:Props){
+type Props={state:Fleet;trip:any;mode:'start'|'return';busy:boolean;uncertain?:boolean;error:string;employee:boolean;returnOnly?:boolean;occupiedCars:Set<string>;onSubmit:(v:any)=>void;onClose:()=>void};
+export default function JourneyForm({state:s,trip,mode,busy,uncertain=false,error,employee,returnOnly=false,occupiedCars,onSubmit,onClose}:Props){
  const [v,setV]=useState({...trip});
  const errorRef=useRef<HTMLDivElement>(null);
  useEffect(()=>{if(error)errorRef.current?.focus();},[error]);
@@ -29,8 +29,8 @@ export default function JourneyForm({state:s,trip,mode,busy,uncertain=false,erro
    {!returning&&<p className="journey-hint"><Info size={15}/>ตรวจเลขไมล์ให้ตรงกับหน้าปัดรถ</p>}
    {returning&&distance!==null&&distance>=0&&Number.isInteger(distance)&&<div className="journey-distance" aria-live="polite"><Route size={38}/><div><span>ระยะทางครั้งนี้</span><strong>{num(distance)} กม.</strong></div></div>}
    {returning&&distance!==null&&distance<0&&<p className="journey-validation" role="alert">เลขไมล์คืนรถต้องไม่น้อยกว่าเลขไมล์ตอนรับรถ</p>}
-   <label className="field journey-notes"><span>{returning?'หมายเหตุการคืนรถ':'หมายเหตุ'} (ถ้ามี)</span><textarea value={v.note||''} onChange={e=>set('note',e.target.value)} rows={2} placeholder="ระบุรายละเอียดเพิ่มเติม (ถ้ามี)" maxLength={2000}/><small className="journey-counter">{(v.note||'').length}/2000</small></label>
-   {(discontinuous||v.reason||error.includes('เลขไมล์ไม่ต่อเนื่อง'))&&<label className="field journey-reason"><span>เหตุผลกรณีเลขไมล์ไม่ต่อเนื่อง{discontinuous&&<b> *</b>}</span><input value={v.reason||''} onChange={e=>set('reason',e.target.value)} placeholder="เช่น มีการใช้รถก่อนรายการนี้" required={discontinuous} maxLength={1000}/></label>}
+   <label className="field journey-notes"><span>{returning?'หมายเหตุการคืนรถ':'หมายเหตุ'} (ถ้ามี)</span><textarea disabled={returning&&returnOnly} value={v.note||''} onChange={e=>set('note',e.target.value)} rows={2} placeholder="ระบุรายละเอียดเพิ่มเติม (ถ้ามี)" maxLength={2000}/><small className="journey-counter">{(v.note||'').length}/2000</small></label>
+   {(discontinuous||v.reason||error.includes('เลขไมล์ไม่ต่อเนื่อง'))&&<label className="field journey-reason"><span>เหตุผลกรณีเลขไมล์ไม่ต่อเนื่อง{discontinuous&&<b> *</b>}</span><input disabled={returning&&returnOnly} value={v.reason||''} onChange={e=>set('reason',e.target.value)} placeholder="เช่น มีการใช้รถก่อนรายการนี้" required={discontinuous} maxLength={1000}/></label>}
   </div></fieldset>
   {error&&<div className="alert error journey-error" role="alert" ref={errorRef} tabIndex={-1}><AlertCircle size={18}/>{error}</div>}
   <div className="modal-footer journey-footer"><VehicleActionButton type="submit" variant={returning?'return':'start'} disabled={busy} aria-busy={busy}>{busy?'กำลังบันทึก…':returning?'ยืนยันคืนรถ':'ยืนยันบันทึกใช้รถ'}</VehicleActionButton><button type="button" className="journey-cancel" disabled={busy||uncertain} onClick={onClose}>ยกเลิก</button></div>

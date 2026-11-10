@@ -8,6 +8,7 @@ import {manualFuel,validMonth} from './fuel';
 import {planImport} from './import-plan';
 import {changeMaintenance} from './maintenance';
 import {validOdometer} from './validation';
+import {preparePersonLink} from './person-link';
 import {AccountCompatibilityError,isSelfAccount,accountEnabled} from './account-compatibility';
 export function fleetApi(env:any,user:User){
 const json=(v:unknown,status=200)=>Response.json(v,{status,headers:{'Cache-Control':'no-store'}});
@@ -20,8 +21,9 @@ async function POST(req:Request){try{
  const scopedEnv=b.action==='trip'&&b.tripOperation!==undefined&&typeof env.DB?.withSession==='function'?{...env,DB:env.DB.withSession('first-primary')}:env;
  const {state:s,version}=await readState(scopedEnv);
  const actorUser=currentUser(user,s),actor=actorUser.name;
- if(actorUser.role==='user')return json({error:'PERSON_LINK_REQUIRED',code:'PERSON_LINK_REQUIRED'},403);
+ if(actorUser.role==='user'&&!actorUser.driverId)return json({error:'PERSON_LINK_REQUIRED',code:'PERSON_LINK_REQUIRED'},403);
  if(actorUser.role!=='admin'&&b.action!=='trip')return json({error:'FORBIDDEN'},403);
+ if(actorUser.role==='user'&&(!b.tripOperation||b.data?.id&&!s.trips.some(t=>t.id===b.data.id&&t.ownerUserId===actorUser.id)))return json({error:'FORBIDDEN'},403);
  const operation=b.action==='trip'&&b.tripOperation!==undefined?await tripOperationContext(b.tripOperation,b.data,actorUser,s):null;
  function result(record:OperationRecord,state:Fleet,currentVersion:number,replayed:boolean){
   const current=currentUser(user,state);authorizeOperation(record,operation!,state,current);
@@ -41,6 +43,10 @@ async function POST(req:Request){try{
   const old=s.trips.find(t=>t.id===b.data.id);before=old||null;
   if(operation?.operation.kind==='return'&&(!old||old.end))throw new OperationError('รายการนี้ไม่อยู่ในสถานะรอคืนรถ',409,'OPERATION_STATE_CHANGED');
   const d=b.data;
+  if(actorUser.role==='user'){
+   if(d.driverId!==actorUser.driverId||old&&old.driverId!==actorUser.driverId)return json({error:'FORBIDDEN'},403);
+   if(old&&(!d.end||['carId','driverId','project','destination','start','odoStart','note','reason'].some(k=>d[k]!==old[k as keyof Trip])||d.ownerUserId!==undefined&&d.ownerUserId!==old.ownerUserId||d.seq!==undefined&&d.seq!==old.seq))return json({error:'อนุญาตให้คืนรถของตนเองเท่านั้น ไม่สามารถแก้รายละเอียดเดิม'},403);
+  }
   if(actorUser.role!=='admin'){
    if(old&&(old.ownerUserId!==actorUser.id||old.end))return json({error:'ไม่มีสิทธิ์แก้ไขรายการนี้'},403);
    if(!old&&d.end)return json({error:'กรุณาเริ่มใช้รถก่อน แล้วบันทึกคืนรถภายหลัง'},403);
@@ -64,7 +70,11 @@ async function POST(req:Request){try{
  }else if(b.action==='account'){
   const member=s.accounts?.find(a=>a.id===b.data?.id);if(!member)throw Error('ไม่พบบัญชีพนักงาน');
   before={id:member.id,username:member.username,name:member.name,active:accountEnabled(member),role:member.role||'employee',...(isSelfAccount(member)?{status:member.status}:{})};
-  if(b.data.operation==='edit'){
+  if(b.data.operation==='linkPerson'){
+   const link=await preparePersonLink(env,s,b.data,actorUser.id);before=link.before;
+   member.accountFormatVersion=4;member.driverId=link.verification.personId;member.personVerification=link.verification;member.passwordVersion++;s.accountFormatVersion=4;
+   action='ยืนยันตัวตนและผูก Person ID';
+  }else if(b.data.operation==='edit'){
    if(isSelfAccount(member))throw Error('บัญชี User ยังไม่เปิดการเปลี่ยนสิทธิ์หรือผูก Person ในรุ่นนี้');
    const name=cleanName(String(b.data.name||'')),username=String(b.data.username||'').trim().toLowerCase(),role=b.data.role;
    if(name.length<2||name.length>100)throw Error('กรุณากรอกชื่อ–นามสกุล 2–100 ตัวอักษร');
@@ -83,7 +93,7 @@ async function POST(req:Request){try{
    const password=String(b.data.password||'');if(!passwordValid(password))throw Error('รหัสผ่านต้องมี 6–128 ตัวอักษร');
    member.salt=hex(crypto.getRandomValues(new Uint8Array(16)).buffer);member.passwordHash=await hashPassword(password,member.salt);member.passwordVersion++;action='ตั้งรหัสผ่านใหม่ให้พนักงาน';
   }else throw Error('คำสั่งจัดการบัญชีไม่ถูกต้อง');
-  after={id:member.id,username:member.username,name:member.name,active:accountEnabled(member),role:member.role||'employee',...(isSelfAccount(member)?{status:member.status}:{})};
+  after={id:member.id,username:member.username,name:member.name,active:accountEnabled(member),role:member.role||'employee',...(isSelfAccount(member)?{status:member.status,driverId:member.driverId,personVerification:member.personVerification}:{})};
  }else if(b.action==='car'){
   const d=b.data;const old=s.cars.find(c=>c.id===d.id);before=old||null;
   const car={id:old?.id||crypto.randomUUID(),plate:String(d.plate||'').trim(),province:String(d.province||'').trim(),model:String(d.model||'').trim(),initialOdo:Number(d.initialOdo),active:d.active!==false};

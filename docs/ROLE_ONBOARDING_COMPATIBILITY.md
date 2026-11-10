@@ -1,5 +1,11 @@
 # Task 3D.4C — Offline role/onboarding compatibility spike
 
+## Task 3D.4D-3 — current linked User compatibility
+
+Policy v1.1 remains immediate signup/login, without Admin approval. [VERIFIED_PERSON_LINKING.md](VERIFIED_PERSON_LINKING.md) adds a strictly reviewed first-link Admin workflow and scoped User operations; supersedes the historical unlinked-only implementation limit below. v3/null remains unlinked. v4/self-user/User/status + nonempty exact driverId and exactly personVerification:{personId,verifiedBy,verifiedAt} requires mixed state marker4, one Person and no other account claim. Existing legacy Admin/Employee, names, historical IDs/ownership/Maintenance/audit/ledger are preserved.
+
+Old readers refuse state4/schema3, raw active=false remains deny fuse; no marker stripping, active=true conversion, mixed old writers or lossy rollback. Shared JS/SQL/backup guards remain strict. PasswordVersion and signed link-scoped User claims revoke/revalidate old sessions; current role/status/driver/ownership still gate replay. Rejected/disabled deny. New signup after linking retains state4 and creates unlinked v3. No relink or Staff activation. Schema3 backup, exact previous-v3 SQL guard pin, valid isolated restore/key rotation and invalid artifact no-mutation snapshots covered by81 new cases; prior tests retained. Operational rollback needs separate owner-reviewed complete data/ledger/session plan. Operator/Live/Initialize/Deployment DEFERRED.
+
 ## Task 3D.4D-2 / Policy v1.1 (current)
 
 [SELF_REGISTRATION_V1_1.md](SELF_REGISTRATION_V1_1.md) supersedes the historical v1.0 pending-signup assumptions below. Owner changed Q6 only: immediate self-account User access without Admin approval; Q7 verified Person linkage and Q1–Q5/Q8–Q10 remain.
@@ -11,6 +17,7 @@ Backups remain schema1 for legacy; version3 requires schema2 JSON with integrity
 Windows Node24.22.1 ci/build/typecheck27 suites PASS:60 self-registration/170 strict guard/102 historical spike/45 transaction/163 value-validation cases. Edge157.0.4341.42 local360px actual signup/login/signed-cookie/logout/password change/restricted API PASS; physical mobile/TLS/cloud NOT_VERIFIED. Exact implementation 824a4214fbb019fa1ff30e12d7a406945be08fdc verified by Linux CI [42761789176](https://github.com/kritsuwan1/smart-fleet/actions/runs/42761789176), job129648950771, completed/success on2026-11-10 12:23 Asia/Bangkok: Ubuntu24.04.5/Nodev24.22.2, npm ci/build/typecheck/all27 suites PASS including60 self-registration/170 guard/102 historical compatibility/45 transaction/163 validation cases. Exact head_sha and decoded logs checked; Linux bundle sizes Demo1018655/Production1017281/Staging1017428 bytes, install reported0 vulnerabilities. This docs-only evidence follow-up leaves the tested executable inputs unchanged. Staff and Admin-verified linking/new-User role changes remain disabled; next proposed3D.4D-3 exact-Person verification and scoped activation. Operator/Live/Initialize/Deployment DEFERRED.
 
 ## Historical 3D.4D-1 / v1.0 reader contract
+
 
 ## Task 3D.4D-1 — actual Development runtime gates (current)
 
@@ -77,6 +84,7 @@ Remaining limits: future metadata is not a complete credential record; no new st
 ---
 
 ## Historical Task 3D.4C spike record
+
 
 2026-11-05, Asia/Bangkok. Development branch dev/smartfleet-batch-1. Owner-approved SmartFleet Role & Onboarding Policy v1.0 is recorded in [ROLE_ONBOARDING_CONTRACT.md](ROLE_ONBOARDING_CONTRACT.md).
 

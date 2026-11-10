@@ -1,5 +1,9 @@
 # Task 3D.4D-2 — Self-registration Policy v1.1 (Development only)
 
+## Task 3D.4D-3 follow-up (current)
+
+Signup remains immediately active and unlinked; the historical task description below records 3D.4D-2. Admin may now verify an exact existing Person ID through a first-link-only audited confirmation/CAS workflow. After fresh login, linked User gets own keyed checkout/return, ownerUserId-only history/personal reports and basic Maintenance reminders. No signup approval, name matching, account promotion or Employee conversion. [VERIFIED_PERSON_LINKING.md](VERIFIED_PERSON_LINKING.md) defines v4 mixed snapshots/schema3 backup, session revocation, denied access, no-loss/rollback limits and local tests. Operator/Live/Initialize/Deployment remain DEFERRED.
+
 2026-11-10, Asia/Bangkok. Branch dev/smartfleet-batch-1. Owner supersedes **only Q6** of Policy v1.0: signup grants immediate personal-account access as User, without Admin approval. Q1–Q5/Q7–Q10 remain unchanged, including verified exact Person linkage before vehicle/history access and no Employee conversion.
 
 **Implemented offline/local: immediate unlinked User account. No PENDING queue, no Person claim, no vehicle-operation activation for new accounts. Operator/Live/Initialize/Deployment remain DEFERRED.**

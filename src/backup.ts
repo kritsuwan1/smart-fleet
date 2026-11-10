@@ -9,7 +9,7 @@ export async function backupDigest(state:unknown){
  const bytes=await crypto.subtle.digest('SHA-256',input);
  return Array.from(new Uint8Array(bytes),n=>n.toString(16).padStart(2,'0')).join('');
 }
-export async function createBackup(state:Fleet,appVersion:string,environment='production'){assertOperationalAccounts(state);return {format:'smart-fleet-backup',schemaVersion:state.accountFormatVersion===3?2:1,environment,exportedAt:new Date().toISOString(),appVersion,sha256:await backupDigest(state),state};}
+export async function createBackup(state:Fleet,appVersion:string,environment='production'){assertOperationalAccounts(state);return {format:'smart-fleet-backup',schemaVersion:state.accountFormatVersion===4?3:state.accountFormatVersion===3?2:1,environment,exportedAt:new Date().toISOString(),appVersion,sha256:await backupDigest(state),state};}
 export async function inspectBackup(text:string){
  if(new TextEncoder().encode(text).length>5_000_000)throw Error('ไฟล์ใหญ่เกิน 5 MB');
  let b:any;try{b=JSON.parse(text);}catch{throw Error('อ่าน JSON ไม่ได้ กรุณาเลือกไฟล์สำรอง JSON ของ Smart Fleet');}
@@ -30,8 +30,8 @@ export async function inspectBackup(text:string){
  validateMaintenance(s);
  if(typeof b.exportedAt!=='string'||!Number.isFinite(Date.parse(b.exportedAt)))fail();
  const verified=b.format==='smart-fleet-backup';
- if(verified){if(b.schemaVersion!==(s.accountFormatVersion===3?2:1))throw Error('ยังไม่รองรับเวอร์ชันไฟล์สำรองนี้');if(typeof b.sha256!=='string'||b.sha256!==await backupDigest(s))throw Error('รหัส SHA-256 ไม่ตรง ข้อมูลอาจถูกแก้ไขหรือไฟล์ไม่ครบ กรุณาสำรองใหม่');}
- else if(s.accountFormatVersion===3)throw Error('บัญชีรูปแบบใหม่ต้องใช้ไฟล์สำรองที่ระบุเวอร์ชัน');
+ if(verified){if(b.schemaVersion!==(s.accountFormatVersion===4?3:s.accountFormatVersion===3?2:1))throw Error('ยังไม่รองรับเวอร์ชันไฟล์สำรองนี้');if(typeof b.sha256!=='string'||b.sha256!==await backupDigest(s))throw Error('รหัส SHA-256 ไม่ตรง ข้อมูลอาจถูกแก้ไขหรือไฟล์ไม่ครบ กรุณาสำรองใหม่');}
+ else if(s.accountFormatVersion===3||s.accountFormatVersion===4)throw Error('บัญชีรูปแบบใหม่ต้องใช้ไฟล์สำรองที่ระบุเวอร์ชัน');
  else if(b.format!==undefined||b.sha256!==undefined)throw Error('รูปแบบไฟล์สำรองไม่รองรับ');
  return {environment:b.environment==='demo'?'Demo':b.environment==='production'?'Production':'ไม่ระบุ (ไฟล์รุ่นเดิม)',exportedAt:b.exportedAt,appVersion:typeof b.appVersion==='string'?b.appVersion:'รุ่นเดิม',verified,cars:s.cars.length,people:s.people.length,trips:s.trips.length,open:s.trips.filter((t:any)=>!t.end).length,accounts:s.accounts?.length||0,audit:s.audit.length};
 }

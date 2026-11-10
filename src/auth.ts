@@ -1,5 +1,6 @@
 import {ACCOUNT_LIMIT} from './limits';
 import {systemStatus} from './system-status';
+import {maintenanceStatus} from './maintenance';
 import {readState,writeState} from './storage';
 import {type Fleet,type Account,latestOdo} from './fleet';
 import {assertOperationalAccounts,accountRole,accountEnabled,isSelfAccount} from './account-compatibility';
@@ -27,7 +28,7 @@ export async function checkLogin(env:any,username:string,password:string,state:F
 }
 export async function issueSession(env:any,state:Fleet,user:User){
  user=currentUser(user,state);
- const value={uid:user.id,ver:user.passwordVersion,exp:Math.floor(Date.now()/1000)+MAX_AGE,nonce:crypto.randomUUID()};
+ const value={uid:user.id,ver:user.passwordVersion,exp:Math.floor(Date.now()/1000)+MAX_AGE,nonce:crypto.randomUUID(),...(user.role==='user'?{link:await digest('person:'+user.driverId)}:{})};
  const body=btoa(JSON.stringify(value)).replaceAll('+','-').replaceAll('/','_').replace(/=+$/,'');
  return `${COOKIE}=${body}.${await sign(await signingKey(env,state),body)}; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=${MAX_AGE}`;
 }
@@ -41,17 +42,25 @@ export async function sessionUser(req:Request,env:any,state:Fleet):Promise<User|
   const claims=JSON.parse(atob(body.replaceAll('-','+').replaceAll('_','/'))),now=Math.floor(Date.now()/1000);
   if(!Number.isInteger(claims.exp)||claims.exp<=now||claims.exp>now+MAX_AGE+30||!Number.isInteger(claims.ver)||typeof claims.uid!=='string')return null;
   if(claims.uid==='admin')return {id:'admin',username:'admin',name:'ผู้ดูแลระบบ',role:'admin',driverId:'',passwordVersion:0};
-  const account=state.accounts?.find(a=>a.id===claims.uid&&accountEnabled(a)&&a.passwordVersion===claims.ver);return account?userFromAccount(account):null;
+  const account=state.accounts?.find(a=>a.id===claims.uid&&accountEnabled(a)&&a.passwordVersion===claims.ver);if(!account)return null;
+  const user=userFromAccount(account);if(user.role==='user'&&(claims.link!==undefined||user.driverId)&&claims.link!==await digest('person:'+user.driverId))return null;return user;
  }catch{return null;}
 }
 export function currentUser(user:User,state:Fleet){
  assertOperationalAccounts(state);
  if(user.id==='admin'&&user.role==='admin')return user;
- const account=state.accounts?.find(a=>a.id===user.id&&accountEnabled(a)&&a.passwordVersion===user.passwordVersion);if(!account)throw Error('UNAUTHORIZED');return userFromAccount(account);
+ const account=state.accounts?.find(a=>a.id===user.id&&accountEnabled(a)&&a.passwordVersion===user.passwordVersion);if(!account)throw Error('UNAUTHORIZED');const current=userFromAccount(account);if(current.role==='user'&&current.driverId!==user.driverId)throw Error('UNAUTHORIZED');return current;
 }
 export function viewForUser(state:Fleet,version:number,user:User,payloadBytes?:number){
  user=currentUser(user,state);
- if(user.role==='user')return {scope:'self-account' as const,user,actor:user.name,personLinked:false};
+ if(user.role==='user'){
+  if(!user.driverId)return {scope:'self-account' as const,user,actor:user.name,personLinked:false};
+  const trips=structuredClone(state.trips.filter(t=>t.ownerUserId===user.id));
+  const cars=state.cars.filter(c=>c.active||trips.some(t=>t.carId===c.id)).map(c=>({id:c.id,plate:c.plate,province:c.province,model:c.model,initialOdo:c.initialOdo,active:c.active,fuelType:c.fuelType,imagePreset:c.imagePreset,currentOdo:latestOdo(state,c.id)}));
+  const own:Fleet={cars,people:structuredClone(state.people.filter(p=>p.id===user.driverId)),projects:[...new Set(trips.map(t=>t.project))],trips,audit:[],imported:false};
+  const basicReminders=(state.maintenancePlans||[]).filter(p=>p.active&&cars.some(c=>c.id===p.carId&&c.active)).map(p=>({id:p.id,carId:p.carId,type:p.type,status:maintenanceStatus(state,p),dueDate:p.dueDate,dueOdo:p.dueOdo}));
+  return {scope:'verified-user' as const,user,actor:user.name,personLinked:true,state:own,version,members:[],occupiedCars:state.trips.filter(t=>!t.end&&t.ownerUserId!==user.id).map(t=>t.carId),basicReminders};
+ }
  const view=structuredClone(state);delete view.accounts;delete view.sessionKey;
  const members=user.role==='admin'?(state.accounts||[]).map(a=>({id:a.id,username:a.username,name:a.name,active:accountEnabled(a),createdAt:a.createdAt,driverId:a.driverId,role:accountRole(a)})):[];
  const occupiedCars=state.trips.filter(t=>!t.end&&t.ownerUserId!==user.id).map(t=>t.carId);
@@ -74,7 +83,7 @@ export async function registerSelfUser(env:any,input:{name:string;username:strin
   if(state.accounts.length>=ACCOUNT_LIMIT)throw Error('จำนวนบัญชีเต็ม กรุณาติดต่อผู้ดูแล');
   if(state.accounts.some(a=>a.username===username))throw Error('ชื่อผู้ใช้นี้มีคนใช้แล้ว กรุณาเลือกชื่ออื่น');
   if(state.accounts.some(a=>cleanName(a.name)===name))throw Error('ชื่อนี้มีบัญชีแล้ว หากลืมรหัสผ่านให้ติดต่อผู้ดูแล');
-  const account:Account={id,username,name,driverId:null,active:false,role:'user',accountFormatVersion:3,accountKind:'self-user',status:'ACTIVE',salt,passwordHash,passwordVersion:0,createdAt:new Date().toISOString()};state.accounts.push(account);state.accountFormatVersion=3;
+  const account:Account={id,username,name,driverId:null,active:false,role:'user',accountFormatVersion:3,accountKind:'self-user',status:'ACTIVE',salt,passwordHash,passwordVersion:0,createdAt:new Date().toISOString()};state.accounts.push(account);if(state.accountFormatVersion!==4)state.accountFormatVersion=3;
   state.audit.unshift({id:crypto.randomUUID(),time:new Date().toISOString(),actor:name,action:'สมัครบัญชี User',before:null,after:{id,username,name,role:'user',personLinked:false}});
   if(await writeState(env,state,version))return {state,user:userFromAccount(account)};
  }
