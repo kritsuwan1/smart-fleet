@@ -1,5 +1,9 @@
 # SmartFleet - System Architecture
 
+## Task 3D.4D-7 — Policy v1.2 runtime update
+
+New registration is one CAS write of Account5 + active Person + audit, with server UUIDs and reciprocal system provenance. Mixed Fleet marker5 preserves legacy/v3/v4. User DTO/source flag distinguishes provisioning from Admin verification; own Person metadata is minimized. JSON backup schema4/shared automatic inspector/SQL guard updated; frozen v4 guard rejects mixed state. No DDL migration/new route/cloud setting. [Contract and rollback limitations](AUTOMATIC_PERSON_V1_2.md).
+
 ## Safe Windows Local Preview — isolated adapter, unchanged app runtime
 
 npm run preview:local builds the existing artifacts and serves only output/worker-staging.js through scripts/preview-local.mjs at127.0.0.1:8787. scripts/preview-fixture.mjs creates a new synthetic in-memory SQLite with the same D1-shaped prepare/bind/first/run/atomic batch pattern as browser tests; no disk database, production configuration/IDs, .env, Wrangler or cloud transport. Only the synthetic DEMO_DB binding and fixed fictional root password are passed to the Staging Worker. Session epoch/salts are fresh each process.

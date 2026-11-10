@@ -1,5 +1,9 @@
 # Task 3D.4D-4 — Session, Person lifecycle and uncertain-result recovery
 
+## Task 3D.4D-7 — v1.2 coverage
+
+New provisioned v5 Users use the same signed-session/status/passwordVersion, active-Person checkout, own-return, CAS/ledger and bounded unknown-outcome protections below. Person metadata does not authorize another ownerUserId. Existing v3/v4 behavior remains. New signup/browser and synthetic lost-response/replay cases cover v5; historical recovery fixtures intentionally seed v3 then Admin-link. No manual unlock/reset/ledger lookup; Task6 SKIPPED. [Details](AUTOMATIC_PERSON_V1_2.md).
+
 ## Task 3D.4D-5 follow-up — manual recovery design only
 
 [MANUAL_UNKNOWN_OPERATION_RECOVERY.md](MANUAL_UNKNOWN_OPERATION_RECOVERY.md) now defines self-help and Admin support when the original pointer is unavailable. Admin's existing lookup remains actor-scoped; history/audit candidates and absent rows are not terminal evidence. Five states, eight OPEN owner decisions and25 future synthetic acceptance specifications distinguish confirmed outcomes from unknown/authorization changed/unavailable evidence. No reset/unlock/search endpoint, marker clearing, new operation ID or blind retry is implemented or authorized.3D.4D-4 runtime, v1.1/legacy compatibility and DEFERRED operational boundaries are unchanged.

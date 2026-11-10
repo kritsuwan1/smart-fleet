@@ -1,5 +1,9 @@
 # Safe Local Preview สำหรับ Windows
 
+## Policy v1.2 — current signup flow
+
+NEW signup creates its own active Person atomically and goes straight to Dashboard: register → Thai success → checkout → own return → own history/personal reports/basic reminders. No manual Admin linking for new signup. Logout/login preserves rights. Existing preview.unlinked is intentionally historical v3 and still restricted; Admin may test its exact-ID first-link workflow separately with preview-person-2. preview.user is historical Admin-linked v4. Neither fixture is auto-converted. Instructions below requiring all new signup users to be linked are superseded by this section. Loopback/RAM-only/network-denial/credentials/commands remain unchanged. [Current contract](AUTOMATIC_PERSON_V1_2.md).
+
 สำหรับ dev/smartfleet-batch-1 เท่านั้น ใช้ Node.js24 และ npm ที่ติดตั้งอยู่แล้ว ไม่ต้อง login Cloudflare, ไม่ต้องสร้าง .env/Secrets, ไม่ต้องใช้ Wrangler หรือ D1 จริง
 
 ## เปิดจาก D:\smart-fleet
@@ -36,9 +40,9 @@ preview:local เรียก npm run build แล้วเปิด Node HTTP s
 
 1. เปิด Admin ใน Edge ปกติ และ User ใน InPrivate เพื่อไม่ให้ session cookie แทนกัน เปิด URL127.0.0.1เดียวกัน ไม่ใช้ workers.dev, LAN IP หรือ localhost แทน
 2. ลอง preview.user: มีรถ LOCAL-001/LOCAL-002 และประวัติจำลองหนึ่งรายการ รายงาน/ประวัติจำกัด ownerUserId เช่นเดิม รถคันแรกมีเลขไมล์ล่าสุด110 เลือกบันทึกใช้รถ กรอกโครงการ/สถานที่จำลอง ตรวจวันเวลาและเลขไมล์ แล้วคืนรถด้วยเลขไมล์ที่ไม่น้อยกว่าตอนออก ดู original success confirmation และประวัติ
-3. ลอง signup ผู้ใช้ใหม่ด้วยชื่อ/username ทดสอบไม่ซ้ำและ password อย่างน้อย6ตัว หรือใช้ preview.unlinked. บัญชีเข้าได้ทันที ไม่มีคิว Admin อนุมัติ signup
-4. ฝั่ง Admin กดรีเฟรชข้อมูลหลัง signup แล้วเข้า จัดการข้อมูล → บัญชีพนักงาน → ยืนยันและผูก Person ID เลือก exact account และ preview-person-2 หรือ preview-person-3 ที่ยังไม่ถูกใช้ ตรวจ ID และ checkbox ยืนยัน กดผูก จากนั้น User login ใหม่ Session เดิมจะถูกยกเลิก ไม่จับคู่ชื่ออัตโนมัติ และไม่รองรับ relink
-5. ทดสอบ User ที่ผูกใหม่รับ–คืนรถ ดูประวัติและรายงานส่วนบุคคล กด PDF/Excel ได้ ฟอนต์ PDF โหลดจากไฟล์ที่ฝังใน Worker ไม่เรียกบริการภายนอก User ได้เฉพาะแจ้งเตือนบำรุงรักษาเบื้องต้น ไม่มีค่าใช้จ่ายหรือประวัติผู้อื่น
+3. ลอง signup ผู้ใช้ใหม่ด้วยชื่อ/username ทดสอบไม่ซ้ำและ password อย่างน้อย6ตัว ระบบสร้าง Person ใหม่เฉพาะบัญชีแบบ atomic แล้วเข้า Dashboard พร้อมข้อความ “สมัครสำเร็จ พร้อมใช้งานรถ” ใช้รถได้ทันที ไม่มีคิวอนุมัติหรือขั้นตอนผูก Person โดย Admin
+4. แยกทดสอบบัญชีเก่า preview.unlinked: ยังใช้รถไม่ได้ ฝั่ง Admin เข้า จัดการข้อมูล → บัญชีพนักงาน → ยืนยันและผูก Person ID เลือก exact account และ preview-person-2 หรือ preview-person-3 ที่ยังไม่ถูกใช้ ตรวจ ID และ checkbox ยืนยัน กดผูก จากนั้นบัญชีเก่า login ใหม่ Session เดิมถูกยกเลิก ไม่จับคู่ชื่อ ไม่ auto-convert และไม่รองรับ relink ขั้นตอนนี้ไม่จำเป็นสำหรับ signup ใหม่ v1.2
+5. ทดสอบ User สมัครใหม่รับ–คืนรถ ดูประวัติและรายงานส่วนบุคคล กด PDF/Excel ได้ Logout/login แล้วยังมีสิทธิ์เดิม ฟอนต์ PDF ฝังใน Worker ไม่เรียกบริการภายนอก User ได้เฉพาะแจ้งเตือนบำรุงรักษาเบื้องต้น ไม่มีค่าใช้จ่ายหรือประวัติผู้อื่น
 6. ฝั่ง Admin เปิด dashboard บำรุงรักษารถยนต์ มีแผนเปลี่ยนน้ำมันเครื่องจำลองให้ลองแก้แผน/บันทึกงานที่เสร็จ/ดูประวัติ ใช้เฉพาะตัวเลข วันที่ รายละเอียด และค่าใช้จ่ายจำลอง เลขไมล์/วันต้องผ่าน validation เดิม
 7. ทดสอบ network timeout/reload ได้โดยใช้ขั้นตอนเดิมของ SESSION_PERSON_RECOVERY; ถ้าเกิด unknown ต้องหยุดส่งซ้ำและใช้ read-only check ที่มีอยู่ ห้ามล้าง marker, สร้าง ID ใหม่ หรือใช้ preview เป็น manual unlock/reset ไม่มี Admin ledger search เพิ่มในงานนี้
 
@@ -62,7 +66,7 @@ preview:local เรียก npm run build แล้วเปิด Node HTTP s
 | พอร์ต8787ถูกใช้อยู่ | กลับ terminal preview เดิมแล้ว Ctrl+C; ไม่ kill process ที่ไม่รู้จัก ไม่เปิดพอร์ตอื่น/LAN |
 | 403 Host/Origin | เปิด http://127.0.0.1:8787 โดยตรง ไม่มี proxy/host override ไม่ใช้ localhost หรือ IP เครื่อง |
 | Login ไม่ผ่าน/ข้อมูลเก่าหายหลังเริ่มใหม่ | ใช้บัญชีจำลองข้างต้นในรอบทดสอบใหม่ ไม่ใช้ credential จริง ตรวจว่าเปิด process และ URL ที่ถูกต้อง |
-| User ใหม่ใช้รถไม่ได้ | ต้อง Admin เลือก exact Person ID ก่อน แล้ว User login ใหม่ ไม่มี signup approval |
+| User ใหม่ใช้รถไม่ได้ | ตรวจว่า build/source เป็น Policy v1.2 และเปิด process ใหม่พร้อมข้อมูลจำลอง; บัญชี preview.unlinked เป็น v3 เก่าที่ตั้งใจจำกัดสิทธิ์ ห้าม auto-link หรือ reset รายการไม่ทราบผล |
 | User ไม่ปรากฏในรายชื่อ Admin | รีเฟรชข้อมูล Admin หลัง signup ก่อนเปิดหน้า Person linking |
 | 429 ลอง login มากเกินไป | rate limit เดิมยังทำงาน รอรอบเวลาที่แอประบุ ไม่ปิด security guard |
 | ราคาอัตโนมัติ/QR/import/backup unavailable | เป็นข้อจำกัด preview ที่ตั้งใจไว้ ไม่ใช้ production config เพื่อแก้ |

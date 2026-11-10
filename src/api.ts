@@ -88,7 +88,7 @@ async function POST(req:Request){try{
   before={id:member.id,username:member.username,name:member.name,active:accountEnabled(member),role:member.role||'employee',...(isSelfAccount(member)?{status:member.status}:{})};
   if(b.data.operation==='linkPerson'){
    const link=await preparePersonLink(env,s,b.data,actorUser.id);before=link.before;
-   member.accountFormatVersion=4;member.driverId=link.verification.personId;member.personVerification=link.verification;member.passwordVersion++;s.accountFormatVersion=4;
+   member.accountFormatVersion=4;member.driverId=link.verification.personId;member.personVerification=link.verification;member.passwordVersion++;if(s.accountFormatVersion!==5)s.accountFormatVersion=4;
    action='ยืนยันตัวตนและผูก Person ID';
   }else if(b.data.operation==='edit'){
    if(isSelfAccount(member))throw Error('บัญชี User ยังไม่เปิดการเปลี่ยนสิทธิ์หรือผูก Person ในรุ่นนี้');
@@ -123,13 +123,13 @@ async function POST(req:Request){try{
   s.cars=old?s.cars.map(c=>c.id===car.id?car:c):[...s.cars,car];after=car;action='จัดการรถยนต์';
  }else if(b.action==='person'){
   const d=b.data,old=s.people.find(p=>p.id===d.id);before=old||null;
-  const person={id:old?.id||crypto.randomUUID(),name:String(d.name||'').trim(),active:d.active!==false};
+  const person={id:old?.id||crypto.randomUUID(),name:String(d.name||'').trim(),active:d.active!==false,...(old?.accountProvisioning?{accountProvisioning:old.accountProvisioning}:{})};
   if(!person.name||person.name.length>150)throw Error('กรุณาระบุชื่อพนักงาน');
-  if(s.people.some(p=>p.id!==person.id&&p.name===person.name))throw Error('มีชื่อพนักงานนี้อยู่แล้ว');
+  if(!(old?.accountProvisioning&&person.name===old.name)&&s.people.some(p=>p.id!==person.id&&p.name===person.name))throw Error('มีชื่อพนักงานนี้อยู่แล้ว');
   const linked=s.accounts?.find(a=>a.driverId===person.id);
   if(linked){
    person.name=cleanName(person.name);
-   if(person.name.length<2||person.name.length>100||s.accounts!.some(a=>a.id!==linked.id&&cleanName(a.name)===person.name)||s.people.some(p=>p.id!==person.id&&cleanName(p.name)===person.name))throw Error('ชื่อบัญชีต้องมี 2–100 ตัวอักษรและไม่ซ้ำ');
+   if(person.name.length<2||person.name.length>100||s.accounts!.some(a=>a.id!==linked.id&&cleanName(a.name)===person.name)||!(old?.accountProvisioning&&person.name===old.name)&&s.people.some(p=>p.id!==person.id&&cleanName(p.name)===person.name))throw Error('ชื่อบัญชีต้องมี 2–100 ตัวอักษรและไม่ซ้ำ');
    linked.name=person.name;
   }
   s.people=old?s.people.map(p=>p.id===person.id?person:p):[...s.people,person];after=person;action='จัดการพนักงาน';

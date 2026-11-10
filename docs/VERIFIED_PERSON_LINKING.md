@@ -1,5 +1,9 @@
 # Task 3D.4D-3 — Admin-verified Person linking (DEV/OFFLINE)
 
+## Policy v1.2 boundary
+
+The explicit Admin first-link workflow below remains for EXISTING unlinked v3 Users only. New registration uses separate system-provisioned Account5/Person, never fabricated personVerification. It cannot claim/relink an old Person; old Admin-linked v4 stays unchanged. No historical ownership backfill. [Current contract](AUTOMATIC_PERSON_V1_2.md).
+
 ## Task 3D.4D-4 lifecycle/recovery follow-up (current)
 
 [SESSION_PERSON_RECOVERY.md](SESSION_PERSON_RECOVERY.md) implements the proposed local lifecycle/reload work: inactive Person checkout refusal/own open return, stronger receipt reader/current authorization, session-bound metadata-only recovery pointer, explicit read-only original-result check after refresh, unknown-result no-resubmit, logout/expiry/account isolation and Thai UX. New63 cases/29 total suites plus Edge desktop360/390/multi-tab acceptance. First-link-only Admin workflow, immediate signup/login, historical IDs/ownership, v4/schema3 backup and Staff restrictions are unchanged. No automatic unknown reset/relink/manual data-changing reconciliation is enabled; operational work remains DEFERRED.

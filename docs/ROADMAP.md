@@ -1,5 +1,9 @@
 # SmartFleet Development Roadmap
 
+## Task 3D.4D-7 — Automatic Person provisioning v1.2
+
+Development implementation and offline/browser acceptance completed; exact Linux commit evidence in PROGRESS. New signup gets own operations immediately, existing unlinked stays restricted. Backup/compatibility fail-closed; no real migration. Next: owner review of v1.2 lifecycle and duplicate-display-name UX using synthetic preview; actual resource/auth/Initialize/Deploy remain DEFERRED. Task3D.4D-6 SKIPPED; Task3D.5 separate. [Details](AUTOMATIC_PERSON_V1_2.md).
+
 Updated 2026-11-10 (Asia/Bangkok), Task3D.4D-5 manual unknown-operation support design; Policy v1.1 supersedes Q6 only. Repository kritsuwan1/smart-fleet; active branch dev/smartfleet-batch-1. App label/baseline v3.8.5; targets remain v3.8.6 through v4.2.0, without assigning a deployment/release date.
 
 ## Owner direction and boundaries

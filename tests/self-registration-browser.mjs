@@ -30,17 +30,19 @@ try{
  assert.equal(await page.locator('input[name=password]').evaluate(e=>e.validity.tooShort),true);
  const before=posts;await page.getByRole('button',{name:'สมัครและเริ่มใช้งาน',exact:true}).click();assert.equal(posts,before);
  await page.getByLabel('ตั้งรหัสผ่าน',{exact:true}).fill('abc123');await page.getByRole('button',{name:'สมัครและเริ่มใช้งาน',exact:true}).click();
- await page.getByText('บัญชี User พร้อมใช้งาน',{exact:true}).waitFor();assert.equal(new URL(page.url()).search,'');await noOverflow();
- assert.equal(cookieObserved,true);assert.equal(await page.getByRole('button',{name:'บันทึกใช้รถ',exact:true}).count(),0);
+ await page.getByText('สมัครสำเร็จ พร้อมใช้งานรถ',{exact:true}).waitFor();assert.equal(new URL(page.url()).search,'');await noOverflow();
+ assert.equal(cookieObserved,true);assert.ok(await page.getByRole('button',{name:'บันทึกใช้รถ',exact:true}).count()>0);
  const results=await page.evaluate(async()=>({fleet:await(await fetch('/api/fleet')).json(),backup:(await fetch('/api/backup.json')).status,
   operation:(await fetch('/api/fleet',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'trip',data:{carId:'c1',driverId:'p1'},version:8})})).status}));
- assert.equal(results.fleet.scope,'self-account');assert.equal(results.fleet.state,undefined);assert.equal(results.backup,403);assert.equal(results.operation,403);
- await page.getByRole('button',{name:'ออกจากระบบ',exact:true}).click();await page.getByRole('button',{name:'เข้าสู่ระบบ',exact:true}).waitFor();await noOverflow();
+ assert.equal(results.fleet.scope,'verified-user');assert.equal(results.fleet.state.trips.length,0);assert.equal(results.fleet.user.personLinkSource,'self-registration');assert.equal(results.backup,403);assert.equal(results.operation,403);
+ await page.getByRole('button',{name:'เมนู',exact:true}).click();
+ await page.getByRole('link',{name:'ออกจากระบบ',exact:true}).click();await page.getByRole('button',{name:'ออกจากระบบ',exact:true}).click();await page.getByRole('button',{name:'เข้าสู่ระบบ',exact:true}).waitFor();await noOverflow();
  await page.getByLabel('ชื่อผู้ใช้',{exact:true}).fill('browser.user');await page.getByLabel('รหัสผ่าน',{exact:true}).fill('wrong12');await page.getByRole('button',{name:'เข้าสู่ระบบ',exact:true}).click();await page.getByRole('alert').waitFor();await noOverflow();
- await page.getByLabel('ชื่อผู้ใช้',{exact:true}).fill('browser.user');await page.getByLabel('รหัสผ่าน',{exact:true}).fill('abc123');await page.getByRole('button',{name:'เข้าสู่ระบบ',exact:true}).click();await page.getByText('บัญชี User พร้อมใช้งาน',{exact:true}).waitFor();
- await page.getByRole('button',{name:/เปลี่ยนรหัสผ่าน/}).click();await page.locator('#account-currentPassword').fill('abc123');await page.locator('#account-password').fill('new123');await page.locator('#account-confirm').fill('new123');await noOverflow();
+ await page.getByLabel('ชื่อผู้ใช้',{exact:true}).fill('browser.user');await page.getByLabel('รหัสผ่าน',{exact:true}).fill('abc123');await page.getByRole('button',{name:'เข้าสู่ระบบ',exact:true}).click();await page.getByText('สมัครสำเร็จ พร้อมใช้งานรถ',{exact:true}).waitFor();
+ await page.getByRole('button',{name:'เมนู',exact:true}).click();
+ await page.getByRole('button',{name:'บัญชีของฉัน',exact:true}).click();await page.getByRole('button',{name:/เปลี่ยนรหัสผ่าน/}).click();await page.locator('#account-currentPassword').fill('abc123');await page.locator('#account-password').fill('new123');await page.locator('#account-confirm').fill('new123');await noOverflow();
  await page.getByRole('button',{name:'บันทึกรหัสผ่านใหม่',exact:true}).click();await page.getByRole('heading',{name:'เปลี่ยนรหัสผ่านสำเร็จ'}).waitFor();await noOverflow();
  const state=JSON.parse(sql.prepare("SELECT payload FROM fleet_store WHERE id='main'").get().payload);
- assert.deepEqual(state.people,initial.people);assert.deepEqual(state.trips,initial.trips);assert.deepEqual(state.accounts.slice(0,-1),initial.accounts);assert.equal(state.accounts.at(-1).role,'user');assert.equal(state.accounts.at(-1).driverId,null);
- assert.deepEqual(errors,[]);console.log('PASS self-registration browser: '+browser.version()+',360px actual Worker signup/login/secure signed cookie/logout/password change, restricted DTO/no operations/no Person claim/no horizontal overflow; loopback synthetic only, external requests blocked');
+ assert.deepEqual(state.people.slice(0,-1),initial.people);assert.deepEqual(state.trips,initial.trips);assert.deepEqual(state.accounts.slice(0,-1),initial.accounts);assert.equal(state.accounts.at(-1).role,'user');assert.equal(state.accounts.at(-1).driverId,state.people.at(-1).id);assert.notEqual(state.accounts.at(-1).driverId,'p1');
+ assert.deepEqual(errors,[]);console.log('PASS self-registration v1.2 browser: '+browser.version()+',360px actual Worker signup/login/secure signed cookie/logout/password change, own-only DTO/forged-driver denial/new Person without claim/no horizontal overflow; loopback synthetic only, external requests blocked');
 }finally{await browser?.close();await new Promise(r=>server.close(r));sql.close();}

@@ -1,4 +1,13 @@
 # SmartFleet - Development Progress
+## 2026-11-10 — Task 3D.4D-7 / Policy v1.2 (Development only)
+
+Baseline dev HEAD536c13a518d7353c68d05eef8fde46f4ba8591e6/Local Preview verified; all116 tracked executable inputs matched before edits. Owner-approved new-only Account5 + active Person provisioned atomically under existing CAS; reciprocal system provenance, no Admin verification fiction/name claim. Existing v3/v4/Admin/Employee/history/ledger preserved; old readers fail closed. JSON schema4/SQL/automatic backup and isolated restore covered. No DDL migration or operational access.
+
+Windows Node24.22.1 npm ci PASS (42 added/43 audited,0 vulnerabilities), build/typecheck/all31 suites PASS; provisioning66, real signup60, guards172, historical Person-link81, recovery63. Actual Edge157 synthetic Worker1280/360/390 PASS signup/immediate eligibility/logout-login/checkout-return/own history-PDF/basic reminders; old Admin linking preserved. Exact implementation Linux CI will be appended after push; until then Linux new commit NOT_VERIFIED. Files/contracts/reproduction: [AUTOMATIC_PERSON_V1_2.md](AUTOMATIC_PERSON_V1_2.md).
+
+Changed runtime: fleet/account-compatibility/auth/api/backup/App; SQL backup checker + frozen v4 fixture; targeted signup/legacy/link/recovery/staging/browser tests + new automatic-person suite/npm test; policy/architecture/backup/preview/roadmap/test/progress docs. Real Operator/Auth/Cloudflare/D1/Initialize/Deployment NOT_VERIFIED and DEFERRED. Task6 SKIPPED. No real data/credentials/cloud/deploy/merge/R2/Cron changes.
+
+
 
 ## 2026-11-10 — Safe Windows Local Preview (independent enablement task)
 

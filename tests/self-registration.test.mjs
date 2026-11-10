@@ -39,49 +39,51 @@ try{
  await test(async()=>{
   const d=await registered(),s=d.state(),a=s.accounts.at(-1);assert.equal(d.r.headers.get('location'),'/');
   assert.match(d.r.headers.get('set-cookie'),/Secure; HttpOnly; SameSite=Lax/);
-  assert.deepEqual({role:a.role,kind:a.accountKind,version:a.accountFormatVersion,status:a.status,driverId:a.driverId,active:a.active},{role:'user',kind:'self-user',version:3,status:'ACTIVE',driverId:null,active:false});
-  assert.equal(s.accountFormatVersion,3);assert.equal(a.passwordHash.length,64);assert.notEqual(a.passwordHash,signup.password);
-  for(const field of ['cars','people','trips','maintenancePlans','maintenanceHistory','projects'])assert.deepEqual(s[field],d.before[field]);
+  assert.deepEqual({role:a.role,kind:a.accountKind,version:a.accountFormatVersion,status:a.status,active:a.active},{role:'user',kind:'self-user',version:5,status:'ACTIVE',active:false});
+  assert.equal(s.accountFormatVersion,5);assert.equal(a.passwordHash.length,64);assert.notEqual(a.passwordHash,signup.password);
+  for(const field of ['cars','trips','maintenancePlans','maintenanceHistory','projects'])assert.deepEqual(s[field],d.before[field]);
+  assert.deepEqual(s.people.slice(0,-1),d.before.people);assert.equal(s.people.at(-1).id,a.driverId);assert.equal(a.personVerification,undefined);assert.equal(a.personProvisioning.method,'self-registration');
   assert.deepEqual(s.accounts.slice(0,-1),d.before.accounts);assert.deepEqual(s.audit.slice(1),d.before.audit);
-  assert.equal(d.view.scope,'self-account');assert.equal(d.view.user.role,'user');assert.equal(d.view.personLinked,false);
-  assert.deepEqual(Object.keys(d.view).sort(),['scope','user','actor','personLinked'].sort());
+  assert.equal(d.view.scope,'verified-user');assert.equal(d.view.user.role,'user');assert.equal(d.view.personLinked,true);assert.equal(d.view.user.personLinkSource,'self-registration');
+  assert.deepEqual(d.view.state.trips,[]);assert.deepEqual(d.view.state.people.map(p=>p.id),[a.driverId]);assert.equal(d.view.state.accounts,undefined);
   assert.ok(!JSON.stringify(d.view).includes('PRIVATE PROJECT'));assert.ok(!JSON.stringify(d.view).includes('passwordHash'));assert.ok(!JSON.stringify(d.view).includes('sessionKey'));
   assert.equal(d.rows().find(r=>r.id==='trip-operation:v1:retain').payload,'{"retain":"original"}');
  });
  for(const role of ['admin','staff','employee','user','root'])await test(async()=>{
   const d=await registered({...signup,role,active:'true',status:'APPROVED',driverId:'p1',personId:'p1',employeeId:'p1',accountFormatVersion:'1'});
-  assert.equal(d.view.user.role,'user');assert.equal(d.state().accounts.at(-1).driverId,null);assert.equal(d.state().accounts.at(-1).active,false);
+  assert.equal(d.view.user.role,'user');assert.notEqual(d.state().accounts.at(-1).driverId,'p1');assert.equal(d.state().accounts.at(-1).active,false);assert.equal(d.state().accounts.at(-1).personVerification,undefined);
  });
  for(const password of ['','12345','x'.repeat(129)])await test(async()=>{const d=setup(),before=d.state();assert.equal((await d.req('/register',form({...signup,password}))).status,400);assert.deepEqual(d.state(),before);});
  for(const password of ['123456','x'.repeat(128)])await test(async()=>{const d=await registered({...signup,password});assert.equal((await d.req('/login',form({username:signup.username,password}))).status,303);});
- for(const name of ['PRIVATE PERSON 1','SAME DISPLAY NAME'])await test(async()=>{const d=await registered({...signup,name});assert.deepEqual(d.state().people,d.before.people);assert.equal(d.state().accounts.at(-1).driverId,null);});
+ for(const name of ['PRIVATE PERSON 1','SAME DISPLAY NAME'])await test(async()=>{const d=await registered({...signup,name});assert.deepEqual(d.state().people.slice(0,-1),d.before.people);assert.equal(d.state().people.at(-1).name,name);assert.equal(d.state().accounts.at(-1).driverId,d.state().people.at(-1).id);});
  await test(async()=>{
   const d=await registered(),before=d.state();assert.equal((await d.req('/register',form({...signup,name:'Different',username:'NEW.USER'}))).status,400);
   assert.equal((await d.req('/register',form({...signup,username:'other-user'}))).status,400);assert.deepEqual(d.state(),before);
  });
  await test(async()=>{
   const d=setup(),before=d.state(),rs=await Promise.all([d.req('/register',form(signup)),d.req('/register',form({...signup,name:'Different'}))]);
-  assert.deepEqual(rs.map(r=>r.status).sort(),[303,400]);assert.equal(d.state().accounts.length,before.accounts.length+1);assert.deepEqual(d.state().people,before.people);assert.deepEqual(d.state().trips,before.trips);
+  assert.deepEqual(rs.map(r=>r.status).sort(),[303,400]);assert.equal(d.state().accounts.length,before.accounts.length+1);assert.deepEqual(d.state().people.slice(0,-1),before.people);assert.deepEqual(d.state().trips,before.trips);
  });
  await test(async()=>{
   const d=setup(),before=d.state(),rs=await Promise.all([d.req('/register',form(signup)),d.req('/register',form({...signup,name:'Another name',username:'another.user'}))]);
-  assert.deepEqual(rs.map(r=>r.status),[303,303]);assert.equal(d.state().accounts.length,before.accounts.length+2);assert.deepEqual(d.state().people,before.people);
+  assert.deepEqual(rs.map(r=>r.status),[303,303]);assert.equal(d.state().accounts.length,before.accounts.length+2);assert.deepEqual(d.state().people.slice(0,-2),before.people);
  });
  for(const returnTo of ['/?car=c1&action=start','/qr','https://evil.invalid','//evil.invalid'])await test(async()=>{
   const d=await registered({...signup,returnTo});assert.equal(d.r.headers.get('location'),'/');const login=await d.req('/login',form({username:signup.username,password:signup.password,returnTo}));assert.equal(login.headers.get('location'),'/');
  });
- const forbidden=['/api/backup.sql','/api/backup.json','/api/backup-status','/api/system-status','/api/fuel-price?month=2026-11','/qr','/report-font-regular.ttf','/vehicle-revo-canopy.webp'];
+ for(const path of ['/report-font-regular.ttf','/vehicle-revo-canopy.webp'])await test(async()=>{const d=await registered(),before=d.snapshot();assert.equal((await d.req(path,{},d.session)).status,200);assert.deepEqual(d.snapshot(),before);});
+ const forbidden=['/api/backup.sql','/api/backup.json','/api/backup-status','/api/system-status','/api/fuel-price?month=2026-11','/qr'];
  for(const path of forbidden)await test(async()=>{const d=await registered(),before=d.snapshot();assert.equal((await d.req(path,{},d.session)).status,403);assert.deepEqual(d.snapshot(),before);});
  for(const action of ['trip','account','person','car','project','maintenance','import','importExcel','fuelPrice'])await test(async()=>{
   const d=await registered(),before=d.snapshot();const r=await d.req('/api/fleet',{method:'POST',body:JSON.stringify({action,version:8,data:{id:'t2',carId:'c1',driverId:'p1',end:'2026-11-05T11:00',odoEnd:120},tripOperation:{id:crypto.randomUUID(),kind:'return'}})},d.session);
-  assert.equal(r.status,403);assert.equal((await r.json()).code,'PERSON_LINK_REQUIRED');assert.deepEqual(d.snapshot(),before);assert.equal(d.stats.batches,0);
+  assert.equal(r.status,403);assert.deepEqual(d.snapshot(),before);assert.equal(d.stats.batches,0);
  });
  await test(async()=>{
   const d=await registered();assert.equal((await d.req('/login',form({username:signup.username,password:'wrong12'}))).status,401);
   const r=await d.req('/api/profile/password',{method:'POST',body:JSON.stringify({currentPassword:signup.password,password:'new123'})},d.session);assert.equal(r.status,200);
   assert.match(r.headers.get('set-cookie'),/Max-Age=0/);assert.equal((await d.req('/api/fleet',{},d.session)).status,401);
   assert.equal((await d.req('/login',form({username:signup.username,password:signup.password}))).status,401);assert.equal((await d.req('/login',form({username:signup.username,password:'new123'}))).status,303);
-  assert.equal(d.state().accounts.at(-1).driverId,null);assert.deepEqual(d.state().people,d.before.people);
+  assert.equal(d.state().accounts.at(-1).driverId,d.view.user.driverId);assert.deepEqual(d.state().people.slice(0,-1),d.before.people);assert.equal(d.state().people.at(-1).accountProvisioning.accountId,d.view.user.id);
  });
  for(const status of ['DISABLED','REJECTED'])await test(async()=>{
   const d=await registered(),s=d.state();s.accounts.at(-1).status=status;s.accounts.at(-1).passwordVersion++;
@@ -101,11 +103,11 @@ try{
   assert.equal((await d.req('/login',form({username:signup.username,password:'reset6'}))).status,303);
  });
  await test(async()=>{
-  const d=await registered(),before=d.state(),b=await A.createBackup(before,'synthetic','demo');assert.equal(b.schemaVersion,2);assert.equal((await A.inspectBackup(JSON.stringify(b))).accounts,before.accounts.length);
+  const d=await registered(),before=d.state(),b=await A.createBackup(before,'synthetic','demo');assert.equal(b.schemaVersion,4);assert.equal((await A.inspectBackup(JSON.stringify(b))).accounts,before.accounts.length);
   assert.equal((await A.createBackup(d.before,'synthetic','demo')).schemaVersion,1);
   await assert.rejects(()=>A.inspectBackup(JSON.stringify({...b,schemaVersion:1})));await assert.rejects(()=>A.inspectBackup(JSON.stringify({exportedAt:b.exportedAt,state:before})));
   const root=await d.root(),sqlText=await(await d.req('/api/backup.sql',{},root)).text(),target=setup(false);target.sql.exec(sqlText);
-  const restored=target.state();assert.notEqual(restored.sessionKey,before.sessionKey);assert.deepEqual({...restored,sessionKey:''},{...before,sessionKey:''});assert.equal(restored.accounts.at(-1).driverId,null);
+  const restored=target.state();assert.notEqual(restored.sessionKey,before.sessionKey);assert.deepEqual({...restored,sessionKey:''},{...before,sessionKey:''});assert.equal(restored.accounts.at(-1).driverId,before.accounts.at(-1).driverId);
   const artifact=await A.automaticBackupArtifact(before,8,'staging','2026-11-10','2026-11-10T00:00:00Z'),target2=setup(false);
   await A.restoreAutomaticBackupToStaging(target2.db,JSON.stringify(artifact),'staging');assert.deepEqual({...target2.state(),sessionKey:''},{...before,sessionKey:''});assert.equal((await target2.req('/api/fleet',{},d.session)).status,401);
  });
@@ -114,7 +116,7 @@ try{
   const guard=`SELECT CASE WHEN NOT EXISTS(SELECT 1 FROM fleet_store WHERE id='main' AND NOT (${A.operationalAccountsSql('payload')})) THEN 1 ELSE json('ACCOUNT_FORMAT_UNSUPPORTED') END`;
   assert.ok(current.includes(guard));
   const dir=await mkdtemp(join(tmpdir(),'fleet-v1-backup-')),path=join(dir,'synthetic.sql');
-  try{for(const fixture of ['account-guard-v1.txt','account-guard-v3.txt'])for(const eol of ['\n','\r\n']){
+  try{for(const fixture of ['account-guard-v1.txt','account-guard-v3.txt','account-guard-v4.txt'])for(const eol of ['\n','\r\n']){
    const old=(await readFile('tests/fixtures/'+fixture,'utf8')).trimEnd().replace(/\r\n/g,'\n').replace(/\n/g,eol);
    await writeFile(path,current.replace(guard,old));let r=spawnSync(process.execPath,['--experimental-sqlite','scripts/check-sql-backup.mjs',path],{encoding:'utf8'});assert.equal(r.status,0,fixture+' '+JSON.stringify(eol)+': '+r.stderr);
    await writeFile(path,current.replace(guard,old.replace('THEN 1','THEN 0')));r=spawnSync(process.execPath,['--experimental-sqlite','scripts/check-sql-backup.mjs',path],{encoding:'utf8'});assert.equal(r.status,1);
@@ -140,9 +142,9 @@ try{
  });
  await test(async()=>{
   const d=await registered(),second=await d.req('/register',form({...signup,name:'Another User',username:'another.user'})),other=await d.get(cookie(second));
-  assert.notEqual(other.user.id,d.view.user.id);assert.equal(other.scope,'self-account');assert.equal(other.state,undefined);
+  assert.notEqual(other.user.id,d.view.user.id);assert.equal(other.scope,'verified-user');assert.deepEqual(other.state.trips,[]);
   const s=d.state();s.trips[0].ownerUserId=d.view.user.id;d.sql.prepare("UPDATE fleet_store SET payload=? WHERE id='main'").run(JSON.stringify(s));
-  const view=await d.get(d.session);assert.equal(view.state,undefined);assert.equal(view.personLinked,false);
+  const view=await d.get(d.session);assert.deepEqual(view.state.trips.map(t=>t.id),[s.trips[0].id]);assert.equal(view.personLinked,true);
   const parts=d.session.split('.');parts[0]=parts[0].replace(/=.+$/,'='+btoa(JSON.stringify({uid:'admin',ver:0,exp:Math.floor(Date.now()/1000)+3600,nonce:'forged'})));assert.equal((await d.req('/api/fleet',{},parts.join('.'))).status,401);
  });
  await test(async()=>{
@@ -154,5 +156,5 @@ try{
   const committed=d.snapshot();assert.equal((await send()).status,200);assert.deepEqual(d.snapshot(),committed);assert.deepEqual(d.state().accounts.slice(0,-1),before.accounts);
  });
  await test(()=>assert.equal(network,0));
- console.log('PASS self-registration v1.1: '+cases+' cases, immediate unlinked User/self-only DTO, no Person claim/promotion, credentials/sessions/revocation, versioned backup/SQL parity/restore, legacy preservation and keyed replay; synthetic offline only');
+ console.log('PASS self-registration v1.2: '+cases+' cases, real HTTP atomic new Account/Person and own-only DTO, no existing Person claim/promotion, credentials/sessions/revocation, versioned backup/SQL parity/restore, legacy preservation and keyed replay; synthetic offline only');
 }finally{globalThis.fetch=savedFetch;console.error=savedError;for(const d of dbs)d.close();}

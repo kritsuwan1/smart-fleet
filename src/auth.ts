@@ -4,7 +4,7 @@ import {maintenanceStatus} from './maintenance';
 import {readState,writeState} from './storage';
 import {type Fleet,type Account,latestOdo} from './fleet';
 import {assertOperationalAccounts,accountRole,accountEnabled,isSelfAccount} from './account-compatibility';
-export type User={id:string;username:string;name:string;role:'admin'|'employee'|'user';driverId:string;passwordVersion:number};
+export type User={id:string;username:string;name:string;role:'admin'|'employee'|'user';driverId:string;passwordVersion:number;personLinkSource?:'admin'|'self-registration'};
 const encode=new TextEncoder();export const COOKIE='__Host-smartfleet';export const MAX_AGE=8*3600;
 export const hex=(v:ArrayBuffer)=>Array.from(new Uint8Array(v),n=>n.toString(16).padStart(2,'0')).join('');
 async function key(secret:string){return crypto.subtle.importKey('raw',encode.encode(secret),{name:'HMAC',hash:'SHA-256'},false,['sign','verify']);}
@@ -16,7 +16,7 @@ export function passwordValid(p:string){return typeof p==='string'&&p.length>=6&
 const constantEqual=(a:string,b:string)=>{if(a.length!==b.length)return false;let v=0;for(let i=0;i<a.length;i++)v|=a.charCodeAt(i)^b.charCodeAt(i);return v===0;};
 export async function verifyPassword(p:string,account:Account){return constantEqual(await hashPassword(p,account.salt),account.passwordHash);}
 export const cleanName=(s:string)=>s.trim().replace(/\s+/g,' ');
-const userFromAccount=(a:Account):User=>({id:a.id,username:a.username,name:a.name,role:accountRole(a),driverId:a.driverId??'',passwordVersion:a.passwordVersion});
+const userFromAccount=(a:Account):User=>({id:a.id,username:a.username,name:a.name,role:accountRole(a),driverId:a.driverId??'',passwordVersion:a.passwordVersion,...(a.accountFormatVersion===5?{personLinkSource:'self-registration' as const}:a.accountFormatVersion===4?{personLinkSource:'admin' as const}:{})});
 export async function checkLogin(env:any,username:string,password:string,state:Fleet):Promise<User|null>{
  assertOperationalAccounts(state);
  username=(username||'admin').trim().toLowerCase();
@@ -57,7 +57,7 @@ export function viewForUser(state:Fleet,version:number,user:User,payloadBytes?:n
   if(!user.driverId)return {scope:'self-account' as const,user,actor:user.name,personLinked:false};
   const trips=structuredClone(state.trips.filter(t=>t.ownerUserId===user.id));
   const cars=state.cars.filter(c=>c.active||trips.some(t=>t.carId===c.id)).map(c=>({id:c.id,plate:c.plate,province:c.province,model:c.model,initialOdo:c.initialOdo,active:c.active,fuelType:c.fuelType,imagePreset:c.imagePreset,currentOdo:latestOdo(state,c.id)}));
-  const own:Fleet={cars,people:structuredClone(state.people.filter(p=>p.id===user.driverId)),projects:[...new Set(trips.map(t=>t.project))],trips,audit:[],imported:false};
+  const own:Fleet={cars,people:state.people.filter(p=>p.id===user.driverId).map(p=>({id:p.id,name:p.name,active:p.active})),projects:[...new Set(trips.map(t=>t.project))],trips,audit:[],imported:false};
   const basicReminders=(state.maintenancePlans||[]).filter(p=>p.active&&cars.some(c=>c.id===p.carId&&c.active)).map(p=>({id:p.id,carId:p.carId,type:p.type,status:maintenanceStatus(state,p),dueDate:p.dueDate,dueOdo:p.dueOdo}));
   return {scope:'verified-user' as const,user,actor:user.name,personLinked:true,state:own,version,members:[],occupiedCars:state.trips.filter(t=>!t.end&&t.ownerUserId!==user.id).map(t=>t.carId),basicReminders};
  }
@@ -77,14 +77,16 @@ export async function registerSelfUser(env:any,input:{name:string;username:strin
  if(name.length<2||name.length>100)throw Error('กรุณากรอกชื่อ–นามสกุล 2–100 ตัวอักษร');
  if(!/^[a-z0-9][a-z0-9._-]{2,29}$/.test(username)||['admin','administrator','root'].includes(username))throw Error('ชื่อผู้ใช้ต้องมี 3–30 ตัว ใช้ a-z ตัวเลข จุด ขีดกลาง หรือขีดล่าง และห้ามใช้ admin');
  if(!passwordValid(password))throw Error('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร และไม่เกิน 128 ตัวอักษร');
- const salt=hex(crypto.getRandomValues(new Uint8Array(16)).buffer),passwordHash=await hashPassword(password,salt),id=crypto.randomUUID();
+ const salt=hex(crypto.getRandomValues(new Uint8Array(16)).buffer),passwordHash=await hashPassword(password,salt),id=String(crypto.randomUUID()),personId=String(crypto.randomUUID()),createdAt=new Date().toISOString();
  for(let retry=0;retry<3;retry++){
   const {state,version}=await readState(env);state.accounts||=[];
   if(state.accounts.length>=ACCOUNT_LIMIT)throw Error('จำนวนบัญชีเต็ม กรุณาติดต่อผู้ดูแล');
   if(state.accounts.some(a=>a.username===username))throw Error('ชื่อผู้ใช้นี้มีคนใช้แล้ว กรุณาเลือกชื่ออื่น');
   if(state.accounts.some(a=>cleanName(a.name)===name))throw Error('ชื่อนี้มีบัญชีแล้ว หากลืมรหัสผ่านให้ติดต่อผู้ดูแล');
-  const account:Account={id,username,name,driverId:null,active:false,role:'user',accountFormatVersion:3,accountKind:'self-user',status:'ACTIVE',salt,passwordHash,passwordVersion:0,createdAt:new Date().toISOString()};state.accounts.push(account);if(state.accountFormatVersion!==4)state.accountFormatVersion=3;
-  state.audit.unshift({id:crypto.randomUUID(),time:new Date().toISOString(),actor:name,action:'สมัครบัญชี User',before:null,after:{id,username,name,role:'user',personLinked:false}});
+  if(id===personId||id==='admin'||state.accounts.some(a=>a.id===id||a.id===personId)||state.people.some(p=>p.id===personId||p.id===id))throw Error('รหัสบัญชีหรือผู้ขับรถซ้ำ ไม่ได้สร้างข้อมูล กรุณาลองสมัครใหม่');
+  const account:Account={id,username,name,driverId:personId,active:false,role:'user',accountFormatVersion:5,accountKind:'self-user',status:'ACTIVE',salt,passwordHash,passwordVersion:0,createdAt,personProvisioning:{personId,method:'self-registration',createdAt}};
+  state.accounts.push(account);state.people.push({id:personId,name,active:true,accountProvisioning:{accountId:id,method:'self-registration',createdAt}});state.accountFormatVersion=5;
+  state.audit.unshift({id:crypto.randomUUID(),time:createdAt,actor:name,action:'สมัครบัญชี User และสร้าง Person อัตโนมัติ',before:null,after:{id,username,name,role:'user',personId,method:'self-registration'}});
   if(await writeState(env,state,version))return {state,user:userFromAccount(account)};
  }
  throw Error('มีการบันทึกพร้อมกัน กรุณากดสมัครอีกครั้ง');

@@ -1,5 +1,9 @@
 # Task 3D.4C — Offline role/onboarding compatibility spike
 
+## Task 3D.4D-7 — marker5 compatibility (current)
+
+Account5 + reciprocal Person provisioning, mixed Fleet marker5; legacy/v3/v4 preserved. Strict JS/SQL readers reject unknown roles/versions, mismatched provenance/UUID/status and ambiguous claims before mutation. JSON schema4 and automatic shared validator; old-v4 reader fail-closed. No marker stripping/lossy downgrade or real migration. Older sections describe earlier versions; new signup differs per [v1.2 contract](AUTOMATIC_PERSON_V1_2.md).
+
 ## Task 3D.4D-3 — current linked User compatibility
 
 Policy v1.1 remains immediate signup/login, without Admin approval. [VERIFIED_PERSON_LINKING.md](VERIFIED_PERSON_LINKING.md) adds a strictly reviewed first-link Admin workflow and scoped User operations; supersedes the historical unlinked-only implementation limit below. v3/null remains unlinked. v4/self-user/User/status + nonempty exact driverId and exactly personVerification:{personId,verifiedBy,verifiedAt} requires mixed state marker4, one Person and no other account claim. Existing legacy Admin/Employee, names, historical IDs/ownership/Maintenance/audit/ledger are preserved.

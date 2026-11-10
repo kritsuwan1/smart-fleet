@@ -1,10 +1,14 @@
-# Role & onboarding contract — Policy v1.1
+# Role & onboarding contract — Policy v1.2
 
-## Task 3D.4D-3 — v1.1 operational Development contract (current)
+## Policy v1.2 — OWNER APPROVED / current for NEW registrations
+
+v1.2 supersedes the v1.1 Person-link prerequisite only for NEW signup: atomically create new User + active Person with system provenance; immediate own vehicle operations/history/reports/basic reminders. No Admin signup approval and no forged human verification. No existing Person matching/claiming. Existing v3 unlinked stays restricted pending separate owner decision; v4 Admin-linked and Admin/Employee unchanged. All other role/privacy/recovery controls remain. Prior v1.1 sections below are historical where they require new signup manual linking. [Full contract](AUTOMATIC_PERSON_V1_2.md).
+
+## Task 3D.4D-3 — historical v1.1 Development contract (retained for existing accounts)
 
 Owner-authorized first-link-only Admin verification is implemented offline: exact account/Person ID selection + confirmation/audit/CAS, no name matching or identity-document retention. Signup/login remains immediate. Only after verification/fresh login does User receive own vehicle operations (no amendments), ownerUserId-only history/personal reports and basic Maintenance reminders. Staff/new-User privileged assignment remains disabled; valid legacy Admin/Employee unchanged. Existing open-trip/ledger conflict, relink, inactive/ambiguous/claimed Person refuses without mutation. Details/versions/session and rollback limits: [VERIFIED_PERSON_LINKING.md](VERIFIED_PERSON_LINKING.md). This supersedes only the previous implementation's unlinked-only limit, not owner Policy v1.1. Operator/Live/Initialize/Deployment DEFERRED.
 
-## Policy v1.1 — owner change recorded 2026-11-10 (current)
+## Policy v1.1 — historical owner change recorded 2026-11-10
 
 **v1.1 supersedes v1.0 Q6 only:** new self-registration creates an immediately active **User personal account**, without Admin approval or a PENDING queue. Q1–Q5 and Q7–Q10 remain unchanged. Immediate account access does not prove Person/employee identity; checkout/return/Person-linked history remain unavailable without Admin-verified exact Person linkage.
 

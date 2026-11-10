@@ -1,5 +1,9 @@
 # SmartFleet - Test Plan
 
+## Task 3D.4D-7 — v1.2 regression acceptance
+
+Windows Node24 npm ci/build/typecheck/all31 suites PASS; automatic-person66 + actual signup60 + operational172 + historical Person-link81/recovery63 cases. Test no-orphan CAS/conflict/collision/capacity, scoped immediate operations, old-state preservation, JS–SQL provenance rejection, rehashed invalid backup pre-mutation refusal and isolated SQL/automatic restore. Edge157 actual local Worker1280/360/390 PASS signup/Thai confirmation/logout/login/checkout/return/own report PDF/basic reminders and historical Admin linking. Separate browser security/password and historical link/recovery checks; exact Linux evidence in PROGRESS. [Reproduction/limits](AUTOMATIC_PERSON_V1_2.md). Cloud/real account/auth/restore NOT_VERIFIED; no operational approval.
+
 ## Safe Windows Local Preview enablement
 
 New preview-local.test.mjs28 cases, total30 npm test suites: exact IPv4 loopback/port contract, Host/Origin/cross-site/absolute-target refusal, self-only CSP/no external font links, actual synthetic auth/secure cookie, scoped User and unlinked User, blocked QR/backup/import/recovery/reset paths, UTF-8 request reconstruction, denied fetch/WebSocket, per-process memory/session isolation and occupied-port refusal. No app security flags weakened; no new dependencies/config/resources.

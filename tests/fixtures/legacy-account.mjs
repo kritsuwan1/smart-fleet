@@ -12,3 +12,14 @@ export async function seedLegacyAccount(sql,{name,username,password,role='employ
  const result=sql.prepare("UPDATE fleet_store SET payload=?,version=version+1 WHERE id='main' AND version=?").run(JSON.stringify(s),row.version);
  if(result.changes!==1)throw Error('SYNTHETIC_FIXTURE_CONFLICT');return a;
 }
+
+// Historical v1.1 unlinked snapshots, not a registration API or runtime adapter.
+export async function seedUnlinkedAccount(sql,{name,username,password}){
+ if(sql.prepare('PRAGMA database_list').all().some(d=>d.file))throw Error('IN_MEMORY_FIXTURE_REQUIRED');
+ const row=sql.prepare("SELECT payload,version FROM fleet_store WHERE id='main'").get(),s=JSON.parse(row.payload),salt=crypto.randomUUID();
+ const a={id:crypto.randomUUID(),name,username,driverId:null,role:'user',active:false,status:'ACTIVE',accountFormatVersion:3,accountKind:'self-user',passwordVersion:0,salt,passwordHash:await hashPassword(password,salt),createdAt:'2026-11-10T00:00:00.000Z'};
+ s.accounts??=[];s.accounts.push(a);if(![4,5].includes(s.accountFormatVersion))s.accountFormatVersion=3;
+ s.audit.unshift({id:crypto.randomUUID(),time:a.createdAt,actor:name,action:'Synthetic historical unlinked User',before:null,after:{id:a.id,role:'user',personLinked:false}});
+ const result=sql.prepare("UPDATE fleet_store SET payload=?,version=version+1 WHERE id='main' AND version=?").run(JSON.stringify(s),row.version);
+ if(result.changes!==1)throw Error('SYNTHETIC_FIXTURE_CONFLICT');return a;
+}

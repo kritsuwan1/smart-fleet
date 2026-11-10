@@ -62,7 +62,9 @@ const competing=await Promise.all([
 ]);assert.deepEqual(competing.map(r=>r.status).sort(),[303,400]);
 console.log('PASS concurrent registration: preserves trips and other accounts; a duplicate username is created only once');
 // Migration from v2 adds private authentication fields without replacing fleet data.
-const legacy=structuredClone(raw);delete legacy.accounts;delete legacy.sessionKey;for(const t of legacy.trips)delete t.ownerUserId;
+// A real pre-account v2 snapshot has no v5 provisioning markers or provisioned
+// People. Do not manufacture an orphaned v5 state by stripping its accounts.
+const legacy=structuredClone(raw);legacy.people=legacy.people.filter(p=>!p.accountProvisioning);delete legacy.accountFormatVersion;delete legacy.accounts;delete legacy.sessionKey;for(const t of legacy.trips)delete t.ownerUserId;
 sql.prepare("UPDATE fleet_store SET payload=?,version=version+1 WHERE id='main'").run(JSON.stringify(legacy));
 r=await request('/login',form({username:'admin',password:env.APP_PASSWORD}));assert.equal(r.status,303);const migrated=await get(cookieFrom(r));assert.deepEqual(migrated.state,legacy);assert.equal(migrated.members.length,0);assert.equal((await request('/api/fleet',{},admin6)).status,401);
 console.log('PASS v2 migration: preserves fleet data, creates private session key, requires a fresh login, and exposes no secret fields');

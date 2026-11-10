@@ -1,5 +1,9 @@
 # Automatic Backup - Development Design and Recovery
 
+## Task 3D.4D-7 — v1.2 account compatibility
+
+Automatic artifact envelope remains unchanged; shared account inspector now enforces mixed Fleet marker5 and reciprocal Account5/Person provenance before isolated restore. JSON manual export uses schemaVersion4 for marker5; legacy versions1/2/3 remain supported with corresponding strict reader. SQL guard policy matches JS; pinned prior v4 guard retained for historical exact templates/old-reader refusal. SHA-256 does not override invalid identity/schema. No cloud R2/retention/Cron settings changed, no actual backup/restore run. [Format/rollback limits](AUTOMATIC_PERSON_V1_2.md).
+
 Task 2C.3: R2 subscription/activation is deferred. Use [BACKUP_OFFLINE.md](BACKUP_OFFLINE.md) for the existing mock storage/isolated SQLite workflow and the future Staging checklist. These tests do not establish cloud integration or operational automatic backups; all real-resource/activation steps below still require separate approval.
 
 Task 2A implementation only. No Cloudflare resources, credentials, secrets, deployed configuration or production records were changed. Existing wrangler*.jsonc and deploy.yml remain unchanged. Both example configs are disabled, contain placeholders and have empty cron lists.
