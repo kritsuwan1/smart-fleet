@@ -1,0 +1,47 @@
+{
+  "baseline": "131dc9fdc0c6b9aed99366da96fb2cf0c57bb6e4",
+  "browser": "Edge 157.0.4341.42",
+  "environment": "synthetic localhost only",
+  "files": [
+    {
+      "file": "acceptance.json",
+      "bytes": 1134,
+      "sha256": "fcb842f0f048fdd2ac10727fd9584e0c8480bea06026460e7dad84e9d26b61e9"
+    },
+    {
+      "file": "admin-390.png",
+      "bytes": 32968,
+      "sha256": "9a71bd7be524a3b3128884b122c56eb0bccb70f4eaed83d9598238333a2706ba"
+    },
+    {
+      "file": "after.json",
+      "bytes": 1084,
+      "sha256": "ca2a3e883651551359456fbecce4ab60802df916152a15368044b444d06d458d"
+    },
+    {
+      "file": "baseline-dashboard-360.png",
+      "bytes": 155391,
+      "sha256": "2d19864e0722ac52039900c47d4ce443cd5d1037c0b08c93462c3d0ca9d50c72"
+    },
+    {
+      "file": "baseline.json",
+      "bytes": 3382,
+      "sha256": "54a4829362201eb3508897838e0a7e13482834d0b84b4648eb5c9763287d58e1"
+    },
+    {
+      "file": "history-360.png",
+      "bytes": 46936,
+      "sha256": "cbdd31357aad7254dfca98ea0db425b24987a7f13a2b25e874e1e31c1a696226"
+    },
+    {
+      "file": "landscape-390.png",
+      "bytes": 56937,
+      "sha256": "725dd3e81b7aa18735332cec95ebc7c72a5d8205956f3871d80e1b58572dae79"
+    },
+    {
+      "file": "pdf-render-360.png",
+      "bytes": 344520,
+      "sha256": "bfaa9b89ed21cac561c4ad7ad0708009ea1e195270ed37106dd1305eb42b16ba"
+    }
+  ]
+}

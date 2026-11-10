@@ -79,3 +79,22 @@ body{line-height:1.65}.heading-actions{flex-wrap:wrap}.field>span{line-height:1.
 @media(max-width:760px){.main{margin-left:0;width:100%}.sidebar{width:230px}.page-heading h1{font-size:28px}.page-heading p{font-size:14px}.stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.stat{min-height:106px;padding:15px}.stat-top{font-size:12px}.stat-value{font-size:27px;margin-top:9px}.stat-value small{font-size:13px}.topbar{height:60px}.brand{font-size:27px}.fleet-showcase .vehicle-presentation{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}.fleet-showcase .vehicle-model{font-size:14px}}
 @media(max-width:540px){main{padding:22px 16px 0}.environment-banner{padding:8px 16px}.topbar{padding:0 16px}.page-heading{gap:14px;margin-bottom:20px}.heading-actions .vehicle-action-return{background:#0c7bf0;color:white;border-color:#0871df}.fleet-showcase{padding:15px}.fleet-showcase .section-title h2{font-size:18px}.fleet-showcase .section-title .textbutton{font-size:12px}.fleet-showcase .vehicle-presentation{display:flex;flex-direction:column;padding:12px;align-items:stretch;gap:10px}.fleet-showcase .vehicle-visual img{max-height:200px;width:100%;aspect-ratio:1.6}.fleet-showcase .vehicle-visual figcaption{font-size:9px}.fleet-showcase .vehicle-identity h3{font-size:23px}.fleet-showcase .vehicle-model{font-size:15px;margin-top:10px}.fleet-showcase .vehicle-facts{font-size:12px}.fleet-showcase .vehicle-identity .car-mile{margin-top:10px;gap:10px}.fleet-showcase .car-mile>strong{font-size:20px}.dashboard-fleet-layout{gap:14px}.open-trips .open-trips-list{display:block}.open-trips .panel-title h2{font-size:19px}.open-trip .pending-date{margin:10px 0;font-size:14px}.pending-driver strong{font-size:15px}.pending-detail{font-size:15px}.open-trips .open-trips-note{font-size:10px}.storage-summary{padding:13px;gap:10px}.storage-summary strong{font-size:13px}.storage-summary small{font-size:11px}.storage-summary .textbutton{font-size:12px}.topdate{font-size:11px}.breadcrumb{gap:7px;font-size:11px}.topdate>svg{display:none}}
 @media print{.environment-banner{background:white!important;color:black!important}.main{margin-left:0;width:100%}.dashboard-fleet-layout{display:block}}
+
+/* Task 3D.5: scoped screen usability; report canvas/PDF geometry is unchanged. */
+@media screen{
+ .app button,.app a[aria-label],.app summary{min-width:44px;min-height:44px}
+ .app a[aria-label]{display:inline-flex;align-items:center;justify-content:center}
+ .app .main .topbar .topdate button,.app .trip-dialog .modal-header .iconbutton,.app .history-card-chevron{min-width:44px;min-height:44px}
+ .app .main,.app .field,.app .panel-title>div,.app .journey-vehicle>div{min-width:0}
+ .app .table-wrap{max-width:100%;min-width:0;overscroll-behavior-x:contain}
+ .app .table-wrap:focus-visible{outline:3px solid #14684e;outline-offset:-3px}
+ .app .alert,.app .panel-title h2,.app .employee-car-heading h3,.app .journey-vehicle strong,.app .report-accessible{overflow-wrap:anywhere}
+ .app .employee-car-heading{flex-wrap:wrap}
+ .app .trip-dialog .modal-header,.app .journey-detail-dialog .modal-header{padding-left:80px}
+ .app .modal-header h2{overflow-wrap:anywhere}
+ .app .checkbox{min-height:44px;cursor:pointer}
+}
+@media screen and (max-width:1000px){
+ .app input:not([type=checkbox]),.app select,.app textarea{font-size:16px;min-height:44px;max-width:100%}
+ .app .primary,.app .secondary{white-space:normal;line-height:1.6}
+}

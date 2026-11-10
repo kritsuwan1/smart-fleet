@@ -31,6 +31,7 @@ preview:local เรียก npm run build แล้วเปิด Node HTTP s
 | บทบาท | Username | Password | สถานะเริ่มต้น |
 | --- | --- | --- | --- |
 | Admin | admin | PreviewAdmin123! | จัดการข้อมูลจำลอง |
+| Employee เดิมจำลอง | preview.employee | PreviewEmployee123! | legacy Employee ที่ผูก preview-person-3; ใช้ทดสอบสิทธิ์เดิม |
 | User ที่ผูก Person แล้ว | preview.user | PreviewUser123! | preview-person-1; ใช้รถและดูประวัติของตนได้ |
 | User ที่ยังไม่ผูก | preview.unlinked | PreviewUser123! | เข้าบัญชีได้ทันที แต่ใช้รถ/ดูประวัติไม่ได้จน Admin ผูก Person |
 
@@ -41,7 +42,7 @@ preview:local เรียก npm run build แล้วเปิด Node HTTP s
 1. เปิด Admin ใน Edge ปกติ และ User ใน InPrivate เพื่อไม่ให้ session cookie แทนกัน เปิด URL127.0.0.1เดียวกัน ไม่ใช้ workers.dev, LAN IP หรือ localhost แทน
 2. ลอง preview.user: มีรถ LOCAL-001/LOCAL-002 และประวัติจำลองหนึ่งรายการ รายงาน/ประวัติจำกัด ownerUserId เช่นเดิม รถคันแรกมีเลขไมล์ล่าสุด110 เลือกบันทึกใช้รถ กรอกโครงการ/สถานที่จำลอง ตรวจวันเวลาและเลขไมล์ แล้วคืนรถด้วยเลขไมล์ที่ไม่น้อยกว่าตอนออก ดู original success confirmation และประวัติ
 3. ลอง signup ผู้ใช้ใหม่ด้วยชื่อ/username ทดสอบไม่ซ้ำและ password อย่างน้อย6ตัว ระบบสร้าง Person ใหม่เฉพาะบัญชีแบบ atomic แล้วเข้า Dashboard พร้อมข้อความ “สมัครสำเร็จ พร้อมใช้งานรถ” ใช้รถได้ทันที ไม่มีคิวอนุมัติหรือขั้นตอนผูก Person โดย Admin
-4. แยกทดสอบบัญชีเก่า preview.unlinked: ยังใช้รถไม่ได้ ฝั่ง Admin เข้า จัดการข้อมูล → บัญชีพนักงาน → ยืนยันและผูก Person ID เลือก exact account และ preview-person-2 หรือ preview-person-3 ที่ยังไม่ถูกใช้ ตรวจ ID และ checkbox ยืนยัน กดผูก จากนั้นบัญชีเก่า login ใหม่ Session เดิมถูกยกเลิก ไม่จับคู่ชื่อ ไม่ auto-convert และไม่รองรับ relink ขั้นตอนนี้ไม่จำเป็นสำหรับ signup ใหม่ v1.2
+4. แยกทดสอบบัญชีเก่า preview.unlinked: ยังใช้รถไม่ได้ ฝั่ง Admin เข้า จัดการข้อมูล → บัญชีพนักงาน → ยืนยันและผูก Person ID เลือก exact account และ preview-person-2 ที่ยังไม่ถูกใช้ (preview-person-3 ใช้กับ Employee จำลอง) ตรวจ ID และ checkbox ยืนยัน กดผูก จากนั้นบัญชีเก่า login ใหม่ Session เดิมถูกยกเลิก ไม่จับคู่ชื่อ ไม่ auto-convert และไม่รองรับ relink ขั้นตอนนี้ไม่จำเป็นสำหรับ signup ใหม่ v1.2
 5. ทดสอบ User สมัครใหม่รับ–คืนรถ ดูประวัติและรายงานส่วนบุคคล กด PDF/Excel ได้ Logout/login แล้วยังมีสิทธิ์เดิม ฟอนต์ PDF ฝังใน Worker ไม่เรียกบริการภายนอก User ได้เฉพาะแจ้งเตือนบำรุงรักษาเบื้องต้น ไม่มีค่าใช้จ่ายหรือประวัติผู้อื่น
 6. ฝั่ง Admin เปิด dashboard บำรุงรักษารถยนต์ มีแผนเปลี่ยนน้ำมันเครื่องจำลองให้ลองแก้แผน/บันทึกงานที่เสร็จ/ดูประวัติ ใช้เฉพาะตัวเลข วันที่ รายละเอียด และค่าใช้จ่ายจำลอง เลขไมล์/วันต้องผ่าน validation เดิม
 7. ทดสอบ network timeout/reload ได้โดยใช้ขั้นตอนเดิมของ SESSION_PERSON_RECOVERY; ถ้าเกิด unknown ต้องหยุดส่งซ้ำและใช้ read-only check ที่มีอยู่ ห้ามล้าง marker, สร้าง ID ใหม่ หรือใช้ preview เป็น manual unlock/reset ไม่มี Admin ledger search เพิ่มในงานนี้

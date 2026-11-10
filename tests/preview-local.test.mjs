@@ -27,6 +27,8 @@ try{
  await check(async()=>{assert.equal(user.status,303);const v=await fleet(userCookie);assert.equal(v.scope,'verified-user');assert.equal(v.state.trips.length,1);assert.equal(v.state.trips[0].ownerUserId,'preview-user');assert.equal(v.state.maintenanceHistory,undefined);});
  const unlinked=await login(PREVIEW_ACCOUNTS.unlinked.username,PREVIEW_ACCOUNTS.unlinked.password);
  await check(async()=>assert.equal((await fleet(unlinked.headers['set-cookie'][0].split(';')[0])).scope,'self-account'));
+ const employee=await login(PREVIEW_ACCOUNTS.employee.username,PREVIEW_ACCOUNTS.employee.password);
+ await check(async()=>{assert.equal(employee.status,303);const v=await fleet(employee.headers['set-cookie'][0].split(';')[0]);assert.equal(v.user.role,'employee');assert.equal(v.user.driverId,'preview-person-3');assert.equal(v.state.trips.length,0);assert.equal(v.state.maintenanceHistory,undefined);});
  await check(async()=>{await assert.rejects(()=>globalThis.fetch('https://network.invalid'),/LOCAL_PREVIEW_NETWORK_DISABLED/);assert.throws(()=>new WebSocket('wss://network.invalid'),/LOCAL_PREVIEW_NETWORK_DISABLED/);});
  await check(async()=>{second=await startPreview({port:0});assert.equal((await send(second,'/api/fleet',{headers:{cookie}})).status,401);const r=await send(second,'/login',{method:'POST',headers:{origin:second.url,'content-type':'application/x-www-form-urlencoded'},body:new URLSearchParams(PREVIEW_ACCOUNTS.admin).toString()}),c=r.headers['set-cookie'][0].split(';')[0],v=JSON.parse((await send(second,'/api/fleet',{headers:{cookie:c}})).text);assert.equal(v.state.projects.includes('โครงการจำลองภาษาไทย'),false);});
  await check(async()=>{await assert.rejects(()=>startPreview({port:Number(new URL(app.url).port)}),e=>e.code==='EADDRINUSE');});

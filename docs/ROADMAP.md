@@ -1,5 +1,9 @@
 # SmartFleet Development Roadmap
 
+## Task 3D.5 — Mobile UI & real-browser acceptance
+
+Development UI fixes and Windows Edge acceptance360/390/768/1280 completed;31 suites/66 provisioning cases retained. Primary actions unchanged; scoped tap/focus/table/copy fixes, no new navigation architecture or business/data/authorization/backup change. [Evidence and matrix](MOBILE_ACCEPTANCE_3D5.md); exact Linux evidence in PROGRESS. Next owner local review and separately scoped physical-device/screen-reader checks; physical phones/Safari NOT_RUN. Operator/Live/Initialize/Deployment DEFERRED, Task6 SKIPPED.
+
 ## Task 3D.4D-7 — Automatic Person provisioning v1.2
 
 Development implementation and offline/browser acceptance completed; exact Linux commit evidence in PROGRESS. New signup gets own operations immediately, existing unlinked stays restricted. Backup/compatibility fail-closed; no real migration. Next: owner review of v1.2 lifecycle and duplicate-display-name UX using synthetic preview; actual resource/auth/Initialize/Deploy remain DEFERRED. Task3D.4D-6 SKIPPED; Task3D.5 separate. [Details](AUTOMATIC_PERSON_V1_2.md).

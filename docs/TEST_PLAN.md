@@ -1,5 +1,9 @@
 # SmartFleet - Test Plan
 
+## Task 3D.5 — actual mobile acceptance
+
+New optional mobile-acceptance-browser.mjs runs real synthetic Worker + Edge157 across360/390/768/1280;4 scenarios covering signup/login/own checkout/receipt/return/history/PDF, legacy Employee operations, Admin account/car/Maintenance,44px geometry, keyboard/focus/409/slow-double/lost response read-only reload/401 and no-mutation own history.800×390 landscape dialog/report checked. External requests blocked/zero attempts/page errors. Prior recovery browser3 widths PASS timeout/network/multi-tab. New preview Employee fixture/regression grows local-preview28→29; all31 npm suites/66 provisioning PASS Windows24.22.1. PDF downloaded/rendered/visually reviewed with Thai fonts. [Matrix, baseline failures, screenshots, commands and limitations](MOBILE_ACCEPTANCE_3D5.md). Linux exact commit evidence follows publication; physical devices/Safari/screen-reader actual sessions NOT_RUN.
+
 ## Task 3D.4D-7 exact-commit evidence
 
 Implementation ae6274d906c813907f040b9b5cad07561e26c49b: [Linux CI42843399967](https://github.com/kritsuwan1/smart-fleet/actions/runs/42843399967)/job129924308153 PASS Ubuntu24.04.5/Node24.22.2, npm ci/build/typecheck/all31 suites including provisioning66/signup60/guards172/legacy-link81/recovery63. Windows24.22.1 workspace and Edge157 desktop/360/390 plus signup/password and historical link/recovery browser checks PASS. Owner clone D:\\smart-fleet initially hit EPERM esbuild.exe; after owner Ctrl+C, ci/build/typecheck/all31 and Edge390 PASS there. Operational verification remains NOT_VERIFIED.

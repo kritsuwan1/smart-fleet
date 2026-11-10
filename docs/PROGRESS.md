@@ -1,5 +1,13 @@
 # SmartFleet - Development Progress
 
+## 2026-11-10 — Task 3D.5 Mobile UI acceptance (DEV/OFFLINE)
+
+Verified remote/D clone HEAD131dc9f includes ae6274d; clean isolated Development clone preserves unrelated preview-error.txt. Read AGENTS/all required docs and measured actual Edge157 baseline360/390/768/1280 before edits: refresh36px/18px high, logout16×25, close40×40;409 focus stolen. Fixed44px screen controls/header spacing, error-focus lifecycle with unchanged busy/unknown Escape lock, keyboard table region and stale v1.2 Admin copy. No business/auth/data/backup/ledger changes.
+
+Windows Node24.22.1 ci/build/typecheck/all31 suites PASS (auto-provisioning66 preserved, local-preview29); new actual Worker/Edge4-viewport acceptance PASS User/Admin/legacy Employee plus800×390 landscape, long Thai, keyboard,409/double/slow/lost response/reload, owner-only history/PDF, Admin car/account/Maintenance and401. Existing recovery browser1280/360/390 PASS15s timeout/network/two-tab/no-resubmit. Actual downloaded PDF/Thai font/visual Poppler review PASS on synthetic data. External attempts/page errors0. Details/evidence/reproduction/limits: [MOBILE_ACCEPTANCE_3D5.md](MOBILE_ACCEPTANCE_3D5.md). Linux exact commit pending until push.
+
+Physical Android/iOS/Safari/assistive-tech sessions NOT_RUN; no full accessibility/production certification. Task6 SKIPPED; Operator/Live/Initialize/Deployment DEFERRED. No real DB/cloud/credentials/deploy/merge/R2/Cron/public URL changes.
+
 ## Task 3D.4D-7 — exact implementation Linux CI evidence
 
 - Implementation ae6274d906c813907f040b9b5cad07561e26c49b, parent536c13a518d7353c68d05eef8fde46f4ba8591e6, pushed only dev/smartfleet-batch-1. Reviewed32 changed paths; six runtime files, package test command/checker, targeted synthetic/browser tests and12 docs. No lockfile/dependency/config/schema/Worker route changes. Existing PROGRESS history preserved from remote baseline.
