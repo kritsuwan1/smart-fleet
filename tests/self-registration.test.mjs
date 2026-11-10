@@ -112,10 +112,13 @@ try{
  await test(async()=>{
   const d=setup(),root=await d.root(),current=await(await d.req('/api/backup.sql',{},root)).text();
   const guard=`SELECT CASE WHEN NOT EXISTS(SELECT 1 FROM fleet_store WHERE id='main' AND NOT (${A.operationalAccountsSql('payload')})) THEN 1 ELSE json('ACCOUNT_FORMAT_UNSUPPORTED') END`;
-  const old=(await readFile('tests/fixtures/account-guard-v1.txt','utf8')).trimEnd();assert.ok(current.includes(guard));
+  assert.ok(current.includes(guard));
   const dir=await mkdtemp(join(tmpdir(),'fleet-v1-backup-')),path=join(dir,'synthetic.sql');
-  try{await writeFile(path,current.replace(guard,old));let r=spawnSync(process.execPath,['--experimental-sqlite','scripts/check-sql-backup.mjs',path],{encoding:'utf8'});assert.equal(r.status,0,r.stderr);
+  try{for(const fixture of ['account-guard-v1.txt','account-guard-v3.txt'])for(const eol of ['\n','\r\n']){
+   const old=(await readFile('tests/fixtures/'+fixture,'utf8')).trimEnd().replace(/\r\n/g,'\n').replace(/\n/g,eol);
+   await writeFile(path,current.replace(guard,old));let r=spawnSync(process.execPath,['--experimental-sqlite','scripts/check-sql-backup.mjs',path],{encoding:'utf8'});assert.equal(r.status,0,fixture+' '+JSON.stringify(eol)+': '+r.stderr);
    await writeFile(path,current.replace(guard,old.replace('THEN 1','THEN 0')));r=spawnSync(process.execPath,['--experimental-sqlite','scripts/check-sql-backup.mjs',path],{encoding:'utf8'});assert.equal(r.status,1);
+   }
   }finally{await unlink(path).catch(()=>{});await rmdir(dir);}
  });
  const mutations=[a=>a.role='admin',a=>a.role='staff',a=>a.role='employee',a=>a.active=true,a=>a.driverId='p1',a=>a.personId='p1',a=>a.status='PENDING',a=>a.status='APPROVED',a=>a.accountFormatVersion=2,a=>delete a.accountKind];

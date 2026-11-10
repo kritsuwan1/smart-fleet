@@ -25,7 +25,10 @@ try{
  // Also reject extra SQL tokens hidden after an otherwise-valid prefix.
  for(const line of statements){
   const withoutStrings=line.replace(/'(?:(?:'')|[^'])*'/g,"''");
-  if(!(line===guard||createHash('sha256').update(line).digest('hex')===legacyGuardSha||createHash('sha256').update(line).digest('hex')===selfUserGuardSha||allowed.some(pattern=>pattern.test(line)))||/\b(ATTACH|DETACH|PRAGMA|DROP|ALTER|load_extension|readfile|writefile)\b/i.test(withoutStrings))throw Error('รองรับเฉพาะ SQL สำรองที่สร้างจาก Smart Fleet');
+  // Frozen guards contain only inter-token line breaks. Canonicalize CRLF for
+  // Windows checkouts; keep exact pins, current policy and payload SQL unchanged.
+  const frozenHash=createHash('sha256').update(line.replace(/\r\n/g,'\n')).digest('hex');
+  if(!(line===guard||frozenHash===legacyGuardSha||frozenHash===selfUserGuardSha||allowed.some(pattern=>pattern.test(line)))||/\b(ATTACH|DETACH|PRAGMA|DROP|ALTER|load_extension|readfile|writefile)\b/i.test(withoutStrings))throw Error('รองรับเฉพาะ SQL สำรองที่สร้างจาก Smart Fleet');
  }
  const environment=/^-- environment: demo$/m.test(text)?'demo':'production';
  if(environment==='demo'){db.exec("CREATE TABLE fleet_store(id TEXT PRIMARY KEY NOT NULL,payload TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 0); INSERT INTO fleet_store VALUES('environment','demo',0)");}

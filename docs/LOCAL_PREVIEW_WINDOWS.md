@@ -66,6 +66,7 @@ preview:local เรียก npm run build แล้วเปิด Node HTTP s
 | User ไม่ปรากฏในรายชื่อ Admin | รีเฟรชข้อมูล Admin หลัง signup ก่อนเปิดหน้า Person linking |
 | 429 ลอง login มากเกินไป | rate limit เดิมยังทำงาน รอรอบเวลาที่แอประบุ ไม่ปิด security guard |
 | ราคาอัตโนมัติ/QR/import/backup unavailable | เป็นข้อจำกัด preview ที่ตั้งใจไว้ ไม่ใช้ production config เพื่อแก้ |
+| SQL checker test ไม่ผ่านเพราะ fixture CRLF | ใช้ commit ล่าสุดที่เทียบ frozen guard แบบ LF/CRLF แล้ว ไม่แก้ hash/guard หรือลดข้อจำกัด SQL เอง |
 | Unknown/blocked recovery | หยุดส่งซ้ำ อ่าน SESSION_PERSON_RECOVERY/MANUAL_UNKNOWN_OPERATION_RECOVERY ไม่มี unlock/reset ใน preview |
 
 ## การตรวจสอบ
