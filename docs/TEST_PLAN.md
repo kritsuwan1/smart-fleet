@@ -1,5 +1,9 @@
 # SmartFleet - Test Plan
 
+## Task 3D.4D-7 exact-commit evidence
+
+Implementation ae6274d906c813907f040b9b5cad07561e26c49b: [Linux CI42843399967](https://github.com/kritsuwan1/smart-fleet/actions/runs/42843399967)/job129924308153 PASS Ubuntu24.04.5/Node24.22.2, npm ci/build/typecheck/all31 suites including provisioning66/signup60/guards172/legacy-link81/recovery63. Windows24.22.1 workspace and Edge157 desktop/360/390 plus signup/password and historical link/recovery browser checks PASS. Owner clone D:\\smart-fleet initially hit EPERM esbuild.exe; after owner Ctrl+C, ci/build/typecheck/all31 and Edge390 PASS there. Operational verification remains NOT_VERIFIED.
+
 ## Task 3D.4D-7 — v1.2 regression acceptance
 
 Windows Node24 npm ci/build/typecheck/all31 suites PASS; automatic-person66 + actual signup60 + operational172 + historical Person-link81/recovery63 cases. Test no-orphan CAS/conflict/collision/capacity, scoped immediate operations, old-state preservation, JS–SQL provenance rejection, rehashed invalid backup pre-mutation refusal and isolated SQL/automatic restore. Edge157 actual local Worker1280/360/390 PASS signup/Thai confirmation/logout/login/checkout/return/own report PDF/basic reminders and historical Admin linking. Separate browser security/password and historical link/recovery checks; exact Linux evidence in PROGRESS. [Reproduction/limits](AUTOMATIC_PERSON_V1_2.md). Cloud/real account/auth/restore NOT_VERIFIED; no operational approval.
