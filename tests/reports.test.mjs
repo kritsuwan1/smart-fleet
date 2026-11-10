@@ -47,7 +47,8 @@ r=await post(admin,'fuelPrice',{operation:'save',month:'2026-09',value:39.84,sou
 r=await req('/api/fuel-price?month=2026-09',{},admin);assert.equal(r.status,200);assert.equal((await r.json()).price.value,39.84);
 assert.equal((await req('/api/fuel-price?month=2026-13',{},admin)).status,400);
 r=await req('/report-font-bold.ttf',{},admin);assert.equal(r.headers.get('Content-Type'),'font/ttf');assert.equal((await r.arrayBuffer()).byteLength,89804);
-r=await req('/register',{method:'POST',body:new URLSearchParams({name:'Test Employee',username:'reportstaff',password:'abc123'})});const staff=r.headers.get('set-cookie').split(';')[0];a=await (await req('/api/fleet',{},admin)).json();
+await (await import('./fixtures/legacy-account.mjs')).seedLegacyAccount(sql,{name:'Test Employee',username:'reportstaff',password:'abc123'});
+r=await req('/login',{method:'POST',body:new URLSearchParams({username:'reportstaff',password:'abc123'})});const staff=r.headers.get('set-cookie').split(';')[0];a=await (await req('/api/fleet',{},admin)).json();
 assert.equal((await post(staff,'fuelPrice',{operation:'remove',month:'2026-09'},a.version)).status,403);
 const backup=await (await req('/api/backup.sql',{},admin)).text();const restored=new DatabaseSync(':memory:');restored.exec(backup);assert.equal(JSON.parse(restored.prepare("SELECT payload FROM fleet_store WHERE id='main'").get().payload).fuelPrices[0].value,39.84);
 r=await post(admin,'fuelPrice',{operation:'remove',month:'2026-09'},a.version);assert.equal(r.status,200);assert.equal((await r.json()).state.fuelPrices.length,0);

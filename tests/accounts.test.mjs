@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {DatabaseSync} from 'node:sqlite';
 import worker from '../output/worker.js';
+import {seedLegacyAccount} from './fixtures/legacy-account.mjs';
 const sql=new DatabaseSync(':memory:');sql.exec('CREATE TABLE fleet_store(id TEXT PRIMARY KEY NOT NULL,payload TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 0)');
 const env={APP_PASSWORD:crypto.randomUUID(),DB:{prepare(text){let args=[];const stmt=sql.prepare(text);return {bind(...a){args=a;return this;},async first(){return stmt.get(...args)||null;},async run(){const r=stmt.run(...args);return {meta:{changes:Number(r.changes)}};}};}}};
 const origin='https://smart-fleet.kritsuwan1.workers.dev';
@@ -13,13 +14,16 @@ assert.match(await (await request('/?car=car-1&action=start')).text(),/name="use
 assert.match(await (await request('/register')).text(),/กรอกเพียง 3 ช่อง/);
 assert.equal((await request('/register',form({name:'Test One',username:'testone',password:'12345'}))).status,400);
 assert.equal((await request('/register',form({name:'Test Admin',username:'admin',password:'a12345'}))).status,400);
-let r=await request('/register',form({name:'Employee One',username:'employee.one',password:'one123',role:'admin',returnTo:'/?car=car-1&action=start'}));
+// Existing Employee behavior is exercised with explicit historical fixtures, not new registration.
+await seedLegacyAccount(sql,{name:'Employee One',username:'employee.one',password:'one123'});
+let r=await request('/login',form({username:'employee.one',password:'one123',returnTo:'/?car=car-1&action=start'}));
 assert.equal(r.status,303);assert.equal(r.headers.get('location'),'/?car=car-1&action=start');assert.match(r.headers.get('set-cookie'),/Secure; HttpOnly; SameSite=Lax/);const e1=cookieFrom(r);
 let d1=await get(e1);assert.equal(d1.user.role,'employee');assert.equal(d1.user.username,'employee.one');assert.equal(d1.state.people.length,1);assert.equal(d1.state.accounts,undefined);assert.equal(d1.state.sessionKey,undefined);assert.deepEqual(d1.members,[]);
 let raw=JSON.parse(sql.prepare("SELECT payload FROM fleet_store WHERE id='main'").get().payload);assert.equal(raw.accounts.length,1);assert.notEqual(raw.accounts[0].passwordHash,'one123');assert.ok(!JSON.stringify(raw).includes('one123'));assert.equal(raw.accounts[0].passwordHash.length,64);
 assert.equal((await request('/register',form({name:'Other Name',username:'EMPLOYEE.ONE',password:'new123'}))).status,400);
 assert.equal((await request('/register',form({name:'Employee One',username:'another',password:'new123'}))).status,400);
-r=await request('/register',form({name:'Employee Two',username:'employee.two',password:'two123',returnTo:'https://evil.example'}));assert.equal(r.status,303);assert.equal(r.headers.get('location'),'/');const e2=cookieFrom(r);
+await seedLegacyAccount(sql,{name:'Employee Two',username:'employee.two',password:'two123'});
+r=await request('/login',form({username:'employee.two',password:'two123',returnTo:'https://evil.example'}));assert.equal(r.status,303);assert.equal(r.headers.get('location'),'/');const e2=cookieFrom(r);
 r=await request('/login',form({username:'admin',password:env.APP_PASSWORD}));assert.equal(r.status,303);const admin=cookieFrom(r);let a=await get(admin);assert.equal(a.user.role,'admin');assert.equal(a.members.length,2);assert.equal(a.state.accounts,undefined);assert.equal(a.state.sessionKey,undefined);assert.ok(!JSON.stringify(a).includes('passwordHash'));
 assert.equal((await request('/api/backup.sql',{},e1)).status,403);assert.equal((await request('/api/backup.json',{},e1)).status,403);assert.equal((await request('/qr',{},e1)).status,403);assert.equal((await request('/qr',{},admin)).status,200);assert.match(await (await request('/qr-car.svg')).text(),/<svg/);
 assert.equal((await post(e1,'person',{name:'forbidden'},a.version)).status,403);
@@ -45,7 +49,7 @@ assert.equal((await request('/login',form({username:'employee.two',password:'fre
 // A six-character admin password remains supported; the signing key is random and not derived from that weak secret alone.
 env.APP_PASSWORD='abc123';r=await request('/login',form({username:'admin',password:'abc123'}));assert.equal(r.status,303);const admin6=cookieFrom(r);assert.equal((await request('/api/fleet',{},admin)).status,401);
 const backup=await (await request('/api/backup.sql',{},admin6)).text();const restored=new DatabaseSync(':memory:');restored.exec(backup);const restoredState=JSON.parse(restored.prepare("SELECT payload FROM fleet_store WHERE id='main'").get().payload);assert.equal(restoredState.accounts.length,2);assert.equal(restoredState.trips.length,1);assert.ok(restoredState.accounts.every(a=>a.salt&&a.passwordHash));
-console.log('PASS accounts: 6-character registration and admin login, automatic employee-only role, secure hashes, duplicate names/usernames, safe QR return, no credentials in API, employee data isolation, driver spoof rejection, ownership and closed-record permissions, occupied car status, current odometer, admin-only management/import/backup, disable/enable/session invalidation, admin password reset, own password change, complete SQL account backup');
+console.log('PASS accounts: 6-character registration and admin login, explicit legacy employee fixtures (new registration covered separately), secure hashes, duplicate names/usernames, safe QR return, no credentials in API, employee data isolation, driver spoof rejection, ownership and closed-record permissions, occupied car status, current odometer, admin-only management/import/backup, disable/enable/session invalidation, admin password reset, own password change, complete SQL account backup');
 // Concurrent sign-ups remain atomic and cannot overwrite fleet data or create duplicate usernames.
 const concurrent=await Promise.all([
  request('/register',form({name:'Concurrent A',username:'concurrent.a',password:'con123'}),'','192.0.2.10'),

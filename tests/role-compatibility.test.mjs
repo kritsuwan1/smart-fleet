@@ -232,5 +232,5 @@ try {
     }
     assert.equal(network,0);
   });
-  console.log('PASS offline role compatibility: '+cases+' cases, policy1.0/versioned quarantine, strict legacy preservation/refusal, pending exact-Person review, DTO minimization, backup pre-write refusal, SQLite atomic migration/rollback/CAS and actual replay guards; operational roles/signup unchanged');
+  console.log('PASS offline role compatibility: '+cases+' cases, policy1.0/versioned quarantine, strict legacy preservation/refusal, pending exact-Person review, DTO minimization, backup pre-write refusal, SQLite atomic migration/rollback/CAS and actual replay guards; historical v1.0 offline model retained; v1.1 application tested separately');
 } finally { globalThis.fetch=previousFetch; for(const s of stores) C.closeSynthetic(s); }

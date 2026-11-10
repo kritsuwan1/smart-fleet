@@ -8,7 +8,7 @@ import {manualFuel,validMonth} from './fuel';
 import {planImport} from './import-plan';
 import {changeMaintenance} from './maintenance';
 import {validOdometer} from './validation';
-import {AccountCompatibilityError} from './account-compatibility';
+import {AccountCompatibilityError,isSelfAccount,accountEnabled} from './account-compatibility';
 export function fleetApi(env:any,user:User){
 const json=(v:unknown,status=200)=>Response.json(v,{status,headers:{'Cache-Control':'no-store'}});
 async function GET(){try{const {state,version,payloadBytes}=await readState(env);return json(viewForUser(state,version,user,payloadBytes));}catch(e){return fail(e);}}
@@ -20,6 +20,7 @@ async function POST(req:Request){try{
  const scopedEnv=b.action==='trip'&&b.tripOperation!==undefined&&typeof env.DB?.withSession==='function'?{...env,DB:env.DB.withSession('first-primary')}:env;
  const {state:s,version}=await readState(scopedEnv);
  const actorUser=currentUser(user,s),actor=actorUser.name;
+ if(actorUser.role==='user')return json({error:'PERSON_LINK_REQUIRED',code:'PERSON_LINK_REQUIRED'},403);
  if(actorUser.role!=='admin'&&b.action!=='trip')return json({error:'FORBIDDEN'},403);
  const operation=b.action==='trip'&&b.tripOperation!==undefined?await tripOperationContext(b.tripOperation,b.data,actorUser,s):null;
  function result(record:OperationRecord,state:Fleet,currentVersion:number,replayed:boolean){
@@ -62,8 +63,9 @@ async function POST(req:Request){try{
   else throw Error('คำสั่งราคาอ้างอิงไม่ถูกต้อง');
  }else if(b.action==='account'){
   const member=s.accounts?.find(a=>a.id===b.data?.id);if(!member)throw Error('ไม่พบบัญชีพนักงาน');
-  before={id:member.id,username:member.username,name:member.name,active:member.active,role:member.role||'employee'};
+  before={id:member.id,username:member.username,name:member.name,active:accountEnabled(member),role:member.role||'employee',...(isSelfAccount(member)?{status:member.status}:{})};
   if(b.data.operation==='edit'){
+   if(isSelfAccount(member))throw Error('บัญชี User ยังไม่เปิดการเปลี่ยนสิทธิ์หรือผูก Person ในรุ่นนี้');
    const name=cleanName(String(b.data.name||'')),username=String(b.data.username||'').trim().toLowerCase(),role=b.data.role;
    if(name.length<2||name.length>100)throw Error('กรุณากรอกชื่อ–นามสกุล 2–100 ตัวอักษร');
    if(!/^[a-z0-9][a-z0-9._-]{2,29}$/.test(username)||['admin','administrator','root'].includes(username))throw Error('ชื่อผู้ใช้ต้องมี 3–30 ตัว ใช้ a-z ตัวเลข จุด ขีดกลาง หรือขีดล่าง และห้ามใช้ admin');
@@ -76,12 +78,12 @@ async function POST(req:Request){try{
    action='แก้ไขบัญชีและสิทธิ์';
   }else if(b.data.operation==='active'){
    if(member.id===actorUser.id&&!b.data.active)throw Error('ไม่สามารถปิดบัญชีของตนเองได้');
-   if(typeof b.data.active!=='boolean')throw Error('สถานะบัญชีไม่ถูกต้อง');member.active=b.data.active;member.passwordVersion++;action=member.active?'เปิดบัญชีพนักงาน':'ปิดบัญชีพนักงาน';
+   if(typeof b.data.active!=='boolean')throw Error('สถานะบัญชีไม่ถูกต้อง');if(isSelfAccount(member)){if(member.status==='REJECTED'&&b.data.active)throw Error('ต้องตรวจสอบบัญชีที่ถูกปฏิเสธก่อนเปิดใช้งาน');member.status=b.data.active?'ACTIVE':'DISABLED';}else member.active=b.data.active;member.passwordVersion++;action=accountEnabled(member)?'เปิดบัญชีพนักงาน':'ปิดบัญชีพนักงาน';
   }else if(b.data.operation==='resetPassword'){
    const password=String(b.data.password||'');if(!passwordValid(password))throw Error('รหัสผ่านต้องมี 6–128 ตัวอักษร');
    member.salt=hex(crypto.getRandomValues(new Uint8Array(16)).buffer);member.passwordHash=await hashPassword(password,member.salt);member.passwordVersion++;action='ตั้งรหัสผ่านใหม่ให้พนักงาน';
   }else throw Error('คำสั่งจัดการบัญชีไม่ถูกต้อง');
-  after={id:member.id,username:member.username,name:member.name,active:member.active,role:member.role||'employee'};
+  after={id:member.id,username:member.username,name:member.name,active:accountEnabled(member),role:member.role||'employee',...(isSelfAccount(member)?{status:member.status}:{})};
  }else if(b.action==='car'){
   const d=b.data;const old=s.cars.find(c=>c.id===d.id);before=old||null;
   const car={id:old?.id||crypto.randomUUID(),plate:String(d.plate||'').trim(),province:String(d.province||'').trim(),model:String(d.model||'').trim(),initialOdo:Number(d.initialOdo),active:d.active!==false};

@@ -1,6 +1,6 @@
 # SmartFleet Development Roadmap
 
-Updated 2026-11-05 (Asia/Bangkok), Task 3D.4D-1 operational compatibility gates; Policy v1.0 approved and3D.4C prerequisite verified. Repository kritsuwan1/smart-fleet; active branch dev/smartfleet-batch-1. App label/baseline v3.8.5; targets remain v3.8.6 through v4.2.0, without assigning a deployment/release date.
+Updated 2026-11-10 (Asia/Bangkok), Task3D.4D-2 immediate self-account; Policy v1.1 supersedes Q6 only. Repository kritsuwan1/smart-fleet; active branch dev/smartfleet-batch-1. App label/baseline v3.8.5; targets remain v3.8.6 through v4.2.0, without assigning a deployment/release date.
 
 ## Owner direction and boundaries
 
@@ -19,13 +19,13 @@ Source-backed feature status, confirmed D1/D2 defects and risks: [FEATURE_AUDIT_
 | No-R2 backup/recovery | PARTIAL | D1 chronology/calendar/odo defect fixed in 3D.2; broader recovery UX/provenance; durable cloud automation deferred |
 | Dashboard / monthly PDF | PARTIAL | Trends/ranges/maintenance costs, browser-rendered PDF acceptance |
 | Mobile | PARTIAL | Whole critical-flow browser matrix and failure UX |
-| Admin / Staff / User | PARTIAL | Operational Admin/Employee only; Policy1.0 approved and isolated compatibility tested; new roles/signup NOT_ENABLED |
+| Admin / Staff / User | PARTIAL | Legacy Admin/Employee preserved; v1.1 unlinked User self-account implemented; Person operations/Staff/new-User promotion disabled |
 | Multiple vehicles | PARTIAL | Car bounds fixed in 3D.2; dynamic per-car QR, wider isolation/concurrency acceptance |
 | Success confirmation | PARTIAL | Original receipt replay/uncertainty handling implemented; cross-reload and other-action requirements |
 
 ## Prioritized application batches
 
-Task 3D.1 documentation commit acbc8bf is verified closed. Task 3D.2 is implemented and tested offline; see [DATA_VALIDATION_CONSISTENCY.md](DATA_VALIDATION_CONSISTENCY.md), with exact-commit Linux evidence in PROGRESS after publication. Task 3D.3 is implemented offline with45 new scenarios and a local360px browser test; see [TRANSACTION_RELIABILITY.md](TRANSACTION_RELIABILITY.md). Policy v1.0 is approved; 3D.4C compatibility spike is complete and 3D.4D-1 exclusion gates are implemented offline;3D.4D-2 authoritative model review is proposed. Each task retains the Development/security/no-cloud boundaries.
+Task 3D.1 documentation commit acbc8bf is verified closed. Task 3D.2 is implemented and tested offline; see [DATA_VALIDATION_CONSISTENCY.md](DATA_VALIDATION_CONSISTENCY.md), with exact-commit Linux evidence in PROGRESS after publication. Task 3D.3 is implemented offline with45 new scenarios and a local360px browser test; see [TRANSACTION_RELIABILITY.md](TRANSACTION_RELIABILITY.md). Policy v1.0 is approved; 3D.4C compatibility spike is complete and 3D.4D-1 gates and3D.4D-2 self-account are implemented offline;3D.4D-3 verified Person linking is proposed under v1.1. Each task retains the Development/security/no-cloud boundaries.
 
 ### 3D.2 — Data-validation consistency (IMPLEMENTED offline; CI evidence in PROGRESS)
 
@@ -45,15 +45,13 @@ Goal: harden the existing flows rather than invent another transaction/security 
 
 Acceptance: one client request for same-task double submit; server CAS/ownership still enforced; no stale error overwrites a later confirmed success; failed/unknown save never claims success. Known successful start/return receipt retains exact car/trip ID/time/odometer. Separate tabs remain safe under existing version guards. Owner's 3D.3 instruction now authorizes stable server operation IDs: implemented as separate rows in existing fleet_store, atomically with main CAS, without SQL/Fleet migration. Compatibility/rollback plan is in TRANSACTION_RELIABILITY.md. Legacy unkeyed clients retain CAS-only behavior; same-ID guarantees require retained records/current epoch and in-page pending intent. No transparent rollback with unresolved keyed requests.
 
-### 3D.4 — Policy v1.0; operational exclusion gates implemented offline
+### 3D.4 — Policy v1.1 immediate account access; verified Person gate retained
 
-Policy v1.0 and unchanged legacy Employee contract are recorded in [ROLE_ONBOARDING_CONTRACT.md](ROLE_ONBOARDING_CONTRACT.md). Task3D.4C completed quarantined compatibility/migration tests. Task3D.4D-1 now integrates strict legacy/version/role/status guards in actual storage/auth/session/API/backup readers, with sanitized refusal before mutations, JS/SQL target parity, unchanged CAS/idempotency and valid legacy restore/session rotation. Details: [ROLE_ONBOARDING_COMPATIBILITY.md](ROLE_ONBOARDING_COMPATIBILITY.md).
+Owner changed only Q6: User self-registration is immediately active without Admin approval or a PENDING queue. Q1–Q5/Q7–Q10 unchanged. Task3D.4D-2 implements safe unlinked personal-account scope, no name/username/employee-ID Person claim or creation, strict v3 reader/credential guards, schema2 backups and legacy deny fuse. Existing Admin/Employee data/permissions remain unchanged. Details: [SELF_REGISTRATION_V1_1.md](SELF_REGISTRATION_V1_1.md).
 
-Future v2/null-Person metadata is explicitly described but every lifecycle/Staff/User state remains operationally refused. Legacy signup and permissions remain unchanged. No account conversion/schema migration/new route/approval UI is activated. Old deployed binaries remain unchanged; mixed-reader exclusion still needs an approved future cutover.
+Implemented: signup/login/own profile/password/logout; exact minimal DTO, no Fleet/history/reports/operations or privileged self-assignment; Admin disable/reset protections. Full Person linkage/new-User promotion/Staff workflow remains disabled.27 suites incl60 new/170 guards/102 historical model/45 transaction/163 value-validation and actual Edge360px PASS; exact Linux in PROGRESS.
 
-Next proposed **3D.4D-2**: separately review/authorize authoritative persisted lifecycle+credential model/root adapter and versioned backup/restore/mixed-reader plan with synthetic tests, then integrate capabilities/DTOs/session/approval UI in reviewed increments under v1.0. Do not admit future data before those gates or infer a real identity check from a Mock boolean.
-
-Acceptance for3D.4D-1: Windows/Linux Node24 ci/build/typecheck/all26 suites, including164 new runtime guard cases,102 compatibility/45 transaction/163 value-validation cases; exact Linux evidence in PROGRESS. No partial mutation on refusal, valid legacy IDs/history/ledger preserved, no unknown-role fallback, no same-ID duplicate return/odo write. Full new-role route/UI RC-01–12 not implemented/activated; future rollback cannot silently downgrade lifecycle data. Operator/Live/Initialize/Deployment remain DEFERRED.
+Next proposed **3D.4D-3**: separately scoped Admin-only exact-Person verification/link and then verified-User checkout/own return (no amendment), own history/personal reports/basic reminders with immutable historical ownership/session/idempotency checks. No new signup approval queue. Old writer isolation, backup/rollback compatibility and no-loss state preservation remain mandatory; no real migration/deploy is authorized.
 
 ### 3D.5 — Mobile and local browser acceptance (P1/P2)
 
@@ -99,6 +97,6 @@ These are planning themes, not new release tags or proof of deployed versions. E
 
 ## Common acceptance and regression policy
 
-Read AGENTS/source/docs, work only on Development, use synthetic memory/SQLite/local Worker tests and preserve complete snapshots on refusal. For executable changes run build/typecheck/all available suites on Windows and Linux Node 24; for docs-only changes use appropriate local checks and accurately reference the unchanged Linux baseline. No lint script exists. Current baseline: 26 suites PASS on Windows including164 runtime guard cases,102 offline compatibility cases,45 transaction scenarios and163 consistency cases; exact new Linux results are recorded in PROGRESS. The previously reproduced D1/D2 defects now reject invalid data before relevant writes. Other audit risks remain; an offline suite PASS does not close operational gates.
+Read AGENTS/source/docs, work only on Development, use synthetic memory/SQLite/local Worker tests and preserve complete snapshots on refusal. For executable changes run build/typecheck/all available suites on Windows and Linux Node 24; for docs-only changes use appropriate local checks and accurately reference the unchanged Linux baseline. No lint script exists. Current baseline: 27 suites PASS on Windows including60 self-registration/170 guard/102 historical compatibility/45 transaction/163 consistency cases; exact new Linux results are recorded in PROGRESS. The previously reproduced D1/D2 defects now reject invalid data before relevant writes. Other audit risks remain; an offline suite PASS does not close operational gates.
 
 Keep tests for trip continuity/overlap/ownership, backups/checksums/session rotation, maintenance rollback/manual overrides, role filters, imports and multi-car isolation. Do not delete or weaken security tests/allowlists because their live operation is deferred. Record results/limits in PROGRESS; owner approvals remain necessary for business/shape/schema changes or operational actions outside a task's scope.

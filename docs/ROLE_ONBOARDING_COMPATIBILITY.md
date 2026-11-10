@@ -1,5 +1,17 @@
 # Task 3D.4C — Offline role/onboarding compatibility spike
 
+## Task 3D.4D-2 / Policy v1.1 (current)
+
+[SELF_REGISTRATION_V1_1.md](SELF_REGISTRATION_V1_1.md) supersedes the historical v1.0 pending-signup assumptions below. Owner changed Q6 only: immediate self-account User access without Admin approval; Q7 verified Person linkage and Q1–Q5/Q8–Q10 remain.
+
+Operational readers now accept exactly self-user version3 records with role User, driverId=null, status ACTIVE/DISABLED/REJECTED and raw legacy active=false. State marker3 distinguishes the mixed snapshot. The legacy deny fuse prevents pre-gate user→Employee login; effective status controls the new self account. No Person association, operation/history/report/Fleet access or new-User privileged-role upgrade is admitted. DTO has only own User/actor/scope/personLinked=false. Own password/reset/revocation protections retained; no queue or automatic Employee conversion.
+
+Backups remain schema1 for legacy; version3 requires schema2 JSON with integrity checks. Shared source/target SQL guards and automatic restore support the exact mixed format; invalid/downgraded artifacts refuse. Legacy credential fields/IDs/history/Maintenance/ledger are preserved. Old3D.4D-1 rejects marker3; old writers must not share these snapshots. No deployed binary/old SQL file is retroactively fixed; no lossy downgrade or real migration authorized.
+
+Windows Node24.22.1 ci/build/typecheck27 suites PASS:60 self-registration/170 strict guard/102 historical spike/45 transaction/163 value-validation cases. Edge157.0.4341.42 local360px actual signup/login/signed-cookie/logout/password change/restricted API PASS; physical mobile/TLS/cloud NOT_VERIFIED. Exact new Linux CI follows in PROGRESS. Staff and Admin-verified linking/new-User role changes remain disabled; next proposed3D.4D-3 exact-Person verification and scoped activation. Operator/Live/Initialize/Deployment DEFERRED.
+
+## Historical 3D.4D-1 / v1.0 reader contract
+
 ## Task 3D.4D-1 — actual Development runtime gates (current)
 
 2026-11-05, approved Policy v1.0. **Guard implementation verified offline; Staff/User/lifecycle activation NOT_ENABLED. Operator/Live/Initialize/Deployment DEFERRED.** The 3D.4C sections below are historical spike evidence, superseded here only for the implemented reader boundaries.

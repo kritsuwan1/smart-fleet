@@ -1,5 +1,12 @@
 # SmartFleet - System Architecture
 
+## Task 3D.4D-2 — Policy v1.1 immediate self-account (current)
+
+Q6 now permits immediate User account access without Admin approval; Q7 verified Person linkage remains mandatory for vehicle/history scope. [SELF_REGISTRATION_V1_1.md](SELF_REGISTRATION_V1_1.md) documents additive self-user v3 records, legacy active=false deny fuse/current ACTIVE status, strict mixed-state readers, schema2 JSON backups and unchanged legacy credentials/permissions/history.
+
+Actual registration no longer matches or creates Person; it creates only User and audit under CAS, issues the existing secure session and redirects to /. GET Fleet for User is a minimal self-account DTO with no Fleet/version/history; all Person writes and other protected data denied. React reuses profile/password UI at360px. No new routes, identity proof/link/approval queue, Staff/new-User promotion activation or automatic Employee conversion. Shared backup/SQL guards preserve exact new state/restore rotation; old writers must not share it.27 suites/60 new cases and local Edge360px PASS; exact CI in PROGRESS. Operator/Live/Initialize/Deployment DEFERRED.
+
+
 ## Task 3D.4D-1 — actual runtime account/version exclusion gates
 
 Current shared src/account-compatibility.ts strictly recognizes legacy Admin/Employee (including absent role) and refuses unknown roles, lifecycle fields and unsupported state/account versions. The separate future-v2 metadata validator grants no operational access. Storage guards before lazy writes and rechecks missing-key CAS; writeState/keyed writes guard current/candidate snapshots. Auth/session/root/Fleet projection, API and backup sources share the gate; generated trusted SQL target guards and the offline checker retain strict restore/environment/rotation rules. See [ROLE_ONBOARDING_COMPATIBILITY.md](ROLE_ONBOARDING_COMPATIBILITY.md).

@@ -1,6 +1,7 @@
 import {IS_DEMO,IS_STAGING,ENVIRONMENT,SITE_URL,ENVIRONMENT_HTML} from './environment';
 import {createBackup} from './backup';
 import {parseOperationalState,operationalAccountsSql} from './account-compatibility';
+import {accountEnabled} from './account-compatibility';
 import {BACKUP_CRON,runAutomaticBackup,automaticBackupStatus} from './automatic-backup';
 import {APP_VERSION} from './version';
 import {systemStatus} from './system-status';
@@ -9,7 +10,7 @@ import reportRegular from '../assets/sarabun-regular.base64.txt';
 import reportBold from '../assets/sarabun-bold.base64.txt';
 import {fleetApi} from './api';
 import {readState,writeState} from './storage';
-import {checkLogin,sessionUser,issueSession,clearSession,registerEmployee,rateLimit,safeReturn,verifyPassword,hashPassword,passwordValid,hex} from './auth';
+import {checkLogin,sessionUser,issueSession,clearSession,registerSelfUser,rateLimit,safeReturn,verifyPassword,hashPassword,passwordValid,hex} from './auth';
 import {screen,login,registerPage,escape,passwordChangedPage} from './auth-pages';
 import appJS from './client.bundle.txt';
 import appCSS from './app.css';
@@ -67,12 +68,12 @@ export default {async scheduled(event:{cron:string;scheduledTime:number},env:any
    const form=new URLSearchParams(text),returnTo=safeReturn(form.get('returnTo')||'/'),username=form.get('username')||'',password=form.get('password')||'';
    if(!await rateLimit(req,env,state,path==='/register'?'register':'login',path==='/register'?20:10))return html(login('ลองทำรายการหลายครั้ง กรุณารอ 15 นาทีแล้วลองใหม่',returnTo),429);
    if(path==='/register'){
-    try{const result=await registerEmployee(env,{name:form.get('name')||'',username,password});return redirect(returnTo,await issueSession(env,result.state,result.user));}
+    try{const result=await registerSelfUser(env,{name:form.get('name')||'',username,password});return redirect('/',await issueSession(env,result.state,result.user));}
     catch(e){return html(registerPage(e instanceof Error?e.message:'สมัครไม่สำเร็จ',returnTo,form.get('name')||'',username),400);}
    }
    if(!password||password.length>256)return html(login('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',returnTo),401);
    const user=await checkLogin(env,username,password,state);if(!user)return html(login('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง หรือบัญชีถูกปิดใช้งาน',returnTo),401);
-   return redirect(returnTo,await issueSession(env,state,user));
+   return redirect(user.role==='user'?'/':returnTo,await issueSession(env,state,user));
   }
   const user=await sessionUser(req,env,state);
   const returnTo=safeReturn(url.searchParams.get('returnTo')||url.pathname+url.search);
@@ -87,6 +88,7 @@ export default {async scheduled(event:{cron:string;scheduledTime:number},env:any
    if(req.method==='POST')return redirect('/login',clearSession());
    return html(screen('<p>ต้องการออกจากระบบหรือไม่?</p><form action="/logout" method="post"><button>ออกจากระบบ</button></form><p><a href="/">กลับหน้าหลัก</a></p>'));
   }
+  if(user.role==='user'&&!['/','/api/fleet','/api/profile/password','/app.js','/app.css'].includes(path))return json({error:'FORBIDDEN'},403);
   if(path==='/api/system-status'&&req.method==='GET'){const latest=await readState(env),access=await sessionUser(req,env,latest.state);if(!access)return json({error:'UNAUTHORIZED'},401);if(access.role!=='admin')return json({error:'FORBIDDEN'},403);return json(systemStatus(latest.state,latest.payloadBytes));}
   if(path==='/api/backup-status'&&req.method==='GET'){
    if(user.role!=='admin')return json({error:'FORBIDDEN'},403);
@@ -103,11 +105,11 @@ export default {async scheduled(event:{cron:string;scheduledTime:number},env:any
    if(user.id==='admin')return json({error:'บัญชีหลักเปลี่ยนรหัสผ่านได้ที่ Cloudflare Secret APP_PASSWORD'},400);
    if(!await rateLimit(req,env,state,'change-password',10))return json({error:'ลองหลายครั้ง กรุณารอ 15 นาที'},429);
    const body=await req.text();if(body.length>4096)return json({error:'ข้อมูลใหญ่เกินกำหนด'},413);
-   const input=JSON.parse(body),member=state.accounts?.find(a=>a.id===user.id&&a.active&&a.passwordVersion===user.passwordVersion);
+   const input=JSON.parse(body),member=state.accounts?.find(a=>a.id===user.id&&accountEnabled(a)&&a.passwordVersion===user.passwordVersion);
    if(!member||typeof input.currentPassword!=='string'||input.currentPassword.length>128||!await verifyPassword(input.currentPassword,member))return json({error:'รหัสผ่านปัจจุบันไม่ถูกต้อง'},400);
    if(!passwordValid(input.password))return json({error:'รหัสผ่านใหม่ต้องมี 6–128 ตัวอักษร'},400);
    // Read latest state before writing so fleet and account updates are never overwritten.
-   const latest=await readState(env),account=latest.state.accounts?.find(a=>a.id===user.id&&a.active&&a.passwordVersion===user.passwordVersion);if(!account)return json({error:'UNAUTHORIZED'},401);
+   const latest=await readState(env),account=latest.state.accounts?.find(a=>a.id===user.id&&accountEnabled(a)&&a.passwordVersion===user.passwordVersion);if(!account)return json({error:'UNAUTHORIZED'},401);
    account.salt=hex(crypto.getRandomValues(new Uint8Array(16)).buffer);account.passwordHash=await hashPassword(input.password,account.salt);account.passwordVersion++;
    latest.state.audit.unshift({id:crypto.randomUUID(),time:new Date().toISOString(),actor:user.name,action:'เปลี่ยนรหัสผ่านของตนเอง',before:null,after:{id:user.id,username:user.username}});
    if(!await writeState(env,latest.state,latest.version))return json({error:'ข้อมูลเปลี่ยนแปลง กรุณาลองอีกครั้ง'},409);

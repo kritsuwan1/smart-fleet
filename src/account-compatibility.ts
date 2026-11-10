@@ -7,7 +7,14 @@ const object=(v:unknown):v is Record<string,any>=>v!==null&&typeof v==='object'&
 const text=(v:unknown):v is string=>typeof v==='string'&&v.length>0;
 const integer=(v:unknown)=>typeof v==='number'&&Number.isSafeInteger(v)&&v>=0;
 export const stateSecurityFields=['format','formatVersion','authorizationVersion','accountSchemaVersion','policyVersion','security'] as const;
-export const accountSecurityFields=['format','formatVersion','accountFormatVersion','authorizationVersion','accountSchemaVersion','policyVersion','status','approvalStatus','personId','accessRevision','origin','revision'] as const;
+export const accountSecurityFields=['format','formatVersion','accountFormatVersion','accountKind','authorizationVersion','accountSchemaVersion','policyVersion','status','approvalStatus','personId','personLink','identityVerification','accessRevision','origin','revision'] as const;
+export const isSelfAccount=(a:any):boolean=>object(a)&&a.accountFormatVersion===3&&a.accountKind==='self-user';
+export const accountEnabled=(a:any):boolean=>isSelfAccount(a)?a.status==='ACTIVE':a.active===true;
+const selfForbidden=accountSecurityFields.filter(k=>!['accountFormatVersion','accountKind','status'].includes(k));
+function assertSelfAccount(a:any):void{
+ if(!isSelfAccount(a)||a.role!=='user'||a.active!==false||a.driverId!==null||!['ACTIVE','DISABLED','REJECTED'].includes(a.status)||selfForbidden.some(k=>k in a))return fail();
+}
+export function accountRole(a:any):'admin'|'employee'|'user'{if(isSelfAccount(a)){assertSelfAccount(a);return 'user';}return legacyAccountRole(a);}
 
 // This is an explicit legacy adapter, not a default for unrecognized roles.
 export function legacyAccountRole(account:unknown):'admin'|'employee'{
@@ -30,7 +37,7 @@ export function inspectFutureAccountMetadata(value:unknown):FutureAccountMetadat
 // Read-only: never repairs/normalizes/converts accounts, Fleet or historical records.
 export function assertOperationalAccounts(value:unknown):void{
  if(!object(value)||stateSecurityFields.some(k=>k in value)||
-  'accountFormatVersion' in value&&value.accountFormatVersion!==1||
+  'accountFormatVersion' in value&&![1,3].includes(value.accountFormatVersion)||
   !['cars','people','trips','audit','projects'].every(k=>Array.isArray(value[k]))||typeof value.imported!=='boolean')return fail();
  if('sessionKey' in value&&!text(value.sessionKey))return fail();
  if(value.accounts!==undefined&&!Array.isArray(value.accounts))return fail();
@@ -38,10 +45,10 @@ export function assertOperationalAccounts(value:unknown):void{
  for(const p of value.people){if(!object(p)||!text(p.id))return fail();people.add(p.id);}
  const ids=new Set<string>(),names=new Set<string>();
  for(const a of value.accounts||[]){
-  legacyAccountRole(a);
+  const self=isSelfAccount(a);if(self){assertSelfAccount(a);if(value.accountFormatVersion!==3)return fail();}else legacyAccountRole(a);
   if(!text(a.id)||a.id==='admin'||ids.has(a.id)||!text(a.username)||a.username==='admin'||names.has(a.username)||
    !text(a.name)||typeof a.active!=='boolean'||!integer(a.passwordVersion)||!text(a.salt)||!text(a.passwordHash)||
-   !text(a.driverId)||!people.has(a.driverId))return fail();
+   !self&&(!text(a.driverId)||!people.has(a.driverId)))return fail();
   ids.add(a.id);names.add(a.username);
  }
 }
@@ -58,20 +65,25 @@ export function operationalAccountsSql(payload:string):string{
  const absent=(keys:readonly string[],source:string)=>keys.map(k=>`json_type(${source},'$.${k}') IS NULL`).join(' AND ');
  const nonempty=(key:string)=>`json_type(a.value,'$.${key}')='text' AND length(json_extract(a.value,'$.${key}'))>0`;
  const allowed=`json_valid(${payload}) AND json_type(${payload})='object' AND ${absent(stateSecurityFields,payload)}
- AND (${type('accountFormatVersion')} IS NULL OR (${type('accountFormatVersion')} IN ('integer','real') AND ${field('accountFormatVersion')}=1))
+ AND (${type('accountFormatVersion')} IS NULL OR (${type('accountFormatVersion')} IN ('integer','real') AND ${field('accountFormatVersion')} IN (1,3)))
  AND ${['cars','people','trips','audit','projects'].map(k=>`${type(k)}='array'`).join(' AND ')}
  AND ${type('imported')} IN ('true','false') AND (${type('accounts')} IS NULL OR ${type('accounts')}='array')
  AND (${type('sessionKey')} IS NULL OR (${type('sessionKey')}='text' AND length(${field('sessionKey')})>0))
  AND NOT EXISTS(SELECT 1 FROM json_each(${payload},'$.people') p WHERE p.type<>'object' OR COALESCE(json_type(p.value,'$.id'),'missing')<>'text' OR length(json_extract(p.value,'$.id'))=0)
  AND NOT EXISTS(SELECT 1 FROM json_each(${payload},'$.accounts') a WHERE a.type<>'object' OR NOT COALESCE((
- ${absent(accountSecurityFields,'a.value')}
- AND (json_type(a.value,'$.role') IS NULL OR (json_type(a.value,'$.role')='text' AND json_extract(a.value,'$.role') IN ('admin','employee')))
- AND ${['id','username','name','salt','passwordHash','driverId'].map(nonempty).join(' AND ')}
+ ${['id','username','name','salt','passwordHash'].map(nonempty).join(' AND ')}
  AND json_extract(a.value,'$.id')<>'admin' AND json_extract(a.value,'$.username')<>'admin'
  AND json_type(a.value,'$.active') IN ('true','false')
  AND json_type(a.value,'$.passwordVersion') IN ('integer','real') AND json_extract(a.value,'$.passwordVersion') BETWEEN 0 AND 9007199254740991
  AND CAST(json_extract(a.value,'$.passwordVersion') AS INTEGER)=json_extract(a.value,'$.passwordVersion')
- AND EXISTS(SELECT 1 FROM json_each(${payload},'$.people') p WHERE json_extract(p.value,'$.id')=json_extract(a.value,'$.driverId'))
+ AND (( ${absent(accountSecurityFields,'a.value')}
+ AND (json_type(a.value,'$.role') IS NULL OR (json_type(a.value,'$.role')='text' AND json_extract(a.value,'$.role') IN ('admin','employee')))
+ AND ${nonempty('driverId')} AND EXISTS(SELECT 1 FROM json_each(${payload},'$.people') p WHERE json_extract(p.value,'$.id')=json_extract(a.value,'$.driverId')))
+ OR (${field('accountFormatVersion')}=3 AND json_type(a.value,'$.accountFormatVersion') IN ('integer','real') AND json_extract(a.value,'$.accountFormatVersion')=3
+ AND json_type(a.value,'$.accountKind')='text' AND json_extract(a.value,'$.accountKind')='self-user'
+ AND json_type(a.value,'$.role')='text' AND json_extract(a.value,'$.role')='user' AND json_type(a.value,'$.active')='false'
+ AND json_type(a.value,'$.driverId')='null' AND json_type(a.value,'$.status')='text' AND json_extract(a.value,'$.status') IN ('ACTIVE','DISABLED','REJECTED')
+ AND ${absent(selfForbidden,'a.value')}))
  ),0))
  AND NOT EXISTS(SELECT 1 FROM json_each(${payload},'$.accounts') a GROUP BY json_extract(a.value,'$.id') HAVING COUNT(*)>1)
  AND NOT EXISTS(SELECT 1 FROM json_each(${payload},'$.accounts') a GROUP BY json_extract(a.value,'$.username') HAVING COUNT(*)>1)`;

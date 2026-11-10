@@ -1,5 +1,16 @@
 # SmartFleet - Test Plan
 
+## Task 3D.4D-2 — Policy v1.1 immediate User account regression
+
+New self-registration.test.mjs60 cases, npm test27 suites: immediate account activation without queue/approval, six-to128-character passwords/hashes/session cookies/rate limits, caller privilege/Person spoof denial, duplicate/concurrent identities, zero Person creation/matching/history takeover, exact self-only DTO, forbidden routes/writes before ledger lookup, own-password/session revocation/disabled/rejected handling, Admin restrictions, v3 JS/SQL parity/schema2 backup/restore, legacy data and same-ID replay.
+
+Accounts/roles/reports suites now seed historical Employee fixtures explicitly in memory; no new production legacy-registration path. Existing legacy scope/role/owner/backup/security assertions retained. Staging registration now expects restricted User. Guard suite170 cases (expanded metadata denials); historical v1.0 model102, transaction45 and validation163 retained. Policy v1.1 supersedes only Q6; no new pending queue or implicit verification is tested as implemented.
+
+Optional self-registration-browser.mjs actual Edge157.0.4341.42 at360px PASS: real Worker forms and signed Secure cookie on loopback, signup/immediate own-profile, wrong/correct login/logout/password change, no horizontal overflow/page errors, denied Fleet operations/backup and preserved old data. External requests blocked/no identity injection; no real TLS/mobile-Safari/cloud claim. Command/setup and limitations in [SELF_REGISTRATION_V1_1.md](SELF_REGISTRATION_V1_1.md).
+
+Windows Node24.22.1 ci/build/typecheck/all27 suites PASS. Exact new implementation Linux evidence follows in PROGRESS; no prior-run substitution. New User remains unlinked, all Person vehicle/history/report scope denied; verified-link and new User promotion workflow NOT_IMPLEMENTED. Operator/Live/Initialize/Deployment DEFERRED.
+
+
 ## 2026-11-10 — Task 3D.4D-1 revalidation
 
 Repeated request rechecked against existing implementation cdd610e and docs e78e0a4; all99 executable/script/test/package/build inputs identical to remote. Fresh Windows x64 Nodev24.22.1 npm ci/build/typecheck/all26 offline suites PASS, including164 operational compatibility/102 spike compatibility/45 transaction/163 value-validation cases. No source/test changes or new role/signup activation.

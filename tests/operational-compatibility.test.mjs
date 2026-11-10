@@ -157,5 +157,5 @@ try{
   const valid=base(),before=clone(valid);A.assertOperationalAccounts(valid);assert.deepEqual(valid,before); // rollback allowed only while data stays recognized legacy
  });
  await test(()=>{assert.equal(network,0);assert.ok(errors.every(e=>!e.includes(password)&&!e.includes('PRIVATE')&&!e.includes(hash)));});
- console.log('PASS operational compatibility gates: '+cases+' cases, actual storage/auth/session/API/backup guards, JS-SQL refusal parity, future metadata disabled, strict legacy adapter, no-mutation snapshots/CAS, restore rotation and same-ID concurrent/lost-response replay; synthetic offline only');
+ console.log('PASS operational compatibility gates: '+cases+' cases, actual storage/auth/session/API/backup guards, JS-SQL refusal parity, unsupported future metadata denied; self-user v3 tested separately, strict legacy adapter, no-mutation snapshots/CAS, restore rotation and same-ID concurrent/lost-response replay; synthetic offline only');
 }finally{globalThis.fetch=savedFetch;console.error=savedError;for(const sql of databases)sql.close();}

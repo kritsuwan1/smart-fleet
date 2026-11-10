@@ -35,7 +35,7 @@ export default function Home(){
  const [tripUncertain,setTripUncertain]=useState(false);
  async function load(){const ticket=++reads.current;try{const r=await fetch('/api/fleet',{cache:'no-store'}),d:any=await r.json();if(ticket!==reads.current)return;if(r.status===401){window.location.assign('/login?returnTo='+encodeURIComponent(window.location.pathname+window.location.search));return;}if(!r.ok)throw Error(d.error);setData(d);setLoadError('');}catch(e){if(ticket===reads.current)setLoadError((e as Error).message);}}
  useEffect(()=>{load();},[]);
- useEffect(()=>{if(!data||qrOpened)return;const params=new URLSearchParams(window.location.search),id=params.get('car');if(!id||params.get('action')!=='start')return;setQrOpened(true);const own=data.state.trips.find(t=>t.carId===id&&!t.end);if(own)open('trip',{trip:{...own,end:now(),odoEnd:''},mode:'return'});else begin(id);},[data,qrOpened]);
+ useEffect(()=>{if(!data||data.user.role==='user'||qrOpened)return;const params=new URLSearchParams(window.location.search),id=params.get('car');if(!id||params.get('action')!=='start')return;setQrOpened(true);const own=data.state.trips.find(t=>t.carId===id&&!t.end);if(own)open('trip',{trip:{...own,end:now(),odoEnd:''},mode:'return'});else begin(id);},[data,qrOpened]);
  useEffect(()=>{if(toast){const t=setTimeout(()=>setToast(''),4000);return()=>clearTimeout(t);}},[toast]);
  useEffect(()=>{if(!modal)return;const old=document.body.style.overflow;const previous=document.activeElement as HTMLElement;document.body.style.overflow='hidden';const dialog=document.querySelector('[role=dialog]') as HTMLElement;const focusable=()=>Array.from(dialog?.querySelectorAll<HTMLElement>('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),a[href]')||[]);focusable()[0]?.focus();const f=(e:KeyboardEvent)=>{if(e.key==='Escape'&&!busy&&!tripUncertain)setModal(null);if(e.key==='Tab'){const list=focusable(),first=list[0],last=list[list.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}}};document.addEventListener('keydown',f);return()=>{document.body.style.overflow=old;document.removeEventListener('keydown',f);if(previous?.isConnected)previous.focus();};},[modal,busy,tripUncertain]);
  async function save(action:string,value:any){
@@ -70,6 +70,7 @@ export default function Home(){
  }
  function navigate(id:string){setTab(id);setMobile(false);}
  if(!data)return <div className="loading"><div className="brandmark"><CarFront/></div><h2>Smart Fleet</h2><p>{loadError||'กำลังเชื่อมต่อข้อมูลการใช้รถ…'}</p>{loadError&&<><button className="primary" onClick={load}>ลองใหม่</button>{loadError==='UNAUTHORIZED'&&<a href="/login" target="_top">เข้าสู่ระบบผู้ดูแล</a>}</>}</div>;
+ if(data.user.role==='user')return <main style={{maxWidth:880,margin:'0 auto',padding:16}}><div className="alert info" role="status"><strong>บัญชี User พร้อมใช้งาน</strong><p>สมัครและเข้าบัญชีได้ทันที ไม่ต้องรออนุมัติ</p><p>ยังไม่มี Person ที่ยืนยันแล้ว จึงยังใช้รถหรือดูประวัติการเดินทางไม่ได้ รุ่นนี้ยังไม่เปิดการผูก Person กรุณาติดต่อผู้ดูแล</p></div><ProfilePanel user={data.user}/></main>;
  const s=data.state;
  const isAdmin=data.user.role==='admin';
  const visibleTabs=tabs.filter(t=>isAdmin||t.id!=='settings');

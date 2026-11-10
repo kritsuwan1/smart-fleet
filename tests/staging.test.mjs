@@ -23,7 +23,7 @@ try{
  const result=await(await request('/api/fleet',{},admin)).json();assert.equal(result.user.role,'admin');assert.equal(result.state.cars[0].plate,'SYNTHETIC-001');assert.equal(result.state.trips.length,0);
  const bytes=source.sql.prepare("SELECT payload,version FROM fleet_store WHERE id='main'").get();await staging.scheduled({cron:'0 19 * * *',scheduledTime:Date.now()},env);assert.deepEqual(source.sql.prepare("SELECT payload,version FROM fleet_store WHERE id='main'").get(),bytes);
  const registration=await request('/register',{method:'POST',body:new URLSearchParams({name:'Synthetic staging employee',username:'stage-employee',password:'synthetic-employee-pass'})});assert.equal(registration.status,303);const employee=registration.headers.get('set-cookie').split(';')[0];
- const employeeView=await(await request('/api/fleet',{},employee)).json();assert.equal(employeeView.user.role,'employee');assert.equal(employeeView.state.maintenanceHistory,undefined);
+ const employeeView=await(await request('/api/fleet',{},employee)).json();assert.equal(employeeView.user.role,'user');assert.equal(employeeView.scope,'self-account');assert.equal(employeeView.state,undefined);
  assert.equal((await request('/api/fleet',{method:'POST',body:JSON.stringify({version:employeeView.version,action:'maintenance',data:{operation:'plan',plan:{}}})},employee)).status,403);
  const badEnv={...env,DEMO_DB:occupied.adapter};assert.equal((await staging.fetch(new Request('https://staging.test/api/fleet'),badEnv)).status,503);
  // Even accidental app initialization on empty demo-marked Staging seeds only synthetic cars.
