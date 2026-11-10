@@ -18,7 +18,7 @@ npm run preview:local
 
 ต้องอยู่ branch dev/smartfleet-batch-1 และไม่มีงานที่ยังไม่ได้บันทึกก่อน pull หากไม่ตรงให้หยุดตรวจ branch/งานค้างก่อน ไม่ใช้ reset --hard, merge main หรือเขียนทับไฟล์ค้าง คำสั่ง pull ดึงเฉพาะ Development; ไม่ Deploy
 
-preview:local เรียก npm run build แล้วเปิด Node HTTP server ที่ **http://127.0.0.1:8787** เท่านั้น รอข้อความ LOCAL PREVIEW และ URL ก่อนเปิด Microsoft Edge ใช้ InPrivate เพื่อแยกบัญชี/แท็บทดสอบ ระบบทำงานต่อจนกด **Ctrl+C** ในหน้าต่าง terminal นี้ อย่าปิด terminal หากยังทดสอบอยู่
+preview:local เรียก npm run build แล้วเปิด Node HTTP server ที่ **http://127.0.0.1:8787** เท่านั้น รอข้อความ LOCAL PREVIEW และ URL ก่อนเปิด Microsoft Edge ใช้ InPrivate เพื่อแยกบัญชี/แท็บทดสอบ ระบบทำงานต่อจนกด **Ctrl+C** ในหน้าต่าง terminal นี้ หากถาม Terminate batch job (Y/N)? ให้ตอบ Y อย่าปิด terminal หากยังทดสอบอยู่
 
 ถ้าติดตั้ง dependencies และ build ผ่านแล้ว สามารถเรียก npm run preview:local ได้เลย script จะ build ให้ตรง source อีกครั้ง ไม่มี hot reload; เมื่อแก้ source ให้หยุดแล้วเริ่ม process ใหม่
 
@@ -73,6 +73,6 @@ preview:local เรียก npm run build แล้วเปิด Node HTTP s
 
 คำสั่งมาตรฐาน: npm run build, npm run typecheck, npm test (เพิ่ม preview-local.test.mjs เป็น suite30). Optional local Edge acceptance ใช้ node tests/preview-local-browser.mjs PATH_TO_PLAYWRIGHT PATH_TO_EDGE เมื่อมี Playwright สำหรับ QA อยู่แล้ว ไม่เป็น prerequisite สำหรับผู้ใช้เปิด preview
 
-Local preview guard tests ครอบคลุม loopback/Host/Origin/CSP, synthetic auth/isolation, secure cookie, import/unsafe route refusal, UTF-8, outbound fetch/WebSocket denial และ port conflict. Browser acceptance ใช้ actual Worker/cookies และข้อมูลจำลองเพื่อทดสอบ signup/login/Person linking/checkout/return/own history/PDF/Maintenance ที่ desktop/360/390 ไม่ถือเป็นการปิด Task3D.5 หรือยืนยันอุปกรณ์มือถือจริง ผลจริงอยู่ใน PROGRESS
+Local preview guard tests ครอบคลุม loopback/Host/Origin/CSP, synthetic auth/isolation, secure cookie, import/unsafe route refusal, UTF-8, outbound fetch/WebSocket denial และ port conflict. Browser acceptance ใช้ actual Worker/cookies และข้อมูลจำลองเพื่อทดสอบ signup/login/Person linking/checkout/return/own history/PDF/Maintenance ที่ desktop/360/390 ไม่ถือเป็นการปิด Task3D.5 หรือยืนยันอุปกรณ์มือถือจริง ผลจริงอยู่ใน PROGRESS; Windows D-drive และ Linux ผ่านครบ30 suites หลังแก้ CRLF checker, preview guard28 cases และ local browser acceptance PASS
 
 **Task3D.4D-6 = SKIPPED ตาม owner instruction; Task3D.5 แยกต่างหาก** Operator/Live/Initialize/Deployment ยังคง DEFERRED ไม่มีการเปิด Cloudflare resources, deploy, merge, initialize ฐานจริง, migration หรือเปลี่ยน Production/Demo
