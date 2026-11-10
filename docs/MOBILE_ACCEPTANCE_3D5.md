@@ -47,7 +47,7 @@ npm run preview:local
 
 Use an already installed Playwright module; default optional path .qa/browser/node_modules/playwright. No automatic browser download/provider access. Preview127.0.0.1:8787 only, RAM-only; Ctrl+C before npm ci to release esbuild lock. Added fictional historical Employee login preview.employee / PreviewEmployee123! linked to preview-person-3; preview-person-2 remains available for historical Admin first-link. Existing Admin/User/unlinked fixtures preserved. Never use real credentials or erase an unknown-operation pointer to make a test pass.
 
-Windows npm ci42 added/43 audited/0 vulnerabilities, build/typecheck/all31 suites PASS; exact-commit Linux evidence added to PROGRESS after push. No package/lockfile/CI/schema/auth/API/backup/ledger changes; UI3 files + local fixture/tests/docs/evidence only. Existing real-data and operation guarantees remain covered by unchanged regressions.
+Exact implementation f539e9734099246bd73c055d7d134398c590ddb5: [Linux CI42856049603](https://github.com/kritsuwan1/smart-fleet/actions/runs/42856049603), Ubuntu24.04.5/Node24.22.2, npm ci0 vulnerabilities/build/typecheck/all31 PASS (including66 provisioning/29 preview). Windows24.22.1 workspace and owner D:\\smart-fleet ci42 added/43 audited/0 vulnerabilities/build/typecheck/all31 and full4-viewport Edge acceptance PASS. Existing recovery browser3 widths PASS. Owner-clone esbuild lock resolved by stopping only the identified old preview under owner restart authorization. No package/lockfile/CI/schema/auth/API/backup/ledger changes; UI3 files + local fixture/tests/docs/evidence only. JSON evidence hashes use UTF-8 LF; normalize checkout CRLF when verifying. Operational verification remains DEFERRED, not PASS.
 
 ## Limits and next task
 

@@ -1,5 +1,14 @@
 # SmartFleet - Development Progress
 
+## Task 3D.5 — exact implementation CI and owner-clone verification
+
+- Implementation f539e9734099246bd73c055d7d134398c590ddb5, parent131dc9fdc0c6b9aed99366da96fb2cf0c57bb6e4,20 scoped UI/fixture/test/docs/evidence paths; no backend/auth/validation/storage/backup/ledger/package/lockfile/schema/Worker/config edits. Original documentation history preserved; binary screenshots and JSON measurements archived with hashes.
+- [Linux CI42856049603](https://github.com/kritsuwan1/smart-fleet/actions/runs/42856049603), job129969237144 completed/success for that exact SHA, Ubuntu24.04.5/Linux x64/Node24.22.2,2026-11-10 16:35–16:36 UTC (23:35–23:36 Asia/Bangkok). Decoded runtime SHA and all suite markers inspected. npm ci PASS/0 vulnerabilities; build PASS Demo1060975/Production1059601/Staging1059748 bytes; typecheck/all31 suites PASS including provisioning66, signup60, Person-link81, recovery63 and preview29. Linux CI does not run optional Windows Edge acceptance.
+- Windows workspace Node24.22.1 ci/build/typecheck/all31 PASS. Optional new Edge157.0.4341.42 suite PASS360/390/768/1280, User/Admin/legacy Employee actual operations and800×390 landscape. Existing recovery browser PASS3 widths including15s/network/multi-tab; PDF downloads rendered/visually reviewed. Physical devices/real assistive-tech/cloud NOT_VERIFIED.
+- D:\\smart-fleet fast-forwarded; tracked files clean and original untracked preview-error.txt retained. Initial extra ci hit esbuild lock: confirmed node preview34520 was child of this chat's PowerShell2528, with its own esbuild child; stopped only that verified preview after owner's stop/restart instruction. ci then PASS42 added/43 audited/0 vulnerabilities, build PASS Demo1061261/Production1059887/Staging1060034, typecheck/all31 and full4-viewport Edge suite PASS in owner clone. No unknown process killed or real data touched.
+- Docs-only evidence follow-up leaves executable tree equal to the exact tested implementation; docs workflow paths-ignore means no new CI is claimed for this follow-up. [Full matrix/limits](MOBILE_ACCEPTANCE_3D5.md). Task6 SKIPPED; Operator/Live/Initialize/Deployment DEFERRED. No Cloudflare/API/credential/real D1/Production/Demo deployment/resources/R2/Cron/QR activation, Initialize or Merge.
+
+
 ## 2026-11-10 — Task 3D.5 Mobile UI acceptance (DEV/OFFLINE)
 
 Verified remote/D clone HEAD131dc9f includes ae6274d; clean isolated Development clone preserves unrelated preview-error.txt. Read AGENTS/all required docs and measured actual Edge157 baseline360/390/768/1280 before edits: refresh36px/18px high, logout16×25, close40×40;409 focus stolen. Fixed44px screen controls/header spacing, error-focus lifecycle with unchanged busy/unknown Escape lock, keyboard table region and stale v1.2 Admin copy. No business/auth/data/backup/ledger changes.

@@ -1,5 +1,10 @@
 # SmartFleet - Test Plan
 
+## Task 3D.5 exact-commit results
+
+Implementation f539e9734099246bd73c055d7d134398c590ddb5: [Linux CI42856049603](https://github.com/kritsuwan1/smart-fleet/actions/runs/42856049603)/job129969237144 PASS Ubuntu24.04.5/Node24.22.2, ci/build/typecheck/all31 suites including66 provisioning/29 preview. Windows24.22.1 workspace and owner D:\\smart-fleet same commands/all31 PASS; Edge157 actual synthetic Worker suite PASS360/390/768/1280 plus800×390 dialog/report landscape in both clones. Existing recovery browser3 widths PASS15s timeout/network/multi-tab. Reviewed actual downloaded PDF renders/Thai fonts. Archived matrix/screenshots under evidence/3d5. Native physical Android/iOS/Safari/screen-reader sessions NOT_RUN; Live operational NOT_VERIFIED. Docs-only follow-up does not alter tested executable inputs.
+
+
 ## Task 3D.5 — actual mobile acceptance
 
 New optional mobile-acceptance-browser.mjs runs real synthetic Worker + Edge157 across360/390/768/1280;4 scenarios covering signup/login/own checkout/receipt/return/history/PDF, legacy Employee operations, Admin account/car/Maintenance,44px geometry, keyboard/focus/409/slow-double/lost response read-only reload/401 and no-mutation own history.800×390 landscape dialog/report checked. External requests blocked/zero attempts/page errors. Prior recovery browser3 widths PASS timeout/network/multi-tab. New preview Employee fixture/regression grows local-preview28→29; all31 npm suites/66 provisioning PASS Windows24.22.1. PDF downloaded/rendered/visually reviewed with Thai fonts. [Matrix, baseline failures, screenshots, commands and limitations](MOBILE_ACCEPTANCE_3D5.md). Linux exact commit evidence follows publication; physical devices/Safari/screen-reader actual sessions NOT_RUN.
