@@ -1,5 +1,21 @@
 # SmartFleet - Development Progress
 
+## 2026-11-11 — PROD-1F rollback review and Development release-config CI
+
+Owner authorized commit/push of scoped PROD-1C configs/docs only; baseline0bc70f097ed86bc5ad5ff020dd6cf8110cbabe53 verified against origin. DB/BACKUP_DB retained, no APP_PASSWORD/vars/routes/compatibility changes; preview-error.txt preserved. Windows24.22.2 build/typecheck/all31 suites PASS including provisioning66/signup60/guards172/link81/recovery63/Preview36. PROD-1E protected offline backup compatibility/integrity/no-mutation PASS; no production payload/private evidence committed.
+
+Actual old version684c38d0-240f-47f8-8bef-3a3f6ae2f2aa mapping/artifact/reader compatibility NOT_VERIFIED: no inherited Cloudflare token or verified artifact; no fallback OAuth/API used. v5 mixed state may be incompatible; matching stale D1 snapshot is not a safe automatic rollback. Documented exact conditional operator steps and forward-fix requirements, with NO rollback/restore/deploy executed. [Rollback plan and CI verification](PROD_1F_ROLLBACK_AND_CI.md).
+
+Linux exact candidate CI is PENDING at commit creation; verify resulting SHA after Development push and record final run evidence in ignored .qa/PROD_1F_FINAL_REPORT.json and task report. Test workflow push trigger is Ubuntu24.04/Node24 and does not invoke manual Deploy workflow. Overall NOT_READY until missing exact-old/fallback and fresh remote settings gates pass. No Cloudflare resource/real DB/secret changes, initialization, R2/Cron activation or merge.
+
+
+## 2026-11-11 — PROD-1C local Production configuration preparation (NO DEPLOY)
+
+Baseline0bc70f097ed86bc5ad5ff020dd6cf8110cbabe53 on dev/smartfleet-batch-1. Added owner-verified BACKUP_DB to wrangler.jsonc and wrangler.production.jsonc; original DB, entrypoints, compatibility date and every other original property unchanged by deep comparison. No APP_PASSWORD/secret/vars/routes/environment/R2/Cron changes, source edits or cloud requests. Deployment workflow uses generated .deploy.config.json from wrangler.production.jsonc, with --keep-vars; prepare-deploy currently verifies only first DB, so full remote settings/BACKUP_DB preservation remains a separate gate. preview-error.txt preserved.
+
+Windows Node24.22.2: installed Wrangler4.116.0 offline parser/normalizer PASS for both configs; build/typecheck/all31 suites PASS (Preview36/provisioning66). No npm ci/dependency change, export, real database reads/writes, initialize, restore, deploy or merge. Documented future protected export plan: D1 Write/Edit required, separate approval and export window needed due to DB lock; no automatic permission escalation. Actual account/settings, backup, Account v5/rollback and new-candidate exact Linux CI NOT_VERIFIED; overall NOT_READY. Changes remain local/uncommitted in this task. [Config, tests, backup and rollback gates](PROD_1C_CONFIGURATION.md).
+
+
 ## 2026-11-11 — PROD-1 fixture repair and release gates
 
 Reproduced date-coupled mobile failure with actual synthetic400 overlap response. Added validated synthetic-only fixture clock, deterministic scenario dates/report month, isolated per-viewport UUID/name checks and7 regression cases (Preview36; all31 suites/provisioning66 retained). Windows24.22.2 ci/build/typecheck/tests and Edge157360/390/768/1280+landscape PASS. Source src/ and production configs unchanged. Exact new Linux SHA evidence follows push.

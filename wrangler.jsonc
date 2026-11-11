@@ -8,6 +8,11 @@
       "binding": "DB",
       "database_name": "smart-fleet-production",
       "database_id": "ebbca318-17d1-4486-b925-d6c787472ba5"
+    },
+    {
+      "binding": "BACKUP_DB",
+      "database_name": "smart-fleet-production-backups",
+      "database_id": "7f598b1a-b263-4305-8f43-409d0dcf08f3"
     }
   ]
 }
