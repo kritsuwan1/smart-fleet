@@ -1,0 +1,58 @@
+{
+  "browser": "157.0.4341.42",
+  "node": "v24.22.2",
+  "scenarioClock": "2026-11-10T00:00:00.000Z",
+  "reportMonth": "2026-11",
+  "results": [
+    {
+      "width": 360,
+      "height": 900,
+      "landscapeHeight": 390,
+      "user": "PASS",
+      "admin": "PASS",
+      "employee": "PASS",
+      "keyboard": "PASS",
+      "conflict": "PASS",
+      "lostReturnReload": "PASS",
+      "pdf": "PASS"
+    },
+    {
+      "width": 390,
+      "height": 900,
+      "landscapeHeight": 390,
+      "user": "PASS",
+      "admin": "PASS",
+      "employee": "PASS",
+      "keyboard": "PASS",
+      "conflict": "PASS",
+      "lostReturnReload": "PASS",
+      "pdf": "PASS"
+    },
+    {
+      "width": 768,
+      "height": 900,
+      "landscapeHeight": 390,
+      "user": "PASS",
+      "admin": "PASS",
+      "employee": "PASS",
+      "keyboard": "PASS",
+      "conflict": "PASS",
+      "lostReturnReload": "PASS",
+      "pdf": "PASS"
+    },
+    {
+      "width": 1280,
+      "height": 900,
+      "landscapeHeight": 390,
+      "user": "PASS",
+      "admin": "PASS",
+      "employee": "PASS",
+      "keyboard": "PASS",
+      "conflict": "PASS",
+      "lostReturnReload": "PASS",
+      "pdf": "PASS"
+    }
+  ],
+  "external": [],
+  "pageErrors": []
+}

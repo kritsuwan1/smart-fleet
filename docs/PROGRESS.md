@@ -1,5 +1,12 @@
 # SmartFleet - Development Progress
 
+## 2026-11-11 — PROD-1 fixture repair and release gates
+
+Reproduced date-coupled mobile failure with actual synthetic400 overlap response. Added validated synthetic-only fixture clock, deterministic scenario dates/report month, isolated per-viewport UUID/name checks and7 regression cases (Preview36; all31 suites/provisioning66 retained). Windows24.22.2 ci/build/typecheck/tests and Edge157360/390/768/1280+landscape PASS. Source src/ and production configs unchanged. Exact new Linux SHA evidence follows push.
+
+whoami PASS with account/user read only; Worker deployment-list and D1-info probes deny resource access. No credential/permission changes, IDs/token/payload output, Production SQL/export/settings/deploy/restore/merge. Both config files still omit BACKUP_DB; no deployable replacement is guessed. Backup/v5-on-real-copy/rollback NOT_VERIFIED, overall NOT_READY. Preserve preview-error.txt. [Full gates and owner Dashboard actions](PROD_1_RELEASE_GATES.md).
+
+
 ## Task 3D.5 — exact implementation CI and owner-clone verification
 
 - Implementation f539e9734099246bd73c055d7d134398c590ddb5, parent131dc9fdc0c6b9aed99366da96fb2cf0c57bb6e4,20 scoped UI/fixture/test/docs/evidence paths; no backend/auth/validation/storage/backup/ledger/package/lockfile/schema/Worker/config edits. Original documentation history preserved; binary screenshots and JSON measurements archived with hashes.

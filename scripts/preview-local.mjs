@@ -8,12 +8,12 @@ export function disablePreviewNetwork(){
  globalThis.fetch=async()=>{throw Error('LOCAL_PREVIEW_NETWORK_DISABLED');};
  globalThis.WebSocket=class{constructor(){throw Error('LOCAL_PREVIEW_NETWORK_DISABLED');}};
 }
-export async function startPreview({port=PREVIEW_PORT}={}){
+export async function startPreview({port=PREVIEW_PORT,fixtureDate}={}){
  if(Number(process.versions.node.split('.')[0])!==24)throw Error('Local Preview ต้องใช้ Node.js 24');
  if(!Number.isInteger(port)||port<0||port>65535)throw Error('Invalid preview port');
  disablePreviewNetwork();
  // No Wrangler config, CLI, credentials, disk database, D1 API, R2 or scheduler.
- const {default:worker}=await import(new URL('../output/worker-staging.js',import.meta.url).href),fixture=await previewFixture();
+ const {default:worker}=await import(new URL('../output/worker-staging.js',import.meta.url).href),fixture=await previewFixture({referenceDate:fixtureDate});
  let origin='';
  const server=createServer({maxHeaderSize:16384},async(req,res)=>{
   const refuse=(status,message)=>{res.writeHead(status,{'Content-Type':'text/plain; charset=utf-8','Cache-Control':'no-store','Content-Security-Policy':PREVIEW_CSP});res.end(message);};

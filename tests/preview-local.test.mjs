@@ -1,11 +1,15 @@
 import assert from 'node:assert/strict';
 import {request} from 'node:http';
 import {startPreview,PREVIEW_HOST,PREVIEW_PORT} from '../scripts/preview-local.mjs';
-import {PREVIEW_ACCOUNTS} from '../scripts/preview-fixture.mjs';
+import {PREVIEW_ACCOUNTS,previewFixture} from '../scripts/preview-fixture.mjs';
+import {SCENARIO_CLOCK,scenarioTime} from './fixtures/preview-scenario.mjs';
 let cases=0;const check=async fn=>{await fn();cases++;};
 function send(app,path='/',{method='GET',body='',headers={},chunks}={}){return new Promise((resolve,reject)=>{const url=new URL(app.url);const r=request({hostname:PREVIEW_HOST,port:url.port,path,method,headers:{host:url.host,...headers}},response=>{const data=[];response.on('data',c=>data.push(c));response.on('end',()=>resolve({status:response.statusCode,headers:response.headers,text:Buffer.concat(data).toString('utf8')}));});r.on('error',reject);for(const chunk of chunks||[body])r.write(chunk);r.end();});}
 const app=await startPreview({port:0});let second;
 try{
+ await check(async()=>{const f=await previewFixture({referenceDate:SCENARIO_CLOCK});try{const row=await f.env.DEMO_DB.prepare("SELECT payload FROM fleet_store WHERE id='main'").first(),s=JSON.parse(row.payload);assert.equal(s.trips[0].start,'2026-11-09T08:00');assert.equal(s.trips[0].end,'2026-11-09T09:00');assert.ok(s.trips[0].end<scenarioTime(8));assert.equal(s.accounts[0].createdAt,SCENARIO_CLOCK);}finally{f.close();}});
+ await check(async()=>{const before=await previewFixture({referenceDate:'2026-11-10T16:59:00.000Z'}),after=await previewFixture({referenceDate:'2026-11-10T17:01:00.000Z'});try{const state=async f=>JSON.parse((await f.env.DEMO_DB.prepare("SELECT payload FROM fleet_store WHERE id='main'").first()).payload);assert.equal((await state(before)).trips[0].start,'2026-11-09T08:00');assert.equal((await state(after)).trips[0].start,scenarioTime(8));}finally{before.close();after.close();}});
+ for(const fixtureDate of ['',{},'2026-11-10','2026-02-30T00:00:00.000Z','2026-11-10T00:00:00+00:00'])await check(async()=>{await assert.rejects(()=>startPreview({port:0,fixtureDate}),/INVALID_SYNTHETIC_REFERENCE_DATE/);});
  assert.equal(PREVIEW_PORT,8787);assert.equal(app.server.address().address,'127.0.0.1');
  await check(async()=>{const r=await send(app);assert.equal(r.status,200);assert.match(r.text,/LOCAL PREVIEW/);assert.match(r.text,/STAGING/);assert.equal(/<link[^>]+href=["']https?:\/\//i.test(r.text),false);assert.equal(r.headers['content-security-policy'].includes('https:'),false);assert.equal(r.headers['cache-control'],'no-store');});
  for(const host of ['evil.invalid','localhost:8787','0.0.0.0:8787'])await check(async()=>assert.equal((await send(app,'/',{headers:{host}})).status,403));

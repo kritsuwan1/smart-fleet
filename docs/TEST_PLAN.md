@@ -1,5 +1,10 @@
 # SmartFleet - Test Plan
 
+## PROD-1 — deterministic browser fixture regression
+
+Freeze only the local synthetic fixture reference date; test Thai-midnight rollover, valid seed preceding scenario, five invalid dates refused, unique new Account/Person/trip IDs across fresh per-viewport SQLite and explicit PDF month selection. Preview cases29→36;31 suites/66 provisioning unchanged. Real auth/time/collision/CAS/idempotency/recovery assertions untouched. Fresh Edge4 widths +800×390 landscape PASS on Nov11; Windows24.22.2 full checks PASS. Exact commit CI follows publication. Production metadata permissions fail; backup/actual-state compatibility/rollback NOT_VERIFIED. [Evidence and blockers](PROD_1_RELEASE_GATES.md).
+
+
 ## Task 3D.5 exact-commit results
 
 Implementation f539e9734099246bd73c055d7d134398c590ddb5: [Linux CI42856049603](https://github.com/kritsuwan1/smart-fleet/actions/runs/42856049603)/job129969237144 PASS Ubuntu24.04.5/Node24.22.2, ci/build/typecheck/all31 suites including66 provisioning/29 preview. Windows24.22.1 workspace and owner D:\\smart-fleet same commands/all31 PASS; Edge157 actual synthetic Worker suite PASS360/390/768/1280 plus800×390 dialog/report landscape in both clones. Existing recovery browser3 widths PASS15s timeout/network/multi-tab. Reviewed actual downloaded PDF renders/Thai fonts. Archived matrix/screenshots under evidence/3d5. Native physical Android/iOS/Safari/screen-reader sessions NOT_RUN; Live operational NOT_VERIFIED. Docs-only follow-up does not alter tested executable inputs.
