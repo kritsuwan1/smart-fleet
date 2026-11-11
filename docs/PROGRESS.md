@@ -1,5 +1,12 @@
 # SmartFleet - Development Progress
 
+## PROD-1I — Seed-free recovery candidate (local tests; scoped Commit/Push authorized)
+
+R1-R4 owner-approved local implementation: compile-time-only recovery build, exact-path bootstrap/seed/static-vehicle/QR exclusions, separate client/server outputs, missing-state/session fail-closed zero mutations, server-side original seed import refusal and disabled static QR/image endpoints. Normal behavior/data extraction preserved by regression. No runtime data redaction/migration, Cloudflare call, real DB use, credential/configuration change, commit/push or deploy. preview-error.txt retained.
+
+Windows24.22.2 normal build/typecheck and31 baseline suites PASS, including provisioning66; actual recovery artifact34 synthetic SQLite cases PASS covering readers/preservation, CAS/concurrency, atomic failure/retry and lost-ack/fresh-module reconciliation. At implementation time source was uncommitted: base65de27dd plus sourceTreeSHA256. Owner subsequently authorized scoped22-file recovery Commit/Push and exact-SHA Linux CI; manifest now records sourceCommit only for clean committed runtime inputs. Final run/SHA/artifact evidence will be recorded in ignored .qa after push. New-source/Linux artifact verification and independent operator/browser content acceptance NOT_VERIFIED. Overall NOT_READY. [Build/runbook](RECOVERY_BUILD.md), [acceptance checklist](RECOVERY_ACCEPTANCE.md). Final candidate/archive hashes and local repeatability evidence are recorded in ignored .qa/PROD_1I_IMPLEMENTATION_REPORT.json after packaging.
+
+
 ## 2026-11-11 — PROD-1F rollback review and Development release-config CI
 
 Owner authorized commit/push of scoped PROD-1C configs/docs only; baseline0bc70f097ed86bc5ad5ff020dd6cf8110cbabe53 verified against origin. DB/BACKUP_DB retained, no APP_PASSWORD/vars/routes/compatibility changes; preview-error.txt preserved. Windows24.22.2 build/typecheck/all31 suites PASS including provisioning66/signup60/guards172/link81/recovery63/Preview36. PROD-1E protected offline backup compatibility/integrity/no-mutation PASS; no production payload/private evidence committed.

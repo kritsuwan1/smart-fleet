@@ -1,0 +1,57 @@
+import {build} from 'esbuild';
+import ts from 'typescript';
+import {readFile,writeFile,mkdir} from 'node:fs/promises';
+import {resolve,dirname,relative} from 'node:path';
+import {execFileSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
+import {fileURLToPath} from 'node:url';
+const root=resolve(dirname(fileURLToPath(import.meta.url)),'..'),out=resolve(root,'output/recovery');
+if(process.versions.node!=='24.22.2')throw Error('RECOVERY_REQUIRES_NODE_24_22_2');
+const digest=b=>createHash('sha256').update(b).digest('hex');
+const head=execFileSync('git',['-c',`safe.directory=${root.replaceAll('\\','/')}`,'rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();
+const sourceStatus=execFileSync('git',['-c',`safe.directory=${root.replaceAll('\\','/')}`,'status','--porcelain','--untracked-files=normal','--','src','assets','scripts','tests','build.mjs','package.json','package-lock.json','tsconfig.json','wrangler.production.jsonc'],{cwd:root,encoding:'utf8'}).trim();
+const sourceCommit=sourceStatus?null:head;
+const branch=execFileSync('git',['-c',`safe.directory=${root.replaceAll('\\','/')}`,'branch','--show-current'],{cwd:root,encoding:'utf8'}).trim();
+if(branch!=='dev/smartfleet-batch-1')throw Error('RECOVERY_DEVELOPMENT_BRANCH_REQUIRED');
+const config=JSON.parse(await readFile(resolve(root,'wrangler.production.jsonc'),'utf8'));
+if(config.name!=='smart-fleet'||JSON.stringify(config.d1_databases)!==JSON.stringify([{binding:'DB',database_name:'smart-fleet-production',database_id:'ebbca318-17d1-4486-b925-d6c787472ba5'},{binding:'BACKUP_DB',database_name:'smart-fleet-production-backups',database_id:'7f598b1a-b263-4305-8f43-409d0dcf08f3'}])||Object.keys(config.vars||{}).length)throw Error('RECOVERY_CONFIG_REVIEW_REQUIRED');
+const normalFiles=['src/client.bundle.txt','output/worker.js','output/worker-production.js','output/worker-demo.js','output/worker-staging.js'];
+const normalBefore=new Map();for(const f of normalFiles){try{normalBefore.set(f,digest(await readFile(resolve(root,f))))}catch{normalBefore.set(f,null)}}
+await mkdir(out,{recursive:true});
+const define={'process.env.NODE_ENV':'"production"','__FLEET_ENV__':'"production"','__FLEET_RECOVERY__':'true'};
+const empty=resolve(root,'src/recovery-empty.ts');
+const protectedAssets=new Set(['smart-fleet-qr.svg','smart-fleet-car-8kn3362-qr.svg','smart-fleet-demo-qr.svg','smart-fleet-demo-car-8kn3362-qr.svg','vehicle-revo-canopy.base64.txt']);
+let clientCode='';
+const isolation={name:'fixed-recovery-isolation',setup(b){
+ b.onResolve({filter:/(?:bootstrap-data|seed|qr-page|static-vehicle-data)$/},args=>{if(args.importer.startsWith(resolve(root,'src'))&&['./bootstrap-data','./seed','./qr-page','./static-vehicle-data'].includes(args.path))return{path:empty};});
+ b.onResolve({filter:/client\.bundle\.txt$/},args=>{if(resolve(dirname(args.importer),args.path)===resolve(root,'src/client.bundle.txt'))return{path:'client',namespace:'recovery-client'};});
+ b.onLoad({filter:/.*/,namespace:'recovery-client'},()=>({contents:'export default '+JSON.stringify(clientCode),loader:'js'}));
+ b.onResolve({filter:/\.(?:svg|txt)$/},args=>{const path=resolve(dirname(args.importer),args.path);if(dirname(path)===resolve(root,'assets')&&protectedAssets.has(path.split(/[\\/]/).at(-1)))return{path:'excluded-static-asset',namespace:'recovery-asset'};});
+ b.onLoad({filter:/.*/,namespace:'recovery-asset'},()=>({contents:'export default "";',loader:'js'}));
+}};
+const common={absWorkingDir:root,bundle:true,minify:true,format:'esm',target:'es2022',define,write:false,metafile:true,plugins:[isolation],legalComments:'eof'};
+const client=await build({...common,entryPoints:['src/client.tsx'],format:'iife',jsx:'automatic'});clientCode=client.outputFiles[0].text;
+const server=await build({...common,entryPoints:['src/worker.ts'],loader:{'.txt':'text','.css':'text','.svg':'text'}});
+const worker=server.outputFiles[0].text;
+const inputs=[...Object.keys(client.metafile.inputs),...Object.keys(server.metafile.inputs)];
+if(inputs.some(p=>/(?:^|\/)src\/(?:bootstrap-data|seed|qr-page|static-vehicle-data)\.ts$/.test(p.replaceAll('\\','/'))||[...protectedAssets].some(a=>p.endsWith(a))))throw Error('RECOVERY_DATA_MODULE_INCLUDED');
+const ast=ts.createSourceFile('bootstrap.ts',await readFile(resolve(root,'src/bootstrap-data.ts'),'utf8'),ts.ScriptTarget.Latest,true);
+let initial;for(const st of ast.statements)if(ts.isVariableStatement(st))for(const d of st.declarationList.declarations)if(d.name.getText(ast)==='initial')initial=d.initializer;
+const prop=(o,k)=>o?.properties?.find(p=>p.name?.getText(ast)===k)?.initializer;
+const literals=[];for(const [field,key] of [['people','name'],['cars','plate']])for(const row of prop(initial,field)?.elements||[]){const v=prop(row,key);if(v&&ts.isStringLiteral(v))literals.push(v.text);}
+const decode=s=>s.replace(/\\u\{([0-9a-f]+)\}|\\u([0-9a-f]{4})/gi,(_,a,b)=>String.fromCodePoint(parseInt(a||b,16)));
+if(literals.some(v=>decode(worker).includes(v)||decode(clientCode).includes(v)))throw Error('RECOVERY_STATIC_IDENTITY_PRESENT');
+if(/data:application\/sql|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/.test(worker))throw Error('RECOVERY_UNEXPECTED_PAYLOAD');
+const sourceList=execFileSync('git',['-c',`safe.directory=${root.replaceAll('\\','/')}`,'ls-files','-z'],{cwd:root,encoding:'utf8'}).split('\0').filter(f=>f&&(f.startsWith('src/')||f.startsWith('assets/')||f.startsWith('scripts/')||f.startsWith('tests/')||['build.mjs','package.json','package-lock.json','tsconfig.json','wrangler.production.jsonc'].includes(f)));
+for(const f of ['src/bootstrap-data.ts','src/qr-page.ts','src/static-vehicle-data.ts','src/recovery-mode.ts','src/recovery-empty.ts','scripts/build-recovery.mjs','tests/recovery-artifact.test.mjs','scripts/package-recovery.py','scripts/verify-recovery.mjs'])if(!sourceList.includes(f))sourceList.push(f);
+const tree=[];for(const f of sourceList.sort())tree.push([f,digest(await readFile(resolve(root,f)))]);
+const payloads={'worker.mjs':worker,'wrangler.recovery.jsonc':JSON.stringify({...config,main:'worker.mjs'},null,2)+'\n'};
+for(const [name,data]of Object.entries(payloads))await writeFile(resolve(out,name),data);
+const versions={node:process.version,platform:process.platform,arch:process.arch};for(const p of ['esbuild','wrangler','typescript'])versions[p]=JSON.parse(await readFile(resolve(root,'node_modules',p,'package.json'),'utf8')).version;
+for(const [f,hash] of normalBefore){let after=null;try{after=digest(await readFile(resolve(root,f)))}catch{}if(after!==hash)throw Error('RECOVERY_CHANGED_NORMAL_OUTPUT')}
+if(versions.esbuild!=='0.28.1'||versions.wrangler!=='4.116.0'||versions.typescript!=='5.9.3')throw Error('RECOVERY_TOOLCHAIN_NOT_PINNED');
+versions.npm='11.19.1 (used for locked install/tests; verify before reproduction)';
+const manifest={format:'smartfleet-recovery-candidate-v1',baseCommit:'65de27dd41f3b813a1b1f012f70151f6fecf464d',sourceCommit,sourceIdentity:sourceCommit?'COMMITTED_GIT_SHA_AND_SOURCE_TREE_SHA256':'UNCOMMITTED_SOURCE_TREE_SHA256',sourceTreeSHA256:digest(JSON.stringify(tree)),lockfileSHA256:digest(await readFile(resolve(root,'package-lock.json'))),productionConfigSHA256:digest(await readFile(resolve(root,'wrangler.production.jsonc'))),toolchain:versions,payloads:Object.entries(payloads).map(([name,data])=>({name,bytes:Buffer.byteLength(data),sha256:digest(data)})),checks:{excludedBootstrapAndSeedModules:true,normalBuildOutputsUnchanged:true,excludedVehicleAndQRAssets:true,staticIdentityLiteralChecks:literals.length,staticIdentityMatches:0},limits:['Candidate only; operator acceptance and commit/exact-new-source Linux CI pending','No production data or runtime credential inputs used; operator content review still required','No automatic deployment or database restore'],overall:'NOT_READY'};
+await writeFile(resolve(out,'manifest.json'),JSON.stringify(manifest,null,2)+'\n');
+await writeFile(resolve(out,'dependency-inputs.json'),JSON.stringify({client:Object.keys(client.metafile.inputs),server:Object.keys(server.metafile.inputs)},null,2)+'\n');
+console.log(JSON.stringify({recoveryBuild:'PASS',workerSHA256:manifest.payloads[0].sha256,sourceTreeSHA256:manifest.sourceTreeSHA256,identityChecks:literals.length,excludedDataModules:true,out:relative(root,out),status:'NOT_READY'}));

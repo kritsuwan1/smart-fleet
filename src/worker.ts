@@ -1,3 +1,4 @@
+import {IS_RECOVERY,RecoveryStateError} from './recovery-mode';
 import {IS_DEMO,IS_STAGING,ENVIRONMENT,SITE_URL,ENVIRONMENT_HTML} from './environment';
 import {createBackup} from './backup';
 import {parseOperationalState,operationalAccountsSql} from './account-compatibility';
@@ -42,7 +43,7 @@ async function backup(env:any){
  lines.push(`INSERT INTO fleet_store(id,payload,version) SELECT 'main',json_set(payload,'$.sessionKey',lower(hex(randomblob(32)))),0 FROM fleet_store WHERE id=${q(id)} AND json_valid(payload) AND ${restoreGuard} ON CONFLICT(id) DO UPDATE SET payload=excluded.payload,version=fleet_store.version+1;`,`DELETE FROM fleet_store WHERE id=${q(id)};`);
  return response(lines.join('\n'),200,{'Content-Type':'application/sql; charset=utf-8','Content-Disposition':`attachment; filename="smart-fleet-${ENVIRONMENT}-backup-${new Date().toISOString().slice(0,10)}.sql"`});
 }
-function qrPage(){return `<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Smart Fleet — QR สำหรับพนักงาน</title><style>body{font:16px system-ui,sans-serif;background:#f3f7f4;color:#183d2c;margin:0;padding:30px}main{max-width:900px;margin:auto}.cards{display:flex;gap:24px;flex-wrap:wrap}.card{background:white;border:1px solid #d9e5dc;border-radius:18px;text-align:center;padding:28px;flex:1;min-width:230px}svg{width:240px;max-width:100%;height:auto}h1{font-size:26px}h2{font-size:20px}p{line-height:1.8;font-size:14px}small{display:block;font-size:11px;overflow-wrap:anywhere;color:#7c9281}a{color:#14684e}.note{margin-top:25px}@media print{body{background:white;padding:10px}.no-print{display:none}.card{break-inside:avoid}}</style></head><body><main>${ENVIRONMENT_HTML}<p class="no-print"><a href="/">กลับหน้าหลัก</a> · กด Ctrl + P เพื่อพิมพ์</p><h1>Smart Fleet — บันทึกการใช้รถยนต์</h1><div class="cards"><section class="card"><h2>สแกนเพื่อเข้าสู่ระบบ</h2>${siteQr}<p>พนักงานเดิม: เข้าสู่ระบบ<br>พนักงานใหม่: กดสมัครใช้งาน</p><small>${SITE_URL.replace('https://','')}</small></section><section class="card"><h2>รถทะเบียน 8กน3362</h2>${carQr}<p>สแกนเพื่อเริ่มใช้รถหรือคืนรถ<br>เข้าสู่ระบบก่อนบันทึกทุกครั้ง</p><small>กรุงเทพมหานคร · Smart Machine & Software</small></section></div><p class="note">สมัครด้วยชื่อ ชื่อผู้ใช้ และรหัสผ่านอย่างน้อย 6 ตัวอักษร</p></main></body></html>`;}
+import {qrPage} from './qr-page';
 export default {async scheduled(event:{cron:string;scheduledTime:number},env:any){
  if(event.cron!==BACKUP_CRON)return;
  const result=await runAutomaticBackup(IS_DEMO?{...env,DB:env.DEMO_DB}:env,event.scheduledTime);
@@ -50,9 +51,10 @@ export default {async scheduled(event:{cron:string;scheduledTime:number},env:any
 },async fetch(req:Request,env:any){
  const url=new URL(req.url),path=url.pathname;
  if(IS_STAGING&&(url.hostname==='smart-fleet.kritsuwan1.workers.dev'||url.hostname==='smart-fleet-demo.kritsuwan1.workers.dev'))return response('STAGING_HOST_MISMATCH',503);
- if(IS_STAGING&&['/qr','/qr-site.svg','/qr-car.svg'].includes(path))return response('QR disabled in Staging',404);
+ if((IS_STAGING||IS_RECOVERY)&&['/qr','/qr-site.svg','/qr-car.svg',...(IS_RECOVERY?['/vehicle-revo-canopy.webp']:[])].includes(path))return response('QR disabled in Staging',404);
  if(IS_DEMO)env={...env,DB:env.DEMO_DB};
  try{
+ if(IS_RECOVERY&&!env.DB)throw new RecoveryStateError();
   if(typeof env.APP_PASSWORD!=='string'||env.APP_PASSWORD.length<6)return html(screen('<p>ผู้ดูแลต้องตั้ง Secret ชื่อ <strong>APP_PASSWORD</strong> อย่างน้อย 6 ตัวอักษรใน Cloudflare แล้ว Deploy</p>'),503);
   if(!env.DB)return html(screen('<p>กรุณาเชื่อม D1 binding ชื่อ '+(IS_DEMO?'DEMO_DB → smart-fleet-demo':'DB → smart-fleet-production')+'</p>'),503);
   if(IS_DEMO&&url.hostname==='smart-fleet.kritsuwan1.workers.dev'||!IS_DEMO&&url.hostname==='smart-fleet-demo.kritsuwan1.workers.dev')return html(screen('<p>ไฟล์ Worker ไม่ตรงฝั่ง Demo / Production กรุณาตรวจไฟล์ที่ Deploy</p>'),503);
@@ -127,5 +129,5 @@ export default {async scheduled(event:{cron:string;scheduledTime:number},env:any
   if(path==='/app.css')return response(appCSS+'\n'+journeyCSS+'\n'+historyCSS+'\n'+accountCSS+'\n'+receiptCSS+'\n'+maintenanceCSS,200,{'Content-Type':'text/css; charset=utf-8'});
   if(path==='/')return html('<!doctype html><html lang="th"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Smart Fleet | บันทึกการใช้รถยนต์</title><link rel="stylesheet" href="/app.css"></head><body><div id="root"></div><script src="/app.js" defer></script></body></html>');
   return response('Not found',404);
- }catch(error){if(error instanceof Error&&error.message==='ENVIRONMENT_MISMATCH'){const message='ฐานข้อมูลไม่ตรงกับ '+ENVIRONMENT+' ระบบหยุดเพื่อป้องกันข้อมูล กรุณาตรวจ Binding และใช้ schema ของฝั่งที่ถูกต้อง';return path.startsWith('/api/')?json({error:message},503):html(screen('<p>'+message+'</p>'),503);}console.error('Smart Fleet request failed',error);return path.startsWith('/api/')?json({error:'ระบบยังไม่พร้อม กรุณาตรวจฐานข้อมูลและลองใหม่'},503):html(screen('<p>ระบบไม่สามารถทำรายการได้ในขณะนี้ กรุณาตรวจว่า DB เชื่อมฐานข้อมูลที่มีตาราง fleet_store แล้ว</p>'),503);}
+ }catch(error){if(error instanceof RecoveryStateError)return path.startsWith('/api/')?json({error:'Recovery ต้องใช้ข้อมูลและ session key เดิมที่ถูกต้อง',code:'RECOVERY_STATE_REQUIRED'},503):html(screen('<p>Recovery ต้องใช้ข้อมูลและ session key เดิมที่ถูกต้อง</p>'),503);if(error instanceof Error&&error.message==='ENVIRONMENT_MISMATCH'){const message='ฐานข้อมูลไม่ตรงกับ '+ENVIRONMENT+' ระบบหยุดเพื่อป้องกันข้อมูล กรุณาตรวจ Binding และใช้ schema ของฝั่งที่ถูกต้อง';return path.startsWith('/api/')?json({error:message},503):html(screen('<p>'+message+'</p>'),503);}console.error('Smart Fleet request failed',error);return path.startsWith('/api/')?json({error:'ระบบยังไม่พร้อม กรุณาตรวจฐานข้อมูลและลองใหม่'},503):html(screen('<p>ระบบไม่สามารถทำรายการได้ในขณะนี้ กรุณาตรวจว่า DB เชื่อมฐานข้อมูลที่มีตาราง fleet_store แล้ว</p>'),503);}
 }};

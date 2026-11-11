@@ -1,9 +1,21 @@
+import {IS_RECOVERY,RecoveryStateError} from './recovery-mode';
 import {IS_DEMO,IS_STAGING,assertDatabaseEnvironment} from './environment';
 import {initial,type Fleet} from './fleet';
 import {MAIN_DATA_LIMIT_BYTES} from './limits';
 import {OperationError} from './trip-operation';
 import {assertOperationalAccounts,parseOperationalState} from './account-compatibility';
 export async function readState(env:any){
+ if(IS_RECOVERY){
+  try{
+   if(!env.DB)throw Error();
+   await assertDatabaseEnvironment(env);
+   const row=await env.DB.prepare("SELECT payload,version FROM fleet_store WHERE id='main'").first();
+   if(!row)throw Error();
+   const state=parseOperationalState(row.payload);
+   if(typeof state.sessionKey!=='string'||!state.sessionKey.trim()||!Number.isSafeInteger(row.version)||row.version<0)throw Error();
+   return {state,version:row.version as number,payloadBytes:new TextEncoder().encode(row.payload).length};
+  }catch{throw new RecoveryStateError();}
+ }
  if(!env.DB)throw Error('ไม่พบฐานข้อมูล DB');
  await assertDatabaseEnvironment(env);
  let row=await env.DB.prepare("SELECT payload,version FROM fleet_store WHERE id='main'").first();

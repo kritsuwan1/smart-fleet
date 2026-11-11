@@ -1,0 +1,2 @@
+import type {Fleet} from './fleet';
+export const initial:Fleet={cars:[{id:'car-1',plate:'8กน3362',province:'กรุงเทพมหานคร',model:'รถยนต์บริษัท',initialOdo:115784,active:true}],people:[{id:'p1',name:'กฤชสุวรรณ',active:true},{id:'p2',name:'ดนุพร',active:true},{id:'p3',name:'พรนิรัตน์',active:true}],projects:['RVM BRB','RVM ANANDA','Smart key','โครงการวางถนนคอนกรีต'],trips:[],audit:[],imported:false};

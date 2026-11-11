@@ -7,7 +7,7 @@ export type Account={id:string;username:string;name:string;driverId:string|null;
 import type {FuelPrice} from './report';
 import type {MaintenancePlan,MaintenanceRecord} from './maintenance';
 export type Fleet={accountFormatVersion?:1|3|4|5;maintenancePlans?:MaintenancePlan[];maintenanceHistory?:MaintenanceRecord[];fuelPrices?:FuelPrice[];accounts?:Account[];sessionKey?:string;cars:Car[];people:Person[];projects:string[];trips:Trip[];audit:Audit[];imported:boolean};
-export const initial:Fleet={cars:[{id:'car-1',plate:'8กน3362',province:'กรุงเทพมหานคร',model:'รถยนต์บริษัท',initialOdo:115784,active:true}],people:[{id:'p1',name:'กฤชสุวรรณ',active:true},{id:'p2',name:'ดนุพร',active:true},{id:'p3',name:'พรนิรัตน์',active:true}],projects:['RVM BRB','RVM ANANDA','Smart key','โครงการวางถนนคอนกรีต'],trips:[],audit:[],imported:false};
+export {initial} from './bootstrap-data';
 export const latestOdo=(s:Fleet,id:string)=>s.cars.find(c=>c.id===id)?.currentOdo??s.trips.filter(t=>t.carId===id&&t.end).sort((a,b)=>b.end.localeCompare(a.end)||b.start.localeCompare(a.start)||b.seq-a.seq)[0]?.odoEnd??s.cars.find(c=>c.id===id)?.initialOdo??0;
 export function validateTrip(s:Fleet,t:Trip){
  if(!s.cars.some(c=>c.id===t.carId))throw Error('ไม่พบรถที่เลือก');

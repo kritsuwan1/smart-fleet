@@ -540,3 +540,8 @@ Reuse the existing bucket() Map mock and independent SQLite :memory: databases i
 - Existing AB-001–009 cover failure injection, final-valid-copy retention, source preservation, redaction and actual offline SQLite recovery. Production-named scenarios use only synthetic data.
 
 2026-11-01 Windows Node v24.22.1: offline command/build, typecheck and all 13 suites PASS. No R2 bucket, subscription, real D1 or credentials required. Cloud R2 integration and Staging D1 integration remain NOT_RUN. Future cloud provisioning, subscription, secrets, deployment and trigger activation each require explicit approval; no activation is implied by these results.
+
+
+## PROD-1I recovery-only candidate regression
+
+Run npm run build, npm run typecheck, npm test (31 baseline suites plus recovery suite), or npm run test:recovery for the actual recovery bundle34-case suite. Tests mutate only synthetic in-memory SQLite. Coverage and independent acceptance gaps: RECOVERY_BUILD.md and RECOVERY_ACCEPTANCE.md. Repeat-build/ZIP integrity are checked separately; exact source is uncommitted base+content digest, so prior Linux CI is not proof for these changes. No Cloudflare/real DB/browser deployment is exercised.

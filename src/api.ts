@@ -1,3 +1,4 @@
+import {IS_RECOVERY} from './recovery-mode';
 import {validateTrip,type Fleet,type Trip} from './fleet';
 import {readState,writeState,writeTripOperation} from './storage';
 import {tripOperationContext,tripOperationLookup,readTripOperation,authorizeOperation,OperationError,type OperationRecord} from './trip-operation';
@@ -38,6 +39,7 @@ async function POST(req:Request){try{
  const actorUser=currentUser(user,s),actor=actorUser.name;
  if(actorUser.role==='user'&&!actorUser.driverId)return json({error:'PERSON_LINK_REQUIRED',code:'PERSON_LINK_REQUIRED'},403);
  if(actorUser.role!=='admin'&&b.action!=='trip')return json({error:'FORBIDDEN'},403);
+ if(IS_RECOVERY&&b.action==='import')throw new OperationError('Recovery build ไม่รองรับการนำเข้าข้อมูลต้นฉบับ',403,'RECOVERY_SEED_IMPORT_DISABLED');
  if(actorUser.role==='user'&&(!b.tripOperation||b.data?.id&&!s.trips.some(t=>t.id===b.data.id&&t.ownerUserId===actorUser.id)))return json({error:'FORBIDDEN'},403);
  const operation=b.action==='trip'&&b.tripOperation!==undefined?await tripOperationContext(b.tripOperation,b.data,actorUser,s):null;
  async function result(record:OperationRecord,state:Fleet,currentVersion:number,replayed:boolean){
