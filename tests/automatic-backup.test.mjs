@@ -114,15 +114,15 @@ try{
  const temp=await mkdtemp(join(tmpdir(),'fleet-auto #%-'));
  try{const file=join(temp,'synthetic.json');await writeFile(file,original);const rehearsal=spawnSync(process.execPath,['--experimental-sqlite','scripts/rehearse-auto-restore.mjs',file],{encoding:'utf8'});assert.equal(rehearsal.status,0,rehearsal.stderr);assert.match(rehearsal.stdout,/PASS offline/);assert.ok(!rehearsal.stdout.includes('PRIVATE_'));}finally{await rm(temp,{recursive:true,force:true});}
 
- // Built Worker entry points, default-off guard, binding mapping, status authorization.
- await production.scheduled({cron:BACKUP_CRON,scheduledTime:scheduled},{});
- const productionMock=setup({marker:'production'});await production.scheduled({cron:BACKUP_CRON,scheduledTime:Date.now()},{...productionMock.env,BACKUP_ENVIRONMENT:'production',BACKUP_NOTIFICATION_URL:undefined});assert.ok(productionMock.r2.values.has('fleet/v1/production/'+backupDay(Date.now())+'.json'));
+ // Scheduled D1 is mandatory. Keep R2 helper/status compatibility tested offline explicitly.
+ await assert.rejects(production.scheduled({cron:BACKUP_CRON,scheduledTime:Date.now()},{}),/AUTOMATIC_BACKUP_FAILED:D1_BACKUP_CONFIGURATION/);
+ const productionMock=setup({marker:'production'});await assert.rejects(production.scheduled({cron:BACKUP_CRON,scheduledTime:Date.now()},{...productionMock.env,BACKUP_ENVIRONMENT:'production',BACKUP_NOTIFICATION_URL:undefined}),/AUTOMATIC_BACKUP_FAILED:D1_BACKUP_CONFIGURATION/);assert.equal(productionMock.r2.values.size,0);
  const live=setup();const liveEnv={...live.env,DEMO_DB:live.db,APP_PASSWORD:'synthetic-password'};delete liveEnv.DB;
- const now=Date.now();await demo.scheduled({cron:BACKUP_CRON,scheduledTime:now},liveEnv);assert.ok(live.r2.values.has('fleet/v1/staging/'+backupDay(now)+'.json'));
+ const now=Date.now();await assert.rejects(demo.scheduled({cron:BACKUP_CRON,scheduledTime:now},liveEnv),/AUTOMATIC_BACKUP_FAILED:D1_BACKUP_CONFIGURATION/);assert.equal(live.r2.values.size,0);assert.equal((await runAutomaticBackup(live.env,now,{...live.deps,now:()=>now})).state,'success');assert.ok(live.r2.values.has('fleet/v1/staging/'+backupDay(now)+'.json'));
  const request=(path,opts={},cookie='')=>demo.fetch(new Request('https://fleet.test'+path,{...opts,headers:{origin:'https://fleet.test','CF-Connecting-IP':'192.0.2.123',...(cookie?{cookie}:{}),...opts.headers}}),liveEnv);
  assert.equal((await request('/api/backup-status')).status,401);
  let response=await request('/login',{method:'POST',body:new URLSearchParams({username:'admin',password:liveEnv.APP_PASSWORD})});const admin=response.headers.get('set-cookie').split(';')[0];
- response=await request('/api/backup-status',{},admin);assert.equal(response.status,200);assert.equal((await response.json()).state,'success');
+ response=await request('/api/backup-status',{},admin);assert.equal(response.status,503);assert.equal((await response.json()).error,'BACKUP_STATUS_UNAVAILABLE');assert.equal((await automaticBackupStatus(live.env)).state,'success');
  response=await request('/register',{method:'POST',body:new URLSearchParams({name:'Other Synthetic',username:'another',password:'abcdef'})});const employee=response.headers.get('set-cookie').split(';')[0];assert.equal((await request('/api/backup-status',{},employee)).status,403);
  const broken=setup();delete broken.env.BACKUP_BUCKET;await assert.rejects(demo.scheduled({cron:BACKUP_CRON,scheduledTime:now},{...broken.env,DEMO_DB:broken.db,BACKUP_NOTIFICATION_URL:undefined}),/AUTOMATIC_BACKUP_FAILED/);
  console.log('PASS automatic backups: UTC/Bangkok day, default-off/env guards, full state and metadata SHA-256, immutable daily idempotency, concurrent/expired/stolen leases, transient/ambiguous/storage/network failures, redacted notifications/status, paginated 7-day retention and last-valid-copy protection, empty-staging-only restore/session rotation, offline rehearsal, scheduled binding integration and admin authorization');

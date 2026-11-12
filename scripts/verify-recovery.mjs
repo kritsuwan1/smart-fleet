@@ -14,6 +14,8 @@ try{
  const c=JSON.parse(await readFile(resolve(root,'wrangler.recovery.jsonc'),'utf8'));if(c.name!=='smart-fleet'||c.main!=='worker.mjs'||Object.keys(c.vars||{}).length)throw Error();
  if(JSON.stringify(c.d1_databases)!==JSON.stringify([{binding:'DB',database_name:'smart-fleet-production',database_id:'ebbca318-17d1-4486-b925-d6c787472ba5'},{binding:'BACKUP_DB',database_name:'smart-fleet-production-backups',database_id:'7f598b1a-b263-4305-8f43-409d0dcf08f3'}]))throw Error();
  const a=JSON.parse(await readFile(resolve(root,'acceptance.json'),'utf8'));if(a.all!=='PASS'||a.cases<34||a.externalCalls!==0||a.sourceTreeSHA256!==m.sourceTreeSHA256||a.workerSHA256!==m.payloads.find(f=>f.name==='worker.mjs').sha256)throw Error();
+ if(a.d1Backup?.offline!=='PASS'||a.d1Backup.cases<60||a.d1Backup.externalCalls!==0||a.d1Backup.recoverySHA256!==a.workerSHA256||!/^[a-f0-9]{64}$/.test(a.d1Backup.normalSHA256))throw Error();
+ if(a.d1Acceptance?.all!=='PASS'||a.d1Acceptance.cases<32||a.d1Acceptance.originalRegressions!==6||a.d1Acceptance.externalCalls!==0||a.d1Acceptance.recoverySHA256!==a.workerSHA256)throw Error();
  if(m.payloads.find(f=>f.name==='pins/package-lock.json').sha256!==m.lockfileSHA256)throw Error();
  console.log('PASS: candidate file allowlist, SHA-256, configuration and offline evidence. Independent acceptance/exact-commit CI still required; NOT_READY.');
 }catch{console.error('FAIL: recovery candidate verification; no deployment performed.');process.exitCode=1;}

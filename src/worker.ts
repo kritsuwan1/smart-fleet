@@ -3,7 +3,8 @@ import {IS_DEMO,IS_STAGING,ENVIRONMENT,SITE_URL,ENVIRONMENT_HTML} from './enviro
 import {createBackup} from './backup';
 import {parseOperationalState,operationalAccountsSql} from './account-compatibility';
 import {accountEnabled} from './account-compatibility';
-import {BACKUP_CRON,runAutomaticBackup,automaticBackupStatus} from './automatic-backup';
+import {BACKUP_CRON} from './automatic-backup';
+import {runD1AutomaticBackup,d1AutomaticBackupStatus} from './d1-automatic-backup';
 import {APP_VERSION} from './version';
 import {systemStatus} from './system-status';
 import {fuelPrice} from './fuel';
@@ -46,13 +47,14 @@ async function backup(env:any){
 import {qrPage} from './qr-page';
 export default {async scheduled(event:{cron:string;scheduledTime:number},env:any){
  if(event.cron!==BACKUP_CRON)return;
- const result=await runAutomaticBackup(IS_DEMO?{...env,DB:env.DEMO_DB}:env,event.scheduledTime);
+ const backupEnv=IS_DEMO?{...env,DB:env.DEMO_DB,BACKUP_DB:env.DEMO_BACKUP_DB}:env;
+ const result=await runD1AutomaticBackup(backupEnv,event.scheduledTime);
  if(result.state==='failed')throw Error('AUTOMATIC_BACKUP_FAILED:'+result.code);
 },async fetch(req:Request,env:any){
  const url=new URL(req.url),path=url.pathname;
  if(IS_STAGING&&(url.hostname==='smart-fleet.kritsuwan1.workers.dev'||url.hostname==='smart-fleet-demo.kritsuwan1.workers.dev'))return response('STAGING_HOST_MISMATCH',503);
  if((IS_STAGING||IS_RECOVERY)&&['/qr','/qr-site.svg','/qr-car.svg',...(IS_RECOVERY?['/vehicle-revo-canopy.webp']:[])].includes(path))return response('QR disabled in Staging',404);
- if(IS_DEMO)env={...env,DB:env.DEMO_DB};
+ if(IS_DEMO)env={...env,DB:env.DEMO_DB,BACKUP_DB:env.DEMO_BACKUP_DB};
  try{
  if(IS_RECOVERY&&!env.DB)throw new RecoveryStateError();
   if(typeof env.APP_PASSWORD!=='string'||env.APP_PASSWORD.length<6)return html(screen('<p>ผู้ดูแลต้องตั้ง Secret ชื่อ <strong>APP_PASSWORD</strong> อย่างน้อย 6 ตัวอักษรใน Cloudflare แล้ว Deploy</p>'),503);
@@ -94,7 +96,7 @@ export default {async scheduled(event:{cron:string;scheduledTime:number},env:any
   if(path==='/api/system-status'&&req.method==='GET'){const latest=await readState(env),access=await sessionUser(req,env,latest.state);if(!access)return json({error:'UNAUTHORIZED'},401);if(access.role!=='admin')return json({error:'FORBIDDEN'},403);return json(systemStatus(latest.state,latest.payloadBytes));}
   if(path==='/api/backup-status'&&req.method==='GET'){
    if(user.role!=='admin')return json({error:'FORBIDDEN'},403);
-   try{return json(await automaticBackupStatus(env));}catch{return json({error:'BACKUP_STATUS_UNAVAILABLE'},503);}
+   try{return json(await d1AutomaticBackupStatus(env));}catch{return json({error:'BACKUP_STATUS_UNAVAILABLE'},503);}
   }
   if(path==='/api/fuel-price'&&req.method==='GET'){
    try{return json(await fuelPrice(env,state,url.searchParams.get('month')||''));}catch(e){return json({error:e instanceof Error?e.message:'ตรวจราคาไม่ได้'},400);}

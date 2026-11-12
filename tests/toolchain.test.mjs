@@ -43,8 +43,8 @@ try{
  await action({operation:'complete',planId:fleet.state.maintenancePlans[0].id,record:{date:day,odometer:100,details:'Synthetic only',costSatang:12345}});
  const history=fleet.state.maintenanceHistory[0];await action({operation:'editHistory',id:history.id,record:{...history,details:'Corrected synthetic',costSatang:10000}});assert.equal(fleet.state.maintenanceHistory.length,1);assert.equal(fleet.state.maintenanceHistory[0].costSatang,10000);
  const backupResponse=await call('/api/backup.json',{},cookie);assert.equal(backupResponse.status,200);const backup=await backupResponse.json();assert.equal(backup.state.maintenanceHistory[0].costSatang,10000);assert.match(backup.sha256,/^[a-f0-9]{64}$/);
- assert.equal((await(await call('/api/backup-status',{},cookie)).json()).state,'disabled');
- console.log('PASS built Staging Worker in local workerd: auth, synthetic D1, maintenance create/complete/correct, private manual backup and disabled automatic backup/QR; no real resources');
+ const unavailableBackup=await call('/api/backup-status',{},cookie);assert.equal(unavailableBackup.status,503);assert.equal((await unavailableBackup.json()).error,'BACKUP_STATUS_UNAVAILABLE');
+ console.log('PASS built Staging Worker in local workerd: auth, synthetic D1, maintenance create/complete/correct, private manual backup, missing-D1 backup status refusal and disabled QR; no real resources');
  console.log('PASS offline toolchain: pinned Wrangler/Miniflare4/sharp/esbuild/undici/ws, native synthetic PNG/JPEG, loopback HTTP/WebSocket, local workerd Worker/D1 query persistence; no real Cloudflare/R2/credentials');
 }finally{
  clearTimeout(timer);client?.terminate();await mf?.dispose();for(const client of sockets.clients)client.terminate();await new Promise(r=>sockets.close(r));await new Promise(r=>http.close(r));http.closeAllConnections();

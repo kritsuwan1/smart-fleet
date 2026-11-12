@@ -9,6 +9,15 @@ base=root/'output'/'recovery';m=json.loads((base/'manifest.json').read_text(enco
 assert a['all']=='PASS' and a['cases']>=34 and a['externalCalls']==0
 assert a['sourceTreeSHA256']==m['sourceTreeSHA256'] and a['workerSHA256']==next(f['sha256'] for f in m['payloads'] if f['name']=='worker.mjs'), 'STALE_ACCEPTANCE_EVIDENCE'
 payload={name:(base/name).read_bytes() for name in ('worker.mjs','wrangler.recovery.jsonc','acceptance.json')}
+# Require actual D1 normal/recovery evidence tied to this exact Worker.
+d1=json.loads((base/'d1-backup-acceptance.json').read_text(encoding='utf-8'))
+assert d1['all']=='PASS' and d1['cases']>=60 and d1['externalCalls']==0 and d1['recoverySHA256']==a['workerSHA256'], 'STALE_D1_BACKUP_EVIDENCE'
+remediation=json.loads((base/'prod1m-acceptance.json').read_text(encoding='utf-8'))
+assert remediation['all']=='PASS' and remediation['cases']>=32 and remediation['externalCalls']==0 and remediation['recoverySHA256']==a['workerSHA256'], 'STALE_PROD1M_EVIDENCE'
+assert sum(item['core'] and item['result']=='PASS' for item in remediation['records'])==6, 'MISSING_ORIGINAL_REGRESSIONS'
+a['d1Acceptance']={'all':'PASS','cases':remediation['cases'],'originalRegressions':6,'externalCalls':0,'recoverySHA256':remediation['recoverySHA256']}
+a['d1Backup']={'offline':'PASS','cases':d1['cases'],'externalCalls':0,'recoverySHA256':d1['recoverySHA256'],'normalSHA256':d1['normalSHA256']}
+payload['acceptance.json']=(json.dumps(a,ensure_ascii=False,indent=2)+'\n').encode()
 payload['verify.mjs']=(root/'scripts/verify-recovery.mjs').read_bytes();payload['pins/package-lock.json']=(root/'package-lock.json').read_bytes()
 payload['RUNBOOK.md']=(root/'docs/RECOVERY_BUILD.md').read_bytes();payload['CHECKLIST.md']=(root/'docs/RECOVERY_ACCEPTANCE.md').read_bytes()
 assert all(hashlib.sha256(payload[f['name']]).hexdigest()==f['sha256'] for f in m['payloads'])
